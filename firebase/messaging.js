@@ -17,14 +17,11 @@
    - Auth-aware token registration
 
    IMPORTANT:
-   - Uses the modular Firebase SDK.
+   - Uses Firebase modular SDK.
    - Does NOT initialize Firebase.
    - Firebase initialization is handled only by:
        firebase/firebase-config.js
-
-   Required:
-   - firebase/firebase-config.js
-   - root service worker:
+   - Background notification handling is handled by:
        /sw.js
 
    ============================================================ */
@@ -37,6 +34,7 @@
 ============================================================ */
 
 import {
+    app,
     auth,
     db,
     onAuthStateChanged,
@@ -74,10 +72,8 @@ window.RiderX.firebase =
 /*
  * Firebase Web Push VAPID public key.
  *
- * This is NOT a private server key.
- *
- * It must belong to the same Firebase project:
- * riderx-1
+ * This is a PUBLIC browser key.
+ * It is not a private server credential.
  */
 
 const VAPID_KEY =
@@ -85,11 +81,10 @@ const VAPID_KEY =
 
 
 /*
- * RiderX service worker.
+ * Root RiderX service worker.
  *
- * The service worker must remain at the site root
- * because Firebase Messaging web push requires the
- * service worker to control the relevant application scope.
+ * The same root service worker is used by the PWA
+ * and Firebase Cloud Messaging.
  */
 
 const SERVICE_WORKER_PATH =
@@ -128,6 +123,45 @@ let currentToken =
 
 
 /* ============================================================
+   EVENT HELPER
+============================================================ */
+
+function dispatchNotificationEvent(
+    eventName,
+    payload
+) {
+
+    try {
+
+        if (
+            typeof window === "undefined"
+        ) {
+
+            return;
+        }
+
+
+        window.dispatchEvent(
+            new CustomEvent(
+                eventName,
+                {
+                    detail:
+                        payload
+                }
+            )
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX notification event dispatch failed:",
+            error
+        );
+    }
+}
+
+
+/* ============================================================
    SUPPORT CHECK
 ============================================================ */
 
@@ -139,6 +173,9 @@ async function checkMessagingSupport() {
             typeof window === "undefined"
         ) {
 
+            messagingSupported =
+                false;
+
             return false;
         }
 
@@ -147,6 +184,9 @@ async function checkMessagingSupport() {
             !("Notification" in window)
         ) {
 
+            messagingSupported =
+                false;
+
             return false;
         }
 
@@ -154,6 +194,9 @@ async function checkMessagingSupport() {
         if (
             !("serviceWorker" in navigator)
         ) {
+
+            messagingSupported =
+                false;
 
             return false;
         }
@@ -196,39 +239,46 @@ async function registerMessagingServiceWorker() {
             !("serviceWorker" in navigator)
         ) {
 
-            console.warn(
-                "RiderX FCM: Service workers are not supported."
-            );
-
             return null;
         }
 
 
         /*
-         * Wait until the page is ready before registering
-         * the service worker.
-         */
-
-        await navigator.serviceWorker.ready;
-
-
-        /*
-         * Check whether the RiderX service worker is already
-         * registered.
+         * First check existing RiderX root registration.
          */
 
         const registrations =
-            await navigator.serviceWorker.getRegistrations();
+            await navigator.serviceWorker
+                .getRegistrations();
 
 
         serviceWorkerRegistration =
             registrations.find(
-                function (registration) {
+                function (
+                    registration
+                ) {
+
+                    if (
+                        !registration
+                    ) {
+
+                        return false;
+                    }
+
+
+                    const scope =
+                        String(
+                            registration.scope ||
+                            ""
+                        );
+
 
                     return (
-                        registration.active
-                        &&
-                        registration.scope
+                        scope ===
+                        new URL(
+                            "/",
+                            window.location.origin
+                        ).href
                     );
                 }
             )
@@ -237,8 +287,8 @@ async function registerMessagingServiceWorker() {
 
 
         /*
-         * If no active registration exists, register the
-         * RiderX root service worker.
+         * Register the root service worker if it does
+         * not already exist.
          */
 
         if (
@@ -249,13 +299,44 @@ async function registerMessagingServiceWorker() {
                 await navigator.serviceWorker.register(
                     SERVICE_WORKER_PATH,
                     {
-                        scope: "/"
+                        scope:
+                            "/"
                     }
                 );
         }
 
 
-        return serviceWorkerRegistration;
+        /*
+         * Wait for the registration to become usable.
+         */
+
+        if (
+            !serviceWorkerRegistration.active
+        ) {
+
+            await navigator.serviceWorker.ready;
+
+            const readyRegistration =
+                await navigator.serviceWorker
+                    .getRegistration(
+                        "/"
+                    );
+
+
+            if (
+                readyRegistration
+            ) {
+
+                serviceWorkerRegistration =
+                    readyRegistration;
+            }
+        }
+
+
+        return (
+            serviceWorkerRegistration ||
+            null
+        );
 
     } catch (error) {
 
@@ -263,6 +344,9 @@ async function registerMessagingServiceWorker() {
             "RiderX FCM service worker registration failed:",
             error
         );
+
+        serviceWorkerRegistration =
+            null;
 
         return null;
     }
@@ -277,37 +361,51 @@ async function initializeMessaging() {
 
     try {
 
+        if (
+            messaging
+        ) {
+
+            return messaging;
+        }
+
+
         const supported =
             await checkMessagingSupport();
 
 
-        if (!supported) {
+        if (
+            !supported
+        ) {
 
-            console.warn(
-                "RiderX FCM: Web messaging is not supported on this browser."
+            return null;
+        }
+
+
+        /*
+         * firebase-config.js already initialized the
+         * default Firebase application.
+         */
+
+        if (
+            !app
+        ) {
+
+            console.error(
+                "RiderX FCM: Firebase app is unavailable."
             );
 
             return null;
         }
 
 
-        if (
-            !messaging
-        ) {
+        messaging =
+            getMessaging(
+                app
+            );
 
-            /*
-             * firebase-config.js already initialized the
-             * Firebase application.
-             *
-             * getMessaging() therefore reuses that default
-             * Firebase application.
-             */
 
-            messaging =
-                getMessaging(
-                    auth.app
-                );
-        }
+        window.RiderX.firebase.messaging =
+            messaging;
 
 
         return messaging;
@@ -354,8 +452,11 @@ async function requestNotificationPermission() {
         ) {
 
             return {
-                success: false,
-                reason: "unsupported"
+                success:
+                    false,
+
+                reason:
+                    "unsupported"
             };
         }
 
@@ -365,47 +466,71 @@ async function requestNotificationPermission() {
 
 
         if (
-            currentPermission === "granted"
+            currentPermission ===
+            "granted"
         ) {
 
             return {
-                success: true,
-                permission: "granted"
+                success:
+                    true,
+
+                permission:
+                    "granted"
             };
         }
 
 
         if (
-            currentPermission === "denied"
+            currentPermission ===
+            "denied"
         ) {
 
             return {
-                success: false,
-                reason: "permission-denied",
-                permission: "denied"
+                success:
+                    false,
+
+                reason:
+                    "permission-denied",
+
+                permission:
+                    "denied"
             };
         }
 
+
+        /*
+         * Permission is requested only when the application
+         * explicitly calls enableNotification().
+         */
 
         const permission =
             await Notification.requestPermission();
 
 
         if (
-            permission !== "granted"
+            permission !==
+            "granted"
         ) {
 
             return {
-                success: false,
-                reason: "permission-denied",
-                permission: permission
+                success:
+                    false,
+
+                reason:
+                    "permission-denied",
+
+                permission:
+                    permission
             };
         }
 
 
         return {
-            success: true,
-            permission: "granted"
+            success:
+                true,
+
+            permission:
+                "granted"
         };
 
     } catch (error) {
@@ -416,9 +541,14 @@ async function requestNotificationPermission() {
         );
 
         return {
-            success: false,
-            reason: "permission-error",
-            error: error
+            success:
+                false,
+
+            reason:
+                "permission-error",
+
+            error:
+                error
         };
     }
 }
@@ -432,8 +562,12 @@ async function getFCMToken() {
 
     try {
 
+        const user =
+            auth.currentUser;
+
+
         if (
-            !auth.currentUser
+            !user
         ) {
 
             console.warn(
@@ -465,7 +599,7 @@ async function getFCMToken() {
         ) {
 
             console.warn(
-                "RiderX FCM: Messaging service worker unavailable."
+                "RiderX FCM: Service worker unavailable."
             );
 
             return null;
@@ -538,7 +672,7 @@ async function saveToken(
         ) {
 
             console.warn(
-                "RiderX FCM: Cannot save token without authenticated user."
+                "RiderX FCM: Cannot save token without login."
             );
 
             return false;
@@ -546,11 +680,9 @@ async function saveToken(
 
 
         /*
-         * Store the current device/browser token in the
-         * user's own document.
+         * Store only the current active web token.
          *
-         * Firestore rules must explicitly allow the
-         * notification fields used here.
+         * Financial/security-sensitive fields are not changed.
          */
 
         await setDoc(
@@ -576,7 +708,8 @@ async function saveToken(
                     serverTimestamp()
             },
             {
-                merge: true
+                merge:
+                    true
             }
         );
 
@@ -585,14 +718,11 @@ async function saveToken(
             token;
 
 
-        /*
-         * Notify the rest of RiderX.
-         */
-
         dispatchNotificationEvent(
             "riderx:fcm-token-updated",
             {
-                token: token
+                token:
+                    token
             }
         );
 
@@ -619,6 +749,24 @@ async function enableNotification() {
 
     try {
 
+        const user =
+            auth.currentUser;
+
+
+        if (
+            !user
+        ) {
+
+            return {
+                success:
+                    false,
+
+                reason:
+                    "not-authenticated"
+            };
+        }
+
+
         const permissionResult =
             await requestNotificationPermission();
 
@@ -640,8 +788,11 @@ async function enableNotification() {
         ) {
 
             return {
-                success: false,
-                reason: "token-unavailable"
+                success:
+                    false,
+
+                reason:
+                    "token-unavailable"
             };
         }
 
@@ -657,16 +808,24 @@ async function enableNotification() {
         ) {
 
             return {
-                success: false,
-                reason: "token-save-failed"
+                success:
+                    false,
+
+                reason:
+                    "token-save-failed"
             };
         }
 
 
         return {
-            success: true,
-            permission: "granted",
-            token: token
+            success:
+                true,
+
+            permission:
+                "granted",
+
+            token:
+                token
         };
 
     } catch (error) {
@@ -677,9 +836,14 @@ async function enableNotification() {
         );
 
         return {
-            success: false,
-            reason: "error",
-            error: error
+            success:
+                false,
+
+            reason:
+                "error",
+
+            error:
+                error
         };
     }
 }
@@ -706,7 +870,7 @@ async function disableNotification() {
 
 
         /*
-         * Disable application-level notifications first.
+         * Disable application-level notifications.
          */
 
         await setDoc(
@@ -726,22 +890,18 @@ async function disableNotification() {
                     serverTimestamp()
             },
             {
-                merge: true
+                merge:
+                    true
             }
         );
 
 
         /*
-         * Remove the current FCM registration token where
-         * possible.
-         *
-         * This does not sign the user out.
+         * Delete the browser's current FCM token.
          */
 
         if (
             messaging
-            &&
-            currentToken
         ) {
 
             try {
@@ -764,6 +924,15 @@ async function disableNotification() {
             null;
 
 
+        dispatchNotificationEvent(
+            "riderx:fcm-token-disabled",
+            {
+                uid:
+                    user.uid
+            }
+        );
+
+
         return true;
 
     } catch (error) {
@@ -779,41 +948,10 @@ async function disableNotification() {
 
 
 /* ============================================================
-   NOTIFICATION EVENT
+   GET CURRENT USER ROLE
 ============================================================ */
 
-function dispatchNotificationEvent(
-    eventName,
-    payload
-) {
-
-    try {
-
-        window.dispatchEvent(
-            new CustomEvent(
-                eventName,
-                {
-                    detail:
-                        payload
-                }
-            )
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX notification event dispatch failed:",
-            error
-        );
-    }
-}
-
-
-/* ============================================================
-   GET USER ROLE
-============================================================ */
-
-async function getCurrentUserRole() {
+function getCurrentUserRole() {
 
     try {
 
@@ -825,37 +963,83 @@ async function getCurrentUserRole() {
             !user
         ) {
 
-            return null;
+            return "";
         }
 
 
         /*
-         * The application may expose the role through the
-         * RiderX namespace/local session.
-         *
-         * Notification routing should not depend on a
-         * potentially stale localStorage value alone.
+         * Prefer the current RiderX session if available.
          */
 
-        if (
-            window.RiderX
-            &&
+        const riderXUser =
+            window.RiderX &&
             window.RiderX.user
-            &&
-            window.RiderX.user.role
+                ? window.RiderX.user
+                : null;
+
+
+        if (
+            riderXUser
         ) {
 
-            return (
-                window.RiderX.user.role
-            );
+            const role =
+                String(
+                    riderXUser.role ||
+                    riderXUser.userRole ||
+                    riderXUser.accountType ||
+                    ""
+                ).toLowerCase();
+
+
+            if (
+                role
+            ) {
+
+                return role;
+            }
         }
 
 
-        return null;
+        /*
+         * Local storage is only a routing hint.
+         * It is never used for security authorization.
+         */
+
+        try {
+
+            const stored =
+                JSON.parse(
+                    localStorage.getItem(
+                        "riderx_user"
+                    ) ||
+                    "null"
+                );
+
+
+            if (
+                stored &&
+                stored.uid === user.uid
+            ) {
+
+                return String(
+                    stored.role ||
+                    stored.userRole ||
+                    stored.accountType ||
+                    ""
+                ).toLowerCase();
+            }
+
+        } catch (error) {
+
+            /* Ignore malformed local session. */
+        }
+
+
+        return "";
 
     } catch (error) {
 
-        return null;
+        return "";
     }
 }
 
@@ -873,7 +1057,8 @@ function handleNotificationClick(
         if (
             !data
             ||
-            typeof data !== "object"
+            typeof data !==
+            "object"
         ) {
 
             return;
@@ -881,48 +1066,51 @@ function handleNotificationClick(
 
 
         const rideId =
-            data.rideId
-            ||
-            data.bookingId
-            ||
+            data.rideId ||
+            data.bookingId ||
             "";
 
 
         const type =
             String(
-                data.type
-                ||
+                data.type ||
+                ""
+            ).toLowerCase();
+
+
+        const suppliedRole =
+            String(
+                data.role ||
                 ""
             ).toLowerCase();
 
 
         const role =
-            String(
-                data.role
-                ||
-                ""
-            ).toLowerCase();
+            suppliedRole ||
+            getCurrentUserRole();
 
 
         /*
-         * Ride request is primarily a rider notification.
+         * Rider ride request.
          */
 
         if (
             rideId
             &&
             (
-                type === "ride_request"
+                type ===
+                    "ride_request"
                 ||
-                type === "new_ride"
+                type ===
+                    "new_ride"
                 ||
-                type === "booking_request"
+                type ===
+                    "booking_request"
             )
         ) {
 
             window.location.href =
-                "/rider/request.html?rideId="
-                +
+                "/rider/request.html?rideId=" +
                 encodeURIComponent(
                     rideId
                 );
@@ -932,28 +1120,35 @@ function handleNotificationClick(
 
 
         /*
-         * Explicit rider notification.
+         * Rider trip notification.
          */
 
         if (
             rideId
             &&
+            role ===
+                "rider"
+            &&
             (
-                role === "rider"
+                type ===
+                    "rider_ride"
                 ||
-                type === "rider_ride"
+                type ===
+                    "ride_accepted"
                 ||
-                type === "ride_accepted"
+                type ===
+                    "ride_started"
                 ||
-                type === "ride_started"
+                type ===
+                    "ride_completed"
                 ||
-                type === "ride_completed"
+                type ===
+                    "ride_cancelled"
             )
         ) {
 
             window.location.href =
-                "/rider/trip.html?rideId="
-                +
+                "/rider/trip.html?rideId=" +
                 encodeURIComponent(
                     rideId
                 );
@@ -963,26 +1158,29 @@ function handleNotificationClick(
 
 
         /*
-         * Explicit customer notification.
+         * Customer ride notification.
          */
 
         if (
             rideId
             &&
             (
-                role === "customer"
+                role ===
+                    "customer"
                 ||
-                type === "customer_ride"
+                type ===
+                    "customer_ride"
                 ||
-                type === "driver_assigned"
+                type ===
+                    "driver_assigned"
                 ||
-                type === "rider_assigned"
+                type ===
+                    "rider_assigned"
             )
         ) {
 
             window.location.href =
-                "/customer/tracking.html?rideId="
-                +
+                "/customer/tracking.html?rideId=" +
                 encodeURIComponent(
                     rideId
                 );
@@ -992,9 +1190,7 @@ function handleNotificationClick(
 
 
         /*
-         * Chat.
-         *
-         * Route according to the supplied role.
+         * Chat notification.
          */
 
         if (
@@ -1003,24 +1199,25 @@ function handleNotificationClick(
 
             const chatId =
                 encodeURIComponent(
-                    data.chatId
+                    String(
+                        data.chatId
+                    )
                 );
 
 
             if (
-                role === "rider"
+                role ===
+                    "rider"
             ) {
 
                 window.location.href =
-                    "/rider/chat.html?chatId="
-                    +
+                    "/rider/chat.html?chatId=" +
                     chatId;
 
             } else {
 
                 window.location.href =
-                    "/customer/chat.html?chatId="
-                    +
+                    "/customer/chat.html?chatId=" +
                     chatId;
             }
 
@@ -1030,14 +1227,12 @@ function handleNotificationClick(
 
 
         /*
-         * Safe internal URL handling.
-         *
-         * Only same-origin relative paths are accepted.
+         * Explicit safe internal URL.
          */
 
         if (
             typeof data.url ===
-            "string"
+                "string"
             &&
             data.url.startsWith("/")
             &&
@@ -1085,28 +1280,21 @@ function showForegroundNotification(
 
 
         const title =
-            notification.title
-            ||
-            data.title
-            ||
+            notification.title ||
+            data.title ||
             "RiderX";
 
 
         const body =
-            notification.body
-            ||
-            data.body
-            ||
+            notification.body ||
+            data.body ||
             "You have a new RiderX notification.";
 
 
         const tag =
-            data.notificationId
-            ||
-            data.rideId
-            ||
-            data.bookingId
-            ||
+            data.notificationId ||
+            data.rideId ||
+            data.bookingId ||
             "riderx-notification";
 
 
@@ -1114,7 +1302,7 @@ function showForegroundNotification(
             isNotificationSupported()
             &&
             Notification.permission ===
-            "granted"
+                "granted"
         ) {
 
             const browserNotification =
@@ -1131,7 +1319,9 @@ function showForegroundNotification(
                             NOTIFICATION_ICON,
 
                         tag:
-                            String(tag),
+                            String(
+                                tag
+                            ),
 
                         data:
                             data
@@ -1159,7 +1349,6 @@ function showForegroundNotification(
 
                     browserNotification.close();
                 };
-
 
         } else {
 
@@ -1216,7 +1405,9 @@ async function setupForegroundListener() {
 
         onMessage(
             messagingInstance,
-            function (payload) {
+            function (
+                payload
+            ) {
 
                 console.log(
                     "RiderX FCM foreground message received."
@@ -1244,7 +1435,7 @@ async function setupForegroundListener() {
 
 
 /* ============================================================
-   AUTOMATIC TOKEN REFRESH / AUTH LISTENER
+   AUTH-AWARE TOKEN REGISTRATION
 ============================================================ */
 
 function setupAuthListener() {
@@ -1263,13 +1454,12 @@ function setupAuthListener() {
 
     onAuthStateChanged(
         auth,
-        async function (user) {
+        async function (
+            user
+        ) {
 
             /*
-             * Never request permission automatically.
-             *
-             * If the user already granted permission,
-             * silently refresh/register the token.
+             * User signed out.
              */
 
             if (
@@ -1283,11 +1473,16 @@ function setupAuthListener() {
             }
 
 
+            /*
+             * Never open the browser permission prompt
+             * automatically.
+             */
+
             if (
                 !isNotificationSupported()
                 ||
                 Notification.permission !==
-                "granted"
+                    "granted"
             ) {
 
                 return;
@@ -1328,11 +1523,13 @@ function setupAuthListener() {
 window.RiderX.firebase.messaging =
     null;
 
+
 window.RiderX.firebase.messagingSupported =
     function () {
 
         return (
-            messagingSupported === true
+            messagingSupported ===
+            true
         );
     };
 
@@ -1362,7 +1559,7 @@ window.RiderX.firebase.handleNotificationClick =
 
 
 /*
- * Compatibility aliases for existing RiderX code.
+ * Compatibility aliases.
  */
 
 window.RiderX.enableNotification =
@@ -1410,7 +1607,7 @@ window.disableNotification =
         ) {
 
             console.info(
-                "RiderX FCM: Web push messaging is unavailable on this device/browser."
+                "RiderX FCM: Web push messaging is unavailable."
             );
 
             setupAuthListener();
@@ -1450,8 +1647,7 @@ window.disableNotification =
         );
 
         /*
-         * Notification failure must never prevent the
-         * main RiderX application from loading.
+         * FCM must never stop the main RiderX application.
          */
 
         setupAuthListener();
