@@ -10,13 +10,22 @@
    - Active navigation
    - Role based navigation
    - Logout
-   - Firebase Auth logout
+   - Firebase/Auth compatible logout
    - User profile display
+   - Safe root-relative navigation
+   - Rider home = rider/home.html
+   - Customer home = customer/home.html
+   - No dependency on rider/dashboard.html
    ============================================================ */
 
 (function () {
 
     "use strict";
+
+
+    /* ========================================================
+       GLOBAL NAMESPACE
+    ======================================================== */
 
     window.RiderX =
         window.RiderX || {};
@@ -30,8 +39,25 @@
 
 
     /* ========================================================
-       CONFIG
-       ======================================================== */
+       CONFIGURATION
+       ========================================================
+
+       IMPORTANT:
+       These paths are PROJECT-ROOT paths.
+
+       Navigation is resolved relative to the current project
+       root instead of the current HTML folder.
+
+       Rider:
+         rider/home.html = canonical rider home
+
+       Customer:
+         customer/home.html = canonical customer home
+
+       Admin:
+         admin/dashboard.html = admin dashboard
+
+    ======================================================== */
 
     Menu.config = {
 
@@ -77,6 +103,12 @@
             home:
                 "rider/home.html",
 
+            /*
+             * dashboard intentionally points to home.
+             *
+             * rider/dashboard.html was removed.
+             */
+
             dashboard:
                 "rider/home.html",
 
@@ -114,6 +146,9 @@
 
         admin: {
 
+            home:
+                "admin/dashboard.html",
+
             dashboard:
                 "admin/dashboard.html",
 
@@ -149,11 +184,134 @@
 
 
     /* ========================================================
-       HELPERS
-       ======================================================== */
+       PROJECT ROOT
+    ======================================================== */
+
+    Menu.getProjectRoot =
+        function () {
+
+            /*
+             * Detect project root from the current page.
+             *
+             * Examples:
+             *
+             * /RiderX2/rider/home.html
+             *       -> /RiderX2/
+             *
+             * /RiderX2/customer/home.html
+             *       -> /RiderX2/
+             *
+             * /RiderX2/admin/dashboard.html
+             *       -> /RiderX2/
+             *
+             * This avoids:
+             *
+             * rider/rider/home.html
+             * rider/auth/login.html
+             * customer/customer/home.html
+             */
+
+            const path =
+                window.location.pathname;
+
+
+            const parts =
+                path
+                    .split("/")
+                    .filter(Boolean);
+
+
+            if (
+                parts.length === 0
+            ) {
+
+                return "/";
+
+            }
+
+
+            /*
+             * Known project folders.
+             */
+
+            const knownFolders = [
+                "rider",
+                "customer",
+                "admin",
+                "auth",
+                "firebase",
+                "js",
+                "css"
+            ];
+
+
+            const folderIndex =
+                parts.findIndex(
+                    function (part) {
+
+                        return knownFolders.includes(
+                            part.toLowerCase()
+                        );
+
+                    }
+                );
+
+
+            if (
+                folderIndex > 0
+            ) {
+
+                return (
+                    "/" +
+                    parts
+                        .slice(
+                            0,
+                            folderIndex
+                        )
+                        .join("/") +
+                    "/"
+                );
+
+            }
+
+
+            /*
+             * If no known folder is found,
+             * assume current directory is project root.
+             */
+
+            if (
+                parts.length === 1
+            ) {
+
+                return "/";
+
+            }
+
+
+            return (
+                "/" +
+                parts
+                    .slice(
+                        0,
+                        parts.length - 1
+                    )
+                    .join("/") +
+                "/"
+            );
+        };
+
+
+    /* ========================================================
+       USER
+    ======================================================== */
 
     Menu.getUser =
         function () {
+
+            /*
+             * RiderX auth module.
+             */
 
             try {
 
@@ -163,20 +321,34 @@
                 ) {
 
                     return RX.auth.currentUser;
+
                 }
 
-            } catch (error) {}
+            } catch (error) {
 
+                console.warn(
+                    "RiderX auth user unavailable:",
+                    error
+                );
+
+            }
+
+
+            /*
+             * Firebase v8/v9 compatibility.
+             */
 
             try {
 
                 if (
                     window.firebase &&
-                    firebase.auth
+                    typeof firebase.auth ===
+                    "function"
                 ) {
 
                     const user =
-                        firebase.auth()
+                        firebase
+                            .auth()
                             .currentUser;
 
 
@@ -185,11 +357,24 @@
                     ) {
 
                         return user;
+
                     }
+
                 }
 
-            } catch (error) {}
+            } catch (error) {
 
+                console.warn(
+                    "Firebase auth user unavailable:",
+                    error
+                );
+
+            }
+
+
+            /*
+             * Local fallback.
+             */
 
             try {
 
@@ -206,14 +391,26 @@
                     return JSON.parse(
                         saved
                     );
+
                 }
 
-            } catch (error) {}
+            } catch (error) {
+
+                console.warn(
+                    "Unable to read riderx_user:",
+                    error
+                );
+
+            }
 
 
             return null;
         };
 
+
+    /* ========================================================
+       ROLE
+    ======================================================== */
 
     Menu.getRole =
         function () {
@@ -226,6 +423,7 @@
                 user?.role ||
                 user?.userRole ||
                 user?.accountType ||
+                user?.type ||
                 localStorage.getItem(
                     "riderx_role"
                 );
@@ -233,35 +431,57 @@
 
             role =
                 String(
-                    role ||
-                    ""
+                    role || ""
                 )
                 .toLowerCase()
                 .trim();
 
 
+            /*
+             * Normalize common role names.
+             */
+
             if (
-                role === "driver"
+                role === "driver" ||
+                role === "delivery_driver" ||
+                role === "bike_driver"
             ) {
 
                 role =
                     "rider";
+
             }
 
 
             if (
                 role === "passenger" ||
-                role === "user"
+                role === "user" ||
+                role === "customer_user"
             ) {
 
                 role =
                     "customer";
+
+            }
+
+
+            if (
+                role === "administrator"
+            ) {
+
+                role =
+                    "admin";
+
             }
 
 
             return role;
         };
 
+
+    /* ========================================================
+       USER ID
+    ======================================================== */
 
     Menu.getUserId =
         function () {
@@ -282,30 +502,104 @@
         };
 
 
+    /* ========================================================
+       CURRENT PAGE
+    ======================================================== */
+
     Menu.getCurrentPage =
         function () {
 
-            const path =
-                window.location.pathname
+            const pathname =
+                window.location.pathname;
+
+
+            const parts =
+                pathname
                     .split("/")
+                    .filter(Boolean);
+
+
+            return (
+                parts
                     .pop()
+                    ?.toLowerCase() ||
+                "index.html"
+            );
+        };
+
+
+    /* ========================================================
+       CURRENT SECTION
+    ======================================================== */
+
+    Menu.getCurrentSection =
+        function () {
+
+            const pathname =
+                window.location.pathname
                     .toLowerCase();
 
 
-            return path ||
-                "index.html";
+            if (
+                pathname.includes(
+                    "/rider/"
+                )
+            ) {
+
+                return "rider";
+
+            }
+
+
+            if (
+                pathname.includes(
+                    "/customer/"
+                )
+            ) {
+
+                return "customer";
+
+            }
+
+
+            if (
+                pathname.includes(
+                    "/admin/"
+                )
+            ) {
+
+                return "admin";
+
+            }
+
+
+            return null;
         };
 
+
+    /* ========================================================
+       NORMALIZE PAGE
+    ======================================================== */
 
     Menu.normalizePage =
         function (
             page
         ) {
 
+            if (
+                !page
+            ) {
+
+                return "";
+
+            }
+
+
             return String(
-                page ||
-                ""
+                page
             )
+            .split("?")[0]
+            .split("#")[0]
             .split("/")
             .pop()
             .toLowerCase();
@@ -313,8 +607,114 @@
 
 
     /* ========================================================
-       PATH RESOLUTION
-       ======================================================== */
+       IS EXTERNAL URL
+    ======================================================== */
+
+    Menu.isExternal =
+        function (
+            url
+        ) {
+
+            return /^https?:\/\//i.test(
+                String(
+                    url || ""
+                )
+            );
+
+        };
+
+
+    /* ========================================================
+       ROOT PATH
+    ======================================================== */
+
+    Menu.toRootPath =
+        function (
+            destination
+        ) {
+
+            if (
+                !destination
+            ) {
+
+                return null;
+
+            }
+
+
+            const value =
+                String(
+                    destination
+                ).trim();
+
+
+            if (
+                !value
+            ) {
+
+                return null;
+
+            }
+
+
+            /*
+             * External URL.
+             */
+
+            if (
+                Menu.isExternal(
+                    value
+                )
+            ) {
+
+                return value;
+
+            }
+
+
+            /*
+             * Protocol-relative URL.
+             */
+
+            if (
+                value.startsWith("//")
+            ) {
+
+                return value;
+
+            }
+
+
+            /*
+             * Root absolute URL.
+             */
+
+            if (
+                value.startsWith("/")
+            ) {
+
+                return value;
+
+            }
+
+
+            const root =
+                Menu.getProjectRoot();
+
+
+            return (
+                root +
+                value.replace(
+                    /^\.?\//,
+                    ""
+                )
+            );
+        };
+
+
+    /* ========================================================
+       RESOLVE DESTINATION
+    ======================================================== */
 
     Menu.resolve =
         function (
@@ -326,49 +726,28 @@
             ) {
 
                 return null;
+
+            }
+
+
+            const value =
+                String(
+                    destination
+                ).trim();
+
+
+            if (
+                !value
+            ) {
+
+                return null;
+
             }
 
 
             /*
-             * Absolute URL.
+             * Known route alias.
              */
-
-            if (
-                /^https?:\/\//i
-                    .test(
-                        destination
-                    )
-            ) {
-
-                return destination;
-            }
-
-
-            /*
-             * Root path.
-             */
-
-            if (
-                destination
-                    .startsWith("/")
-            ) {
-
-                return destination;
-            }
-
-
-            /*
-             * Already contains folder.
-             */
-
-            if (
-                destination
-                    .includes("/")
-            ) {
-
-                return destination;
-            }
-
 
             const role =
                 Menu.getRole();
@@ -382,22 +761,32 @@
 
             if (
                 routes &&
-                routes[destination]
+                Object.prototype.hasOwnProperty.call(
+                    routes,
+                    value
+                )
             ) {
 
-                return routes[
-                    destination
-                ];
+                return Menu.toRootPath(
+                    routes[value]
+                );
+
             }
 
 
-            return destination;
+            /*
+             * Explicit project path.
+             */
+
+            return Menu.toRootPath(
+                value
+            );
         };
 
 
     /* ========================================================
        NAVIGATE
-       ======================================================== */
+    ======================================================== */
 
     Menu.navigate =
         function (
@@ -414,18 +803,80 @@
                 !url
             ) {
 
-                return;
+                console.warn(
+                    "RiderX navigation: invalid destination",
+                    destination
+                );
+
+                return false;
+
             }
+
+
+            /*
+             * External URL.
+             */
+
+            if (
+                Menu.isExternal(
+                    url
+                )
+            ) {
+
+                window.location.href =
+                    url;
+
+                return true;
+
+            }
+
+
+            /*
+             * Same-page protection.
+             */
+
+            const current =
+                window.location.pathname +
+                window.location.search;
+
+
+            const targetUrl =
+                new URL(
+                    url,
+                    window.location.origin
+                );
+
+
+            const target =
+                targetUrl.pathname +
+                targetUrl.search;
+
+
+            if (
+                current === target
+            ) {
+
+                Menu.close();
+
+                return true;
+
+            }
+
+
+            Menu.close();
 
 
             window.location.href =
                 url;
+
+
+            return true;
         };
 
 
     /* ========================================================
-       ROLE BASED HOME
-       ======================================================== */
+       ROLE HOME
+    ======================================================== */
 
     Menu.getHome =
         function (
@@ -447,8 +898,8 @@
 
 
     /* ========================================================
-       ROLE CHECK
-       ======================================================== */
+       IS ALLOWED
+    ======================================================== */
 
     Menu.isAllowed =
         function (
@@ -464,108 +915,15 @@
             ) {
 
                 return false;
+
             }
 
 
             const normalized =
                 String(
-                    url ||
-                    ""
+                    url || ""
                 )
                 .toLowerCase();
-
-
-            if (
-                role === "admin"
-            ) {
-
-                return normalized
-                    .includes(
-                        "/admin/"
-                    );
-            }
-
-
-            if (
-                role === "rider"
-            ) {
-
-                return normalized
-                    .includes(
-                        "/rider/"
-                    );
-            }
-
-
-            if (
-                role === "customer"
-            ) {
-
-                return normalized
-                    .includes(
-                        "/customer/"
-                    );
-            }
-
-
-            return false;
-        };
-
-
-    /* ========================================================
-       ROLE GUARD
-       ======================================================== */
-
-    Menu.guardCurrentPage =
-        function () {
-
-            const path =
-                window.location.pathname
-                    .toLowerCase();
-
-
-            /*
-             * Public pages.
-             */
-
-            const publicPages = [
-
-                "/",
-                "index.html",
-                "login.html",
-                "register.html",
-                "otp-login.html",
-                "verify-otp.html",
-                "customer-login.html",
-                "rider-login.html",
-                "role.html"
-            ];
-
-
-            const isPublic =
-                publicPages.some(
-                    function (
-                        page
-                    ) {
-
-                        return path
-                            .endsWith(
-                                page
-                            );
-                    }
-                );
-
-
-            if (
-                isPublic
-            ) {
-
-                return true;
-            }
-
-
-            const role =
-                Menu.getRole();
 
 
             /*
@@ -573,22 +931,13 @@
              */
 
             if (
-                path.includes(
-                    "/admin/"
-                )
+                role === "admin"
             ) {
 
-                if (
-                    role !== "admin"
-                ) {
+                return normalized.includes(
+                    "/admin/"
+                );
 
-                    Menu.navigate(
-                        "auth/login.html"
-                    );
-
-
-                    return false;
-                }
             }
 
 
@@ -597,22 +946,13 @@
              */
 
             if (
-                path.includes(
-                    "/rider/"
-                )
+                role === "rider"
             ) {
 
-                if (
-                    role !== "rider"
-                ) {
+                return normalized.includes(
+                    "/rider/"
+                );
 
-                    Menu.navigate(
-                        "auth/login.html"
-                    );
-
-
-                    return false;
-                }
             }
 
 
@@ -621,22 +961,202 @@
              */
 
             if (
-                path.includes(
+                role === "customer"
+            ) {
+
+                return normalized.includes(
                     "/customer/"
+                );
+
+            }
+
+
+            return false;
+        };
+
+
+    /* ========================================================
+       PUBLIC PAGE CHECK
+    ======================================================== */
+
+    Menu.isPublicPage =
+        function () {
+
+            const path =
+                window.location.pathname
+                    .toLowerCase();
+
+
+            const current =
+                Menu.getCurrentPage();
+
+
+            const publicPages = [
+
+                "",
+
+                "index.html",
+
+                "login.html",
+
+                "register.html",
+
+                "otp-login.html",
+
+                "verify-otp.html",
+
+                "customer-login.html",
+
+                "rider-login.html",
+
+                "role.html"
+
+            ];
+
+
+            /*
+             * Auth folder pages are public.
+             */
+
+            if (
+                path.includes(
+                    "/auth/"
                 )
             ) {
 
-                if (
-                    role !== "customer"
-                ) {
+                return true;
 
-                    Menu.navigate(
-                        "auth/login.html"
-                    );
+            }
 
 
-                    return false;
-                }
+            return publicPages.includes(
+                current
+            );
+        };
+
+
+    /* ========================================================
+       ROLE GUARD
+    ======================================================== */
+
+    Menu.guardCurrentPage =
+        function () {
+
+            /*
+             * Public pages do not require role.
+             */
+
+            if (
+                Menu.isPublicPage()
+            ) {
+
+                return true;
+
+            }
+
+
+            const path =
+                window.location.pathname
+                    .toLowerCase();
+
+
+            const role =
+                Menu.getRole();
+
+
+            /*
+             * No known protected section.
+             */
+
+            const isRider =
+                path.includes(
+                    "/rider/"
+                );
+
+
+            const isCustomer =
+                path.includes(
+                    "/customer/"
+                );
+
+
+            const isAdmin =
+                path.includes(
+                    "/admin/"
+                );
+
+
+            if (
+                !isRider &&
+                !isCustomer &&
+                !isAdmin
+            ) {
+
+                return true;
+
+            }
+
+
+            /*
+             * No role/session.
+             */
+
+            if (
+                !role
+            ) {
+
+                Menu.redirectToLogin();
+
+                return false;
+
+            }
+
+
+            /*
+             * Admin.
+             */
+
+            if (
+                isAdmin &&
+                role !== "admin"
+            ) {
+
+                Menu.redirectToLogin();
+
+                return false;
+
+            }
+
+
+            /*
+             * Rider.
+             */
+
+            if (
+                isRider &&
+                role !== "rider"
+            ) {
+
+                Menu.redirectToLogin();
+
+                return false;
+
+            }
+
+
+            /*
+             * Customer.
+             */
+
+            if (
+                isCustomer &&
+                role !== "customer"
+            ) {
+
+                Menu.redirectToLogin();
+
+                return false;
+
             }
 
 
@@ -645,8 +1165,33 @@
 
 
     /* ========================================================
-       ACTIVE MENU
-       ======================================================== */
+       LOGIN REDIRECT
+    ======================================================== */
+
+    Menu.redirectToLogin =
+        function () {
+
+            const loginUrl =
+                Menu.toRootPath(
+                    "auth/login.html"
+                );
+
+
+            if (
+                loginUrl
+            ) {
+
+                window.location.replace(
+                    loginUrl
+                );
+
+            }
+        };
+
+
+    /* ========================================================
+       ACTIVE NAVIGATION
+    ======================================================== */
 
     Menu.setActive =
         function () {
@@ -681,6 +1226,23 @@
                         );
 
 
+                    /*
+                     * Do not treat "#" as a page.
+                     */
+
+                    if (
+                        !dataPage &&
+                        (
+                            !href ||
+                            href === "#"
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+
                     const target =
                         Menu.normalizePage(
                             dataPage ||
@@ -688,15 +1250,41 @@
                         );
 
 
+                    /*
+                     * dashboard.html is an alias for
+                     * rider/home.html.
+                     */
+
+                    let active =
+                        target === current;
+
+
                     if (
-                        target &&
-                        target === current
+                        Menu.getCurrentSection() ===
+                        "rider"
+                    ) {
+
+                        if (
+                            current ===
+                            "home.html" &&
+                            target ===
+                            "dashboard.html"
+                        ) {
+
+                            active = true;
+
+                        }
+
+                    }
+
+
+                    if (
+                        active
                     ) {
 
                         link.classList.add(
                             "active"
                         );
-
 
                         link.setAttribute(
                             "aria-current",
@@ -709,10 +1297,10 @@
                             "active"
                         );
 
-
                         link.removeAttribute(
                             "aria-current"
                         );
+
                     }
                 }
             );
@@ -721,7 +1309,7 @@
 
     /* ========================================================
        DRAWER
-       ======================================================== */
+    ======================================================== */
 
     Menu.getDrawer =
         function () {
@@ -746,6 +1334,10 @@
         };
 
 
+    /* ========================================================
+       OVERLAY
+    ======================================================== */
+
     Menu.getOverlay =
         function () {
 
@@ -762,6 +1354,10 @@
             );
         };
 
+
+    /* ========================================================
+       OPEN MENU
+    ======================================================== */
 
     Menu.open =
         function () {
@@ -790,6 +1386,7 @@
                     "aria-hidden",
                     "false"
                 );
+
             }
 
 
@@ -804,6 +1401,12 @@
                 overlay.classList.add(
                     "active"
                 );
+
+                overlay.setAttribute(
+                    "aria-hidden",
+                    "false"
+                );
+
             }
 
 
@@ -817,6 +1420,10 @@
             );
         };
 
+
+    /* ========================================================
+       CLOSE MENU
+    ======================================================== */
 
     Menu.close =
         function () {
@@ -845,6 +1452,7 @@
                     "aria-hidden",
                     "true"
                 );
+
             }
 
 
@@ -859,6 +1467,12 @@
                 overlay.classList.remove(
                     "active"
                 );
+
+                overlay.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
             }
 
 
@@ -873,6 +1487,10 @@
         };
 
 
+    /* ========================================================
+       TOGGLE MENU
+    ======================================================== */
+
     Menu.toggle =
         function () {
 
@@ -881,11 +1499,14 @@
 
 
             if (
-                drawer?.classList.contains(
-                    "open"
-                ) ||
-                drawer?.classList.contains(
-                    "active"
+                drawer &&
+                (
+                    drawer.classList.contains(
+                        "open"
+                    ) ||
+                    drawer.classList.contains(
+                        "active"
+                    )
                 )
             ) {
 
@@ -894,13 +1515,14 @@
             } else {
 
                 Menu.open();
+
             }
         };
 
 
     /* ========================================================
-       PROFILE DATA
-       ======================================================== */
+       PROFILE UPDATE
+    ======================================================== */
 
     Menu.updateProfile =
         function () {
@@ -914,6 +1536,7 @@
             ) {
 
                 return;
+
             }
 
 
@@ -921,6 +1544,8 @@
                 user.name ||
                 user.displayName ||
                 user.fullName ||
+                user.riderName ||
+                user.customerName ||
                 "RiderX User";
 
 
@@ -953,6 +1578,7 @@
 
                         element.textContent =
                             name;
+
                     }
                 );
 
@@ -968,6 +1594,7 @@
 
                         element.textContent =
                             email;
+
                     }
                 );
 
@@ -983,6 +1610,7 @@
 
                         element.textContent =
                             phone;
+
                     }
                 );
 
@@ -1007,7 +1635,12 @@
 
                                 element.src =
                                     photo;
+
+                                element.alt =
+                                    name;
+
                             }
+
                         }
                     );
             }
@@ -1016,14 +1649,10 @@
 
     /* ========================================================
        LOGOUT
-       ======================================================== */
+    ======================================================== */
 
     Menu.logout =
         async function () {
-
-            /*
-             * Prevent accidental logout.
-             */
 
             const confirmed =
                 window.confirm(
@@ -1036,6 +1665,7 @@
             ) {
 
                 return false;
+
             }
 
 
@@ -1058,13 +1688,22 @@
 
                     await RX.auth.logout();
 
-                } else if (
+                }
+
+                /*
+                 * Firebase v8 fallback.
+                 */
+
+                else if (
                     window.firebase &&
-                    firebase.auth
+                    typeof firebase.auth ===
+                    "function"
                 ) {
 
-                    await firebase.auth()
+                    await firebase
+                        .auth()
                         .signOut();
+
                 }
 
             } catch (error) {
@@ -1073,30 +1712,40 @@
                     "Logout error:",
                     error
                 );
+
             }
 
 
             /*
-             * Clear local session.
+             * Clear RiderX local session.
              */
 
-            const keys = [
+            const localKeys = [
 
                 "riderx_user",
+
                 "riderx_uid",
+
                 "riderx_role",
+
                 "riderx_token",
+
                 "riderx_session",
+
                 "riderx_customer",
+
                 "riderx_rider",
+
                 "riderx_admin",
+
                 "riderx_current_ride",
+
                 "riderx_active_ride"
 
             ];
 
 
-            keys.forEach(
+            localKeys.forEach(
                 function (
                     key
                 ) {
@@ -1108,12 +1757,13 @@
                         );
 
                     } catch (error) {}
+
                 }
             );
 
 
             /*
-             * Session storage.
+             * Clear session storage.
              */
 
             try {
@@ -1129,11 +1779,10 @@
 
 
             /*
-             * Always go to auth login.
+             * Always use project-root login path.
              */
 
-            window.location.href =
-                "auth/login.html";
+            Menu.redirectToLogin();
 
 
             return true;
@@ -1142,18 +1791,36 @@
 
     /* ========================================================
        EVENT BINDING
-       ======================================================== */
+    ======================================================== */
 
     Menu.bind =
         function () {
 
             /*
-             * Menu buttons.
+             * Prevent duplicate binding if
+             * init() is accidentally called again.
              */
+
+            if (
+                Menu._bound
+            ) {
+
+                return;
+
+            }
+
+
+            Menu._bound =
+                true;
+
+
+            /* ==================================================
+               MENU TOGGLE
+            ================================================== */
 
             document
                 .querySelectorAll(
-                    "[data-menu-toggle], .menu-toggle, #menuToggle"
+                    "[data-menu-toggle], .menu-toggle, #menuToggle, #menuButton"
                 )
                 .forEach(
                     function (
@@ -1168,16 +1835,20 @@
 
                                 event.preventDefault();
 
+                                event.stopPropagation();
+
                                 Menu.toggle();
+
                             }
                         );
+
                     }
                 );
 
 
-            /*
-             * Close buttons.
-             */
+            /* ==================================================
+               MENU CLOSE
+            ================================================== */
 
             document
                 .querySelectorAll(
@@ -1197,15 +1868,17 @@
                                 event.preventDefault();
 
                                 Menu.close();
+
                             }
                         );
+
                     }
                 );
 
 
-            /*
-             * Overlay.
-             */
+            /* ==================================================
+               OVERLAY
+            ================================================== */
 
             const overlay =
                 Menu.getOverlay();
@@ -1220,14 +1893,16 @@
                     function () {
 
                         Menu.close();
+
                     }
                 );
+
             }
 
 
-            /*
-             * Logout buttons.
-             */
+            /* ==================================================
+               LOGOUT
+            ================================================== */
 
             document
                 .querySelectorAll(
@@ -1247,15 +1922,17 @@
                                 event.preventDefault();
 
                                 Menu.logout();
+
                             }
                         );
+
                     }
                 );
 
 
-            /*
-             * Navigation links.
-             */
+            /* ==================================================
+               DATA NAVIGATION
+            ================================================== */
 
             document
                 .querySelectorAll(
@@ -1273,14 +1950,12 @@
                             ) {
 
                                 const target =
-                                    element
-                                        .getAttribute(
-                                            "data-menu"
-                                        ) ||
-                                    element
-                                        .getAttribute(
-                                            "data-nav"
-                                        );
+                                    element.getAttribute(
+                                        "data-menu"
+                                    ) ||
+                                    element.getAttribute(
+                                        "data-nav"
+                                    );
 
 
                                 if (
@@ -1288,27 +1963,27 @@
                                 ) {
 
                                     return;
+
                                 }
 
 
                                 event.preventDefault();
 
 
-                                Menu.close();
-
-
                                 Menu.navigate(
                                     target
                                 );
+
                             }
                         );
+
                     }
                 );
 
 
-            /*
-             * Close menu with Escape.
-             */
+            /* ==================================================
+               ESCAPE
+            ================================================== */
 
             document.addEventListener(
                 "keydown",
@@ -1322,7 +1997,25 @@
                     ) {
 
                         Menu.close();
+
                     }
+
+                }
+            );
+
+
+            /* ==================================================
+               BACK BUTTON
+            ================================================== */
+
+            window.addEventListener(
+                "popstate",
+                function () {
+
+                    Menu.close();
+
+                    Menu.setActive();
+
                 }
             );
         };
@@ -1330,10 +2023,23 @@
 
     /* ========================================================
        SWIPE MENU
-       ======================================================== */
+    ======================================================== */
 
     Menu.enableSwipe =
         function () {
+
+            /*
+             * Prevent duplicate swipe binding.
+             */
+
+            if (
+                Menu._swipeBound
+            ) {
+
+                return;
+
+            }
+
 
             const drawer =
                 Menu.getDrawer();
@@ -1344,7 +2050,12 @@
             ) {
 
                 return;
+
             }
+
+
+            Menu._swipeBound =
+                true;
 
 
             let startX =
@@ -1371,6 +2082,7 @@
                     ) {
 
                         return;
+
                     }
 
 
@@ -1379,12 +2091,16 @@
                             .clientX;
 
 
+                    currentX =
+                        startX;
+
+
                     touching =
                         true;
+
                 },
                 {
-                    passive:
-                        true
+                    passive: true
                 }
             );
 
@@ -1402,16 +2118,17 @@
                     ) {
 
                         return;
+
                     }
 
 
                     currentX =
                         event.touches[0]
                             .clientX;
+
                 },
                 {
-                    passive:
-                        true
+                    passive: true
                 }
             );
 
@@ -1425,6 +2142,7 @@
                     ) {
 
                         return;
+
                     }
 
 
@@ -1438,7 +2156,7 @@
 
 
                     /*
-                     * Swipe left to close.
+                     * Swipe left = close.
                      */
 
                     if (
@@ -1446,7 +2164,9 @@
                     ) {
 
                         Menu.close();
+
                     }
+
                 }
             );
         };
@@ -1454,7 +2174,7 @@
 
     /* ========================================================
        EVENTS
-       ======================================================== */
+    ======================================================== */
 
     Menu.emit =
         function (
@@ -1462,16 +2182,27 @@
             data
         ) {
 
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-menu-" +
-                    name,
-                    {
-                        detail:
-                            data || {}
-                    }
-                )
-            );
+            try {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "riderx-menu-" +
+                        name,
+                        {
+                            detail:
+                                data || {}
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX menu event error:",
+                    error
+                );
+
+            }
         };
 
 
@@ -1487,6 +2218,7 @@
             ) {
 
                 return;
+
             }
 
 
@@ -1501,6 +2233,7 @@
                         event.detail || {},
                         event
                     );
+
                 }
             );
         };
@@ -1508,10 +2241,14 @@
 
     /* ========================================================
        INITIALIZATION
-       ======================================================== */
+    ======================================================== */
 
     Menu.init =
         function () {
+
+            /*
+             * Bind UI.
+             */
 
             Menu.bind();
 
@@ -1523,9 +2260,11 @@
 
 
             /*
-             * Do not enforce guard on
-             * pages before auth module
-             * has initialized.
+             * Only guard if a role is already
+             * available.
+             *
+             * Firebase auth.js can perform its
+             * own async authentication check.
              */
 
             const role =
@@ -1537,8 +2276,13 @@
             ) {
 
                 Menu.guardCurrentPage();
+
             }
 
+
+            /*
+             * Emit ready event.
+             */
 
             Menu.emit(
                 "ready",
@@ -1553,26 +2297,40 @@
 
 
             console.log(
-                "RiderX menu.js loaded."
+                "RiderX menu.js loaded.",
+                {
+                    role:
+                        role,
+
+                    page:
+                        Menu.getCurrentPage(),
+
+                    section:
+                        Menu.getCurrentSection()
+                }
             );
         };
 
 
     /* ========================================================
        GLOBAL API
-       ======================================================== */
+    ======================================================== */
 
     RX.navigate =
         Menu.navigate;
 
+
     RX.logout =
         Menu.logout;
+
 
     RX.openMenu =
         Menu.open;
 
+
     RX.closeMenu =
         Menu.close;
+
 
     RX.toggleMenu =
         Menu.toggle;
@@ -1580,7 +2338,7 @@
 
     /* ========================================================
        START
-       ======================================================== */
+    ======================================================== */
 
     if (
         document.readyState ===
@@ -1589,12 +2347,16 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            Menu.init
+            Menu.init,
+            {
+                once: true
+            }
         );
 
     } else {
 
         Menu.init();
+
     }
 
 
