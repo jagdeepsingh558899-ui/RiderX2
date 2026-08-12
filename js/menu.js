@@ -15,7 +15,7 @@
    - Safe root-relative navigation
    - Rider home = rider/home.html
    - Customer home = customer/home.html
-   - No dependency on rider/dashboard.html
+   - No dependency on rider/home.html
    ============================================================ */
 
 (function () {
