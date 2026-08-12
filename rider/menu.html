@@ -51,8 +51,7 @@ body{
 
 body{
     min-height:100vh;
-    padding-bottom:
-        max(20px,env(safe-area-inset-bottom));
+    padding-bottom:max(20px,env(safe-area-inset-bottom));
 }
 
 /* =====================================================
@@ -74,13 +73,13 @@ body{
         16px
         14px;
 
-    background:
-        rgba(0,0,0,.96);
+    background:rgba(0,0,0,.96);
 
-    border-bottom:
-        1px solid #292929;
+    border-bottom:1px solid #292929;
 
     backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+
 }
 
 .header-left{
@@ -107,6 +106,8 @@ body{
     justify-content:center;
 
     font-size:16px;
+
+    cursor:pointer;
 
 }
 
@@ -149,6 +150,12 @@ body{
     align-items:center;
     justify-content:center;
 
+    cursor:pointer;
+
+}
+
+.header-icon:active{
+    transform:scale(.92);
 }
 
 /* =====================================================
@@ -168,8 +175,7 @@ body{
             #101010
         );
 
-    border:
-        1px solid #292929;
+    border:1px solid #292929;
 
     border-radius:22px;
 
@@ -187,6 +193,8 @@ body{
 
     width:58px;
     height:58px;
+
+    min-width:58px;
 
     border-radius:50%;
 
@@ -208,6 +216,7 @@ body{
 
     width:100%;
     height:100%;
+
     object-fit:cover;
 
     display:none;
@@ -215,8 +224,10 @@ body{
 }
 
 .profile-info{
+
     flex:1;
     min-width:0;
+
 }
 
 .profile-name{
@@ -276,12 +287,20 @@ body{
     width:38px;
     height:38px;
 
+    min-width:38px;
+
     border:0;
     border-radius:12px;
 
     background:#242424;
     color:var(--yellow);
 
+    cursor:pointer;
+
+}
+
+.edit-profile:active{
+    transform:scale(.92);
 }
 
 /* =====================================================
@@ -292,8 +311,7 @@ body{
 
     display:grid;
 
-    grid-template-columns:
-        repeat(3,1fr);
+    grid-template-columns:repeat(3,1fr);
 
     gap:8px;
 
@@ -388,8 +406,7 @@ body{
 
     gap:13px;
 
-    border:
-        1px solid #202020;
+    border:1px solid #202020;
 
     border-radius:16px;
 
@@ -435,7 +452,6 @@ body{
 .menu-text{
 
     flex:1;
-
     min-width:0;
 
 }
@@ -443,7 +459,6 @@ body{
 .menu-title{
 
     font-size:13px;
-
     font-weight:700;
 
 }
@@ -453,7 +468,6 @@ body{
     margin-top:3px;
 
     color:#666;
-
     font-size:9px;
 
 }
@@ -461,7 +475,6 @@ body{
 .menu-arrow{
 
     color:#555;
-
     font-size:11px;
 
 }
@@ -490,6 +503,8 @@ body{
     align-items:center;
     justify-content:space-between;
 
+    gap:15px;
+
 }
 
 .online-title{
@@ -500,6 +515,8 @@ body{
 }
 
 .online-status{
+
+    margin-top:4px;
 
     color:#777;
     font-size:10px;
@@ -513,10 +530,16 @@ body{
     width:51px;
     height:29px;
 
+    min-width:51px;
+
     border:0;
     border-radius:30px;
 
     background:#333;
+
+    cursor:pointer;
+
+    transition:background .2s ease;
 
 }
 
@@ -554,6 +577,13 @@ body{
 
 }
 
+.toggle:disabled{
+
+    opacity:.55;
+    cursor:not-allowed;
+
+}
+
 /* =====================================================
    LOGOUT
 ===================================================== */
@@ -566,8 +596,7 @@ body{
 
     min-height:52px;
 
-    border:
-        1px solid #3a2020;
+    border:1px solid #3a2020;
 
     border-radius:15px;
 
@@ -576,14 +605,22 @@ body{
     color:#ff6b6b;
 
     font-size:13px;
-
     font-weight:800;
+
+    cursor:pointer;
 
 }
 
 .logout:active{
 
     transform:scale(.98);
+
+}
+
+.logout:disabled{
+
+    opacity:.6;
+    cursor:not-allowed;
 
 }
 
@@ -666,9 +703,7 @@ body{
 
         <div class="avatar" id="avatar">
 
-            <span id="avatarLetter">
-                R
-            </span>
+            <span id="avatarLetter">R</span>
 
             <img
                 id="avatarImage"
@@ -1192,6 +1227,7 @@ body{
                 class="toggle"
                 type="button"
                 aria-label="Toggle online status"
+                aria-pressed="false"
             ></button>
 
         </div>
@@ -1225,6 +1261,13 @@ body{
 
 <script type="module">
 
+"use strict";
+
+
+/* =====================================================
+   FIREBASE IMPORTS
+===================================================== */
+
 import {
     auth,
     db
@@ -1233,10 +1276,12 @@ import {
 import {
     doc,
     getDoc,
+    setDoc,
     collection,
     getDocs,
     query,
-    where
+    where,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 import {
@@ -1251,6 +1296,9 @@ import {
 
 const profileName =
     document.getElementById("profileName");
+
+const profileStatus =
+    document.getElementById("profileStatus");
 
 const avatarLetter =
     document.getElementById("avatarLetter");
@@ -1273,8 +1321,209 @@ const onlineToggle =
 const onlineText =
     document.getElementById("onlineText");
 
+const backBtn =
+    document.getElementById("backBtn");
+
+const notificationBtn =
+    document.getElementById("notificationBtn");
+
+const editProfile =
+    document.getElementById("editProfile");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
 let currentUser = null;
+
 let riderOnline = false;
+
+let authResolved = false;
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+/**
+ * Safely convert a value to a finite number.
+ */
+function toNumber(value, fallback = 0){
+
+    const number =
+        Number(value);
+
+    return Number.isFinite(number)
+        ? number
+        : fallback;
+
+}
+
+
+/**
+ * Get rider display name.
+ */
+function getRiderName(
+    riderData,
+    userData
+){
+
+    return (
+        riderData?.name ||
+        userData?.name ||
+        userData?.displayName ||
+        "Rider"
+    ).toString().trim() || "Rider";
+
+}
+
+
+/**
+ * Get rider photo URL.
+ */
+function getRiderPhoto(
+    riderData,
+    userData
+){
+
+    const photo =
+        riderData?.photoURL ||
+        riderData?.photo ||
+        userData?.photoURL ||
+        userData?.photo ||
+        "";
+
+    return typeof photo === "string"
+        ? photo.trim()
+        : "";
+
+}
+
+
+/**
+ * Safely determine online state.
+ */
+function getOnlineState(
+    riderData
+){
+
+    return (
+        riderData?.online === true ||
+        riderData?.isOnline === true
+    );
+
+}
+
+
+/* =====================================================
+   PROFILE AVATAR
+===================================================== */
+
+function updateAvatar(
+    name,
+    photo
+){
+
+    const firstLetter =
+        name
+            .trim()
+            .charAt(0)
+            .toUpperCase() || "R";
+
+
+    avatarLetter.innerText =
+        firstLetter;
+
+
+    avatarLetter.style.display =
+        "block";
+
+
+    avatarImage.style.display =
+        "none";
+
+
+    avatarImage.removeAttribute(
+        "src"
+    );
+
+
+    if(!photo){
+        return;
+    }
+
+
+    avatarImage.onload =
+        ()=>{
+            avatarImage.style.display =
+                "block";
+
+            avatarLetter.style.display =
+                "none";
+        };
+
+
+    avatarImage.onerror =
+        ()=>{
+            avatarImage.style.display =
+                "none";
+
+            avatarLetter.style.display =
+                "block";
+
+            avatarImage.removeAttribute(
+                "src"
+            );
+        };
+
+
+    avatarImage.src =
+        photo;
+
+}
+
+
+/* =====================================================
+   ONLINE UI
+===================================================== */
+
+function updateOnlineUI(){
+
+    onlineToggle.classList.toggle(
+        "active",
+        riderOnline
+    );
+
+
+    onlineToggle.setAttribute(
+        "aria-pressed",
+        String(riderOnline)
+    );
+
+
+    if(riderOnline){
+
+        onlineText.innerText =
+            "Currently online • receiving rides";
+
+        profileStatus.innerText =
+            "Online • ready for rides";
+
+    }else{
+
+        onlineText.innerText =
+            "Currently offline";
+
+        profileStatus.innerText =
+            "Ready to ride";
+
+    }
+
+}
 
 
 /* =====================================================
@@ -1283,9 +1532,21 @@ let riderOnline = false;
 
 async function loadRider(uid){
 
+    if(!uid){
+        return;
+    }
+
+
     try{
 
         let userData = {};
+
+        let riderData = {};
+
+
+        /* -------------------------------------------------
+           USERS DOCUMENT
+        ------------------------------------------------- */
 
         const userSnap =
             await getDoc(
@@ -1296,15 +1557,18 @@ async function loadRider(uid){
                 )
             );
 
+
         if(userSnap.exists()){
 
             userData =
-                userSnap.data();
+                userSnap.data() || {};
 
         }
 
 
-        let riderData = {};
+        /* -------------------------------------------------
+           RIDERS DOCUMENT
+        ------------------------------------------------- */
 
         const riderSnap =
             await getDoc(
@@ -1315,82 +1579,93 @@ async function loadRider(uid){
                 )
             );
 
+
         if(riderSnap.exists()){
 
             riderData =
-                riderSnap.data();
+                riderSnap.data() || {};
 
         }
 
 
+        /* -------------------------------------------------
+           NAME
+        ------------------------------------------------- */
+
         const name =
-            riderData.name ||
-            userData.name ||
-            userData.displayName ||
-            "Rider";
+            getRiderName(
+                riderData,
+                userData
+            );
 
 
         profileName.innerText =
             name;
 
 
-        avatarLetter.innerText =
-            name
-                .trim()
-                .charAt(0)
-                .toUpperCase() ||
-            "R";
-
+        /* -------------------------------------------------
+           AVATAR
+        ------------------------------------------------- */
 
         const photo =
-            riderData.photoURL ||
-            riderData.photo ||
-            userData.photoURL ||
-            userData.photo;
+            getRiderPhoto(
+                riderData,
+                userData
+            );
 
 
-        if(photo){
-
-            avatarImage.src = photo;
-
-            avatarImage.style.display =
-                "block";
-
-            avatarLetter.style.display =
-                "none";
-
-        }
+        updateAvatar(
+            name,
+            photo
+        );
 
 
-        const status =
-            riderData.online ??
-            riderData.isOnline ??
-            false;
-
+        /* -------------------------------------------------
+           ONLINE STATUS
+        ------------------------------------------------- */
 
         riderOnline =
-            status === true;
+            getOnlineState(
+                riderData
+            );
 
 
         updateOnlineUI();
 
 
+        /* -------------------------------------------------
+           RATING
+        ------------------------------------------------- */
+
         const rating =
-            riderData.rating ??
-            userData.rating ??
-            5;
+            toNumber(
+                riderData.rating ??
+                userData.rating ??
+                5,
+                5
+            );
 
 
         ratingValue.innerText =
-            Number(rating).toFixed(1);
+            Math.max(
+                0,
+                rating
+            ).toFixed(1);
 
 
-        await loadRideStats(uid);
+        /* -------------------------------------------------
+           RIDE STATS
+        ------------------------------------------------- */
+
+        await loadRideStats(
+            uid
+        );
+
 
     }catch(error){
 
         console.error(
-            "Rider menu error:",
+            "Rider menu load error:",
             error
         );
 
@@ -1405,9 +1680,14 @@ async function loadRider(uid){
 
 async function loadRideStats(uid){
 
+    if(!uid){
+        return;
+    }
+
+
     try{
 
-        const q =
+        const ridesQuery =
             query(
                 collection(
                     db,
@@ -1421,56 +1701,72 @@ async function loadRideStats(uid){
             );
 
 
-        const snap =
-            await getDocs(q);
+        const ridesSnap =
+            await getDocs(
+                ridesQuery
+            );
 
 
         let trips = 0;
+
         let earnings = 0;
 
 
-        snap.forEach(
+        ridesSnap.forEach(
             rideSnap=>{
 
                 const data =
-                    rideSnap.data();
+                    rideSnap.data() || {};
 
 
                 const status =
                     String(
-                        data.status ||
-                        ""
-                    ).toLowerCase();
+                        data.status || ""
+                    )
+                    .trim()
+                    .toLowerCase();
 
 
-                if(
-                    status === "completed"
-                ){
-
-                    trips++;
-
-                    earnings +=
-                        Number(
-                            data.fare ||
-                            data.amount ||
-                            data.totalFare ||
-                            0
-                        );
-
+                if(status !== "completed"){
+                    return;
                 }
+
+
+                trips++;
+
+
+                /*
+                 * Support the different fare field names
+                 * already used by the project.
+                 */
+
+                const fare =
+                    data.fare ??
+                    data.amount ??
+                    data.totalFare ??
+                    0;
+
+
+                earnings +=
+                    toNumber(
+                        fare,
+                        0
+                    );
 
             }
         );
 
 
         tripCount.innerText =
-            trips;
+            String(trips);
 
 
         earningAmount.innerText =
             "₹" +
             Math.round(
                 earnings
+            ).toLocaleString(
+                "en-IN"
             );
 
 
@@ -1481,34 +1777,17 @@ async function loadRideStats(uid){
             error
         );
 
-    }
 
-}
+        /*
+         * Keep safe defaults if the
+         * statistics query fails.
+         */
 
+        tripCount.innerText =
+            "0";
 
-/* =====================================================
-   ONLINE UI
-===================================================== */
-
-function updateOnlineUI(){
-
-    if(riderOnline){
-
-        onlineToggle.classList.add(
-            "active"
-        );
-
-        onlineText.innerText =
-            "Currently online • receiving rides";
-
-    }else{
-
-        onlineToggle.classList.remove(
-            "active"
-        );
-
-        onlineText.innerText =
-            "Currently offline";
+        earningAmount.innerText =
+            "₹0";
 
     }
 
@@ -1519,86 +1798,241 @@ function updateOnlineUI(){
    TOGGLE ONLINE
 ===================================================== */
 
-onlineToggle.addEventListener(
-    "click",
-    async()=>{
+async function toggleOnlineStatus(){
 
-        if(!currentUser){
-            return;
-        }
+    if(!currentUser){
 
+        alert(
+            "Please login first."
+        );
+
+        return;
+
+    }
+
+
+    if(onlineToggle.disabled){
+        return;
+    }
+
+
+    const previousState =
+        riderOnline;
+
+
+    const nextState =
+        !previousState;
+
+
+    /*
+     * Optimistic UI update.
+     */
+    riderOnline =
+        nextState;
+
+
+    updateOnlineUI();
+
+
+    onlineToggle.disabled =
+        true;
+
+
+    try{
+
+        const riderRef =
+            doc(
+                db,
+                "riders",
+                currentUser.uid
+            );
+
+
+        /*
+         * Only update the fields that belong
+         * to online status.
+         *
+         * No need to read the whole document
+         * and spread old data back into Firestore.
+         */
+
+        await setDoc(
+            riderRef,
+            {
+                online:nextState,
+                isOnline:nextState,
+                updatedAt:serverTimestamp()
+            },
+            {
+                merge:true
+            }
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Online status update error:",
+            error
+        );
+
+
+        /*
+         * Roll back optimistic UI.
+         */
 
         riderOnline =
-            !riderOnline;
+            previousState;
 
 
         updateOnlineUI();
 
 
+        alert(
+            "Unable to update online status. Please try again."
+        );
+
+
+    }finally{
+
+        onlineToggle.disabled =
+            false;
+
+    }
+
+}
+
+
+/* =====================================================
+   ONLINE TOGGLE EVENT
+===================================================== */
+
+onlineToggle.addEventListener(
+    "click",
+    toggleOnlineStatus
+);
+
+
+/* =====================================================
+   BACK NAVIGATION
+===================================================== */
+
+backBtn.addEventListener(
+    "click",
+    ()=>{
+
+        /*
+         * If browser history has a previous page,
+         * go back. Otherwise use rider dashboard.
+         */
+
+        if(
+            window.history.length > 1
+        ){
+
+            window.history.back();
+
+        }else{
+
+            window.location.href =
+                "home.html";
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   NOTIFICATIONS
+===================================================== */
+
+notificationBtn.addEventListener(
+    "click",
+    ()=>{
+
+        window.location.href =
+            "notifications.html";
+
+    }
+);
+
+
+/* =====================================================
+   EDIT PROFILE
+===================================================== */
+
+editProfile.addEventListener(
+    "click",
+    ()=>{
+
+        window.location.href =
+            "profile.html";
+
+    }
+);
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+logoutBtn.addEventListener(
+    "click",
+    async()=>{
+
+        if(logoutBtn.disabled){
+            return;
+        }
+
+
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to logout?"
+            );
+
+
+        if(!confirmed){
+            return;
+        }
+
+
+        logoutBtn.disabled =
+            true;
+
+
         try{
 
             /*
-             * The dedicated online page/map
-             * remains responsible for continuous
-             * GPS tracking.
+             * Do not silently change rider online
+             * status here. The authenticated session
+             * is simply signed out.
              */
 
-            const riderRef =
-                doc(
-                    db,
-                    "riders",
-                    currentUser.uid
-                );
+            await signOut(
+                auth
+            );
 
 
-            const existing =
-                await getDoc(
-                    riderRef
-                );
-
-
-            const oldData =
-                existing.exists()
-                    ? existing.data()
-                    : {};
-
-
-            const {
-                setDoc
-            } =
-                await import(
-                    "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js"
-                );
-
-
-            await setDoc(
-                riderRef,
-                {
-                    ...oldData,
-                    online:riderOnline,
-                    isOnline:riderOnline,
-                    updatedAt:new Date()
-                },
-                {
-                    merge:true
-                }
+            window.location.replace(
+                "../auth/login.html"
             );
 
 
         }catch(error){
 
             console.error(
-                "Online status error:",
+                "Logout error:",
                 error
             );
 
-            riderOnline =
-                !riderOnline;
 
-            updateOnlineUI();
+            logoutBtn.disabled =
+                false;
+
 
             alert(
-                "Unable to update online status."
+                "Logout failed. Please try again."
             );
 
         }
@@ -1608,88 +2042,7 @@ onlineToggle.addEventListener(
 
 
 /* =====================================================
-   NAVIGATION
-===================================================== */
-
-document
-    .getElementById("backBtn")
-    .addEventListener(
-        "click",
-        ()=>{
-            history.back();
-        }
-    );
-
-
-document
-    .getElementById("notificationBtn")
-    .addEventListener(
-        "click",
-        ()=>{
-            location.href =
-                "notifications.html";
-        }
-    );
-
-
-document
-    .getElementById("editProfile")
-    .addEventListener(
-        "click",
-        ()=>{
-            location.href =
-                "profile.html";
-        }
-    );
-
-
-/* =====================================================
-   LOGOUT
-===================================================== */
-
-document
-    .getElementById("logoutBtn")
-    .addEventListener(
-        "click",
-        async()=>{
-
-            const confirmed =
-                confirm(
-                    "Are you sure you want to logout?"
-                );
-
-
-            if(!confirmed){
-                return;
-            }
-
-
-            try{
-
-                await signOut(auth);
-
-                location.href =
-                    "../auth/login.html";
-
-            }catch(error){
-
-                console.error(
-                    "Logout error:",
-                    error
-                );
-
-                alert(
-                    "Logout failed. Please try again."
-                );
-
-            }
-
-        }
-    );
-
-
-/* =====================================================
-   AUTH
+   AUTH STATE
 ===================================================== */
 
 onAuthStateChanged(
@@ -1698,8 +2051,22 @@ onAuthStateChanged(
 
         if(!user){
 
-            location.href =
-                "../auth/login.html";
+            currentUser =
+                null;
+
+
+            if(!authResolved){
+
+                authResolved =
+                    true;
+
+            }
+
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
 
             return;
 
@@ -1708,6 +2075,10 @@ onAuthStateChanged(
 
         currentUser =
             user;
+
+
+        authResolved =
+            true;
 
 
         await loadRider(
@@ -1721,4 +2092,4 @@ onAuthStateChanged(
 
 </body>
 
-  </html>
+</html>
