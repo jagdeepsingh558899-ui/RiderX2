@@ -1,52 +1,23 @@
 /* =========================================================
-   RIDERX 2.0
-   FIREBASE CONFIGURATION
-   File: firebase/firebase-config.js
-
-   CANONICAL FIREBASE CONFIGURATION
-
-   Firebase SDK:
-   12.2.1
-
-   Services:
-   - Firebase Authentication
-   - Cloud Firestore
-   - Realtime Database
-   - Firebase Storage
-
-   ARCHITECTURE:
-   - This is the ONLY page-side Firebase initialization file.
-   - No other RiderX page/module may call initializeApp().
-   - Feature modules must import Firebase services from here.
-   - This file uses Firebase Modular SDK only.
-   - No Firebase Compat SDK is initialized here.
-
-   IMPORTANT:
-   Firebase API keys used by Firebase web applications are not
-   treated as application secrets. Security must be enforced
-   through Firebase Authentication and database/storage rules.
-========================================================= */
+   GO BIKE — FIREBASE CONFIGURATION
+   ========================================================= */
 
 "use strict";
 
 
 /* =========================================================
    FIREBASE SDK VERSION
-========================================================= */
+   ========================================================= */
 
 const FIREBASE_SDK_VERSION = "12.2.1";
 
 const FIREBASE_SDK_BASE =
-    `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
+    "https://www.gstatic.com/firebasejs/12.2.1";
 
 
 /* =========================================================
    FIREBASE APP
-   ---------------------------------------------------------
-   IMPORTANT:
-   ES module import specifiers must be static strings.
-   JavaScript template literals are NOT valid here.
-========================================================= */
+   ========================================================= */
 
 import {
     initializeApp,
@@ -55,8 +26,8 @@ import {
 
 
 /* =========================================================
-   FIREBASE AUTHENTICATION
-========================================================= */
+   FIREBASE AUTH
+   ========================================================= */
 
 import {
     getAuth,
@@ -76,8 +47,8 @@ import {
 
 
 /* =========================================================
-   CLOUD FIRESTORE
-========================================================= */
+   FIRESTORE
+   ========================================================= */
 
 import {
     getFirestore,
@@ -106,7 +77,7 @@ import {
 
 /* =========================================================
    REALTIME DATABASE
-========================================================= */
+   ========================================================= */
 
 import {
     getDatabase,
@@ -125,7 +96,7 @@ import {
 
 /* =========================================================
    FIREBASE STORAGE
-========================================================= */
+   ========================================================= */
 
 import {
     getStorage,
@@ -138,306 +109,238 @@ import {
 
 
 /* =========================================================
-   RIDERX FIREBASE CONFIGURATION
-========================================================= */
+   FIREBASE CONFIG
+   ========================================================= */
 
-const firebaseConfig = Object.freeze({
-
-    apiKey:
-        "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
-
-    authDomain:
-        "riderx-1.firebaseapp.com",
-
+const firebaseConfig = {
+    apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
+    authDomain: "riderx-1.firebaseapp.com",
     databaseURL:
         "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
-
-    projectId:
-        "riderx-1",
-
-    storageBucket:
-        "riderx-1.firebasestorage.app",
-
-    messagingSenderId:
-        "261640190671",
-
-    appId:
-        "1:261640190671:web:701b3ce5dcb6135fd955ba",
-
-    measurementId:
-        "G-SM8KLBVPWN"
-
-});
+    projectId: "riderx-1",
+    storageBucket: "riderx-1.firebasestorage.app",
+    messagingSenderId: "261640190671",
+    appId: "1:261640190671:web:701b3ce5dcb6135fd955ba",
+    measurementId: "G-SM8KLBVPWN"
+};
 
 
 /* =========================================================
-   FIREBASE APP INITIALIZATION
-========================================================= */
+   INITIALIZE FIREBASE APP
+   ========================================================= */
 
-let app = null;
+let app;
 
 try {
-
-    const existingApps =
-        getApps();
+    const existingApps = getApps();
 
     app =
         existingApps.find(
-            firebaseApp =>
-                firebaseApp.name === "[DEFAULT]"
-        ) || null;
-
-
-    if (!app) {
-
-        app =
-            initializeApp(
-                firebaseConfig
-            );
-
-    }
+            firebaseApp => firebaseApp.name === "[DEFAULT]"
+        ) ||
+        initializeApp(firebaseConfig);
 
 } catch (error) {
 
     console.error(
-        "RiderX: Firebase app initialization failed.",
+        "GO BIKE: Firebase initialization failed:",
         error
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   FIREBASE AUTHENTICATION INSTANCE
-========================================================= */
+   AUTH
+   ========================================================= */
 
-let auth = null;
+let auth;
 
 try {
 
-    auth =
-        getAuth(
-            app
-        );
+    auth = getAuth(app);
 
 } catch (error) {
 
     console.error(
-        "RiderX: Firebase Authentication initialization failed.",
+        "GO BIKE: Firebase Auth initialization failed:",
         error
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   CLOUD FIRESTORE INSTANCE
-========================================================= */
+   FIRESTORE
+   ========================================================= */
 
-let db = null;
+let db;
 
 try {
 
-    db =
-        getFirestore(
-            app
-        );
+    db = getFirestore(app);
 
 } catch (error) {
 
     console.error(
-        "RiderX: Cloud Firestore initialization failed.",
+        "GO BIKE: Firestore initialization failed:",
         error
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   REALTIME DATABASE INSTANCE
-========================================================= */
+   REALTIME DATABASE
+   ========================================================= */
 
-let realtimeDb = null;
+let realtimeDb;
 
 try {
 
-    realtimeDb =
-        getDatabase(
-            app
-        );
+    realtimeDb = getDatabase(app);
 
 } catch (error) {
 
     console.error(
-        "RiderX: Firebase Realtime Database initialization failed.",
+        "GO BIKE: Realtime Database initialization failed:",
         error
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   FIREBASE STORAGE INSTANCE
-========================================================= */
+   STORAGE
+   ========================================================= */
 
-let storage = null;
+let storage;
 
 try {
 
-    storage =
-        getStorage(
-            app
-        );
+    storage = getStorage(app);
 
 } catch (error) {
 
     console.error(
-        "RiderX: Firebase Storage initialization failed.",
+        "GO BIKE: Firebase Storage initialization failed:",
         error
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
    GOOGLE AUTH PROVIDER
-========================================================= */
+   ========================================================= */
 
 const googleProvider =
     new GoogleAuthProvider();
 
-
 googleProvider.setCustomParameters({
+    prompt: "select_account"
+});
 
-    prompt:
-        "select_account"
+
+/* =========================================================
+   FIREBASE SERVICES
+   ========================================================= */
+
+const firebaseServices = Object.freeze({
+
+    app,
+
+    auth,
+
+    db,
+
+    firestore: db,
+
+    realtimeDb,
+
+    database: realtimeDb,
+
+    storage,
+
+    googleProvider
 
 });
 
 
 /* =========================================================
-   CENTRAL FIREBASE SERVICES
-========================================================= */
+   FIREBASE READY
+   ========================================================= */
 
-const firebaseServices =
-    Object.freeze({
-
-        app,
-
-        auth,
-
-        db,
-
-        firestore:
-            db,
-
-        realtimeDb,
-
-        database:
-            realtimeDb,
-
-        storage,
-
-        googleProvider
-
-    });
-
-
-/* =========================================================
-   FIREBASE READY STATE
-========================================================= */
-
-const firebaseReady =
-    Boolean(
-
-        app &&
-        auth &&
-        db &&
-        realtimeDb &&
-        storage
-
-    );
+const firebaseReady = Boolean(
+    app &&
+    auth &&
+    db &&
+    realtimeDb &&
+    storage
+);
 
 
 /* =========================================================
    FIREBASE READY PROMISE
-========================================================= */
+   ========================================================= */
 
 const firebaseReadyPromise =
     firebaseReady
-
-        ? Promise.resolve(
-            firebaseServices
-        )
-
+        ? Promise.resolve(firebaseServices)
         : Promise.reject(
-
             new Error(
-                "RiderX Firebase services are not ready."
+                "GO BIKE Firebase services are not ready."
             )
-
         );
 
 
 /* =========================================================
    CHECK FIREBASE READY
-========================================================= */
+   ========================================================= */
 
 function isFirebaseReady() {
 
     return Boolean(
-
         firebaseReady &&
         app &&
         auth &&
         db &&
         realtimeDb &&
         storage
-
     );
-
 }
 
 
 /* =========================================================
    WAIT FOR FIREBASE
-========================================================= */
+   ========================================================= */
 
 function waitForFirebase() {
 
     return firebaseReadyPromise;
-
 }
 
 
 /* =========================================================
    GET FIREBASE SERVICES
-========================================================= */
+   ========================================================= */
 
 function getFirebase() {
 
     return firebaseServices;
-
 }
 
 
 /* =========================================================
-   GLOBAL COMPATIBILITY BRIDGE
-========================================================= */
+   GLOBAL BRIDGE
+   ========================================================= */
 
-if (
-    typeof window !== "undefined"
-) {
+if (typeof window !== "undefined") {
 
     window.RiderXFirebase =
         firebaseServices;
@@ -473,41 +376,32 @@ if (
 
     /* =====================================================
        FIREBASE READY EVENT
-    ===================================================== */
+       ===================================================== */
 
-    const dispatchReadyEvent =
-        () => {
+    const dispatchReadyEvent = () => {
 
-            try {
+        try {
 
-                window.dispatchEvent(
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx:firebase-ready",
+                    {
+                        detail:
+                            firebaseServices
+                    }
+                )
+            );
 
-                    new CustomEvent(
+        } catch (error) {
 
-                        "riderx:firebase-ready",
+            console.warn(
+                "GO BIKE: Firebase ready event failed:",
+                error
+            );
 
-                        {
-                            detail:
-                                firebaseServices
-                        }
+        }
 
-                    )
-
-                );
-
-            } catch (error) {
-
-                console.warn(
-
-                    "RiderX: Firebase ready event could not be dispatched.",
-
-                    error
-
-                );
-
-            }
-
-        };
+    };
 
 
     if (
@@ -527,26 +421,17 @@ if (
         );
 
     }
-
 }
 
 
 /* =========================================================
    EXPORTS
-========================================================= */
+   ========================================================= */
 
 export {
 
-    /* =====================================================
-       FIREBASE SDK
-    ===================================================== */
-
+    /* Firebase */
     FIREBASE_SDK_VERSION,
-
-
-    /* =====================================================
-       FIREBASE APP / CONFIG
-    ===================================================== */
 
     app,
 
@@ -554,11 +439,7 @@ export {
 
     firebaseServices,
 
-
-    /* =====================================================
-       FIREBASE INSTANCES
-    ===================================================== */
-
+    /* Services */
     auth,
 
     db,
@@ -569,22 +450,14 @@ export {
 
     googleProvider,
 
-
-    /* =====================================================
-       FIREBASE STATE / HELPERS
-    ===================================================== */
-
+    /* Helpers */
     isFirebaseReady,
 
     waitForFirebase,
 
     getFirebase,
 
-
-    /* =====================================================
-       AUTHENTICATION
-    ===================================================== */
-
+    /* Auth */
     createUserWithEmailAndPassword,
 
     signInWithEmailAndPassword,
@@ -609,11 +482,7 @@ export {
 
     sendEmailVerification,
 
-
-    /* =====================================================
-       CLOUD FIRESTORE
-    ===================================================== */
-
+    /* Firestore */
     doc,
 
     setDoc,
@@ -654,11 +523,7 @@ export {
 
     increment,
 
-
-    /* =====================================================
-       REALTIME DATABASE
-    ===================================================== */
-
+    /* Realtime Database */
     ref,
 
     set,
@@ -679,11 +544,7 @@ export {
 
     databaseServerTimestamp,
 
-
-    /* =====================================================
-       FIREBASE STORAGE
-    ===================================================== */
-
+    /* Storage */
     storageRef,
 
     uploadBytes,
@@ -698,15 +559,12 @@ export {
 
 
 /* =========================================================
-   SAFE DEBUG INFORMATION
-========================================================= */
+   DEBUG
+   ========================================================= */
 
 console.info(
-
-    "RiderX Firebase initialized.",
-
+    "GO BIKE Firebase initialized successfully.",
     {
-
         sdk:
             FIREBASE_SDK_VERSION,
 
@@ -730,7 +588,5 @@ console.info(
 
         ready:
             isFirebaseReady()
-
     }
-
 );
