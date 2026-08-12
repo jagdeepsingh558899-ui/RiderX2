@@ -10,9 +10,23 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 >
 
+<meta
+    name="theme-color"
+    content="#050505"
+>
+
+<meta
+    name="mobile-web-app-capable"
+    content="yes"
+>
+
+<meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+>
+
 <title>RiderX • Rider Profile</title>
 
-<meta name="theme-color" content="#050505">
 
 <style>
 
@@ -32,6 +46,7 @@
     margin:0;
     padding:0;
     font-family:Inter,Arial,Helvetica,sans-serif;
+    -webkit-tap-highlight-color:transparent;
 }
 
 html,
@@ -45,7 +60,10 @@ body{
     padding-bottom:30px;
 }
 
-/* HEADER */
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header{
     position:sticky;
@@ -62,13 +80,17 @@ body{
 
     background:rgba(5,5,5,.94);
     backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
 
     border-bottom:1px solid var(--border);
 }
 
-.back{
+.back,
+.settings{
     width:41px;
     height:41px;
+
+    flex:none;
 
     border-radius:13px;
 
@@ -77,15 +99,34 @@ body{
 
     color:#fff;
 
-    font-size:21px;
-
     display:flex;
     align-items:center;
     justify-content:center;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease;
+}
+
+.back{
+    font-size:21px;
+}
+
+.settings{
+    font-size:17px;
+}
+
+.back:active,
+.settings:active{
+    transform:scale(.93);
+    background:#202020;
 }
 
 .header-title{
     flex:1;
+    min-width:0;
 }
 
 .header-title h1{
@@ -95,34 +136,34 @@ body{
 
 .header-title p{
     margin-top:2px;
+
     color:#777;
+
     font-size:10px;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
-.settings{
-    width:41px;
-    height:41px;
 
-    border-radius:13px;
-
-    border:1px solid #303030;
-    background:#151515;
-
-    color:#fff;
-
-    font-size:17px;
-}
-
-/* PAGE */
+/* =========================================================
+   PAGE
+========================================================= */
 
 .container{
     width:100%;
     max-width:620px;
+
     margin:auto;
+
     padding:14px;
 }
 
-/* PROFILE HERO */
+
+/* =========================================================
+   PROFILE HERO
+========================================================= */
 
 .profile-card{
     position:relative;
@@ -151,6 +192,7 @@ body{
 .profile-top{
     display:flex;
     align-items:center;
+
     gap:15px;
 }
 
@@ -186,8 +228,18 @@ body{
 .avatar img{
     width:100%;
     height:100%;
+
     object-fit:cover;
+
     display:none;
+}
+
+.avatar-image-visible{
+    display:block !important;
+}
+
+.avatar-initial-hidden{
+    display:none !important;
 }
 
 .online-dot{
@@ -201,9 +253,16 @@ body{
 
     border-radius:50%;
 
-    background:var(--green);
+    background:#666;
 
     border:3px solid #151515;
+
+    transition:
+        background .2s ease;
+}
+
+.online-dot.online{
+    background:var(--green);
 }
 
 .profile-info{
@@ -261,13 +320,30 @@ body{
 
     font-size:11px;
     font-weight:900;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease;
 }
 
-/* STATS */
+.edit-btn:active{
+    transform:scale(.985);
+    background:#292600;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
 
 .stats{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+
+    grid-template-columns:
+        repeat(3,1fr);
+
     gap:8px;
 
     margin-top:12px;
@@ -288,6 +364,10 @@ body{
 .stat-value{
     font-size:17px;
     font-weight:1000;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .stat-value.yellow{
@@ -306,7 +386,10 @@ body{
     letter-spacing:.5px;
 }
 
-/* ONLINE */
+
+/* =========================================================
+   ONLINE
+========================================================= */
 
 .online-card{
     margin-top:12px;
@@ -321,6 +404,7 @@ body{
 
     display:flex;
     align-items:center;
+
     gap:12px;
 }
 
@@ -328,21 +412,33 @@ body{
     width:42px;
     height:42px;
 
+    flex:none;
+
     border-radius:13px;
 
-    background:#092010;
+    background:#292929;
 
-    color:var(--green);
+    color:#777;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
     font-size:18px;
+
+    transition:
+        background .2s ease,
+        color .2s ease;
+}
+
+.online-icon.online{
+    background:#092010;
+    color:var(--green);
 }
 
 .online-info{
     flex:1;
+    min-width:0;
 }
 
 .online-title{
@@ -356,11 +452,15 @@ body{
     color:#777;
 
     font-size:9px;
+
+    line-height:1.4;
 }
 
 .toggle{
     width:48px;
     height:27px;
+
+    flex:none;
 
     border-radius:999px;
 
@@ -369,6 +469,12 @@ body{
     background:#333;
 
     border:none;
+
+    cursor:pointer;
+
+    transition:
+        background .2s ease,
+        opacity .2s ease;
 }
 
 .toggle span{
@@ -390,11 +496,18 @@ body{
 
 .toggle.active span{
     transform:translateX(21px);
-
     background:#000;
 }
 
-/* SECTION */
+.toggle:disabled{
+    opacity:.55;
+    cursor:wait;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
 
 .section-title{
     margin:20px 2px 10px;
@@ -410,7 +523,10 @@ body{
     letter-spacing:.8px;
 }
 
-/* MENU */
+
+/* =========================================================
+   MENU
+========================================================= */
 
 .menu{
     border-radius:19px;
@@ -443,10 +559,19 @@ body{
     color:#fff;
 
     text-align:left;
+
+    cursor:pointer;
+
+    transition:
+        background .15s ease;
 }
 
 .menu-item:last-child{
     border-bottom:0;
+}
+
+.menu-item:active{
+    background:#1b1b1b;
 }
 
 .menu-icon{
@@ -468,6 +593,7 @@ body{
 
 .menu-content{
     flex:1;
+    min-width:0;
 }
 
 .menu-title{
@@ -481,6 +607,8 @@ body{
     color:#777;
 
     font-size:9px;
+
+    line-height:1.35;
 }
 
 .menu-arrow{
@@ -488,7 +616,10 @@ body{
     font-size:16px;
 }
 
-/* VEHICLE */
+
+/* =========================================================
+   VEHICLE
+========================================================= */
 
 .vehicle{
     padding:16px;
@@ -503,12 +634,15 @@ body{
 .vehicle-row{
     display:flex;
     align-items:center;
+
     gap:12px;
 }
 
 .vehicle-icon{
     width:48px;
     height:48px;
+
+    flex:none;
 
     border-radius:15px;
 
@@ -525,11 +659,16 @@ body{
 
 .vehicle-info{
     flex:1;
+    min-width:0;
 }
 
 .vehicle-name{
     font-size:13px;
     font-weight:1000;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .vehicle-number{
@@ -538,10 +677,16 @@ body{
     color:#888;
 
     font-size:10px;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .vehicle-status{
     padding:6px 9px;
+
+    flex:none;
 
     border-radius:999px;
 
@@ -556,7 +701,10 @@ body{
     font-weight:900;
 }
 
-/* LOGOUT */
+
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 .logout{
     width:100%;
@@ -575,9 +723,23 @@ body{
     font-size:12px;
 
     font-weight:900;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease;
 }
 
-/* FOOTER */
+.logout:active{
+    transform:scale(.985);
+    background:#281010;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
 
 .footer{
     padding:20px 5px 5px;
@@ -589,7 +751,10 @@ body{
     font-size:9px;
 }
 
-/* LOADING */
+
+/* =========================================================
+   LOADING
+========================================================= */
 
 .loading{
     padding:70px 20px;
@@ -610,16 +775,82 @@ body{
     border:3px solid #292929;
     border-top-color:var(--yellow);
 
-    animation:spin .8s linear infinite;
+    animation:
+        spin .8s linear infinite;
 }
 
 @keyframes spin{
+
     to{
         transform:rotate(360deg);
     }
+
 }
 
-/* TOAST */
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error-state{
+    padding:30px 20px;
+
+    border-radius:19px;
+
+    background:#160b0b;
+
+    border:1px solid #3b1717;
+
+    text-align:center;
+}
+
+.error-state-icon{
+    font-size:30px;
+    color:#ff7777;
+    margin-bottom:12px;
+}
+
+.error-state-title{
+    font-size:14px;
+    font-weight:900;
+}
+
+.error-state-text{
+    margin-top:6px;
+
+    color:#888;
+
+    font-size:10px;
+
+    line-height:1.5;
+}
+
+.retry-btn{
+    margin-top:16px;
+
+    min-width:120px;
+    height:42px;
+
+    padding:0 16px;
+
+    border-radius:12px;
+
+    border:1px solid #3c3800;
+
+    background:#201e00;
+
+    color:var(--yellow);
+
+    font-size:11px;
+    font-weight:900;
+
+    cursor:pointer;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:fixed;
@@ -627,7 +858,8 @@ body{
     left:50%;
     bottom:25px;
 
-    transform:translate(-50%,20px);
+    transform:
+        translate(-50%,20px);
 
     max-width:90%;
 
@@ -653,8 +885,15 @@ body{
 
 .toast.show{
     opacity:1;
-    transform:translate(-50%,0);
+
+    transform:
+        translate(-50%,0);
 }
+
+
+/* =========================================================
+   SMALL DEVICES
+========================================================= */
 
 @media(max-width:370px){
 
@@ -670,6 +909,37 @@ body{
         font-size:17px;
     }
 
+    .avatar{
+        width:64px;
+        height:64px;
+        border-radius:19px;
+    }
+
+    .stats{
+        gap:6px;
+    }
+
+    .stat{
+        padding:12px 6px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.01ms !important;
+    }
+
 }
 
 </style>
@@ -680,12 +950,17 @@ body{
 <body>
 
 
+<!-- =======================================================
+     HEADER
+======================================================= -->
+
 <header class="header">
 
     <button
         class="back"
         id="backBtn"
         type="button"
+        aria-label="Go back"
     >
         ‹
     </button>
@@ -708,12 +983,17 @@ body{
         class="settings"
         id="settingsBtn"
         type="button"
+        aria-label="Settings"
     >
         ⚙
     </button>
 
 </header>
 
+
+<!-- =======================================================
+     CONTENT
+======================================================= -->
 
 <main
     class="container"
@@ -731,85 +1011,205 @@ body{
 </main>
 
 
+<!-- =======================================================
+     TOAST
+======================================================= -->
+
 <div
     class="toast"
     id="toast"
+    role="status"
+    aria-live="polite"
 ></div>
 
 
+<!-- =======================================================
+     FIREBASE / PAGE LOGIC
+======================================================= -->
+
 <script type="module">
+
+/*
+ * RiderX Profile
+ *
+ * IMPORTANT:
+ * This file expects ../firebase/firebase-config.js
+ * to export:
+ *
+ * auth
+ * db
+ * doc
+ * getDoc
+ * setDoc
+ * onAuthStateChanged
+ * signOut
+ *
+ * If your firebase-config.js exports only auth/db,
+ * the Firestore functions are imported below directly
+ * from the Firebase CDN so this page remains compatible.
+ */
+
+
+/* =========================================================
+   FIREBASE IMPORTS
+========================================================= */
 
 import {
     auth,
-    db,
-    doc,
-    getDoc,
-    updateDoc,
-    onAuthStateChanged,
-    signOut
+    db
 } from "../firebase/firebase-config.js";
 
 
+import {
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
 const content =
-    document.getElementById("content");
+    document.getElementById(
+        "content"
+    );
+
 
 const backBtn =
-    document.getElementById("backBtn");
+    document.getElementById(
+        "backBtn"
+    );
+
 
 const settingsBtn =
-    document.getElementById("settingsBtn");
+    document.getElementById(
+        "settingsBtn"
+    );
+
 
 const toast =
-    document.getElementById("toast");
+    document.getElementById(
+        "toast"
+    );
 
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let currentUser = null;
+
 let riderData = {};
 
+let authResolved = false;
 
-/* --------------------------------
+
+/* =========================================================
    HELPERS
--------------------------------- */
+========================================================= */
 
 function escapeHtml(value){
 
-    return String(value ?? "")
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
-function pick(data,keys,fallback=""){
+/* =========================================================
+   PICK FIRST VALID VALUE
+========================================================= */
 
-    for(const key of keys){
+function pick(
+    data,
+    keys,
+    fallback = ""
+){
+
+    if(!data){
+        return fallback;
+    }
+
+
+    for(
+        const key of keys
+    ){
+
+        const value =
+            data[key];
+
 
         if(
-            data &&
-            data[key] !== undefined &&
-            data[key] !== null &&
-            data[key] !== ""
+            value !== undefined &&
+            value !== null &&
+            value !== ""
         ){
 
-            return data[key];
+            return value;
 
         }
 
     }
+
 
     return fallback;
 
 }
 
 
+/* =========================================================
+   MONEY
+========================================================= */
+
 function money(value){
 
+    const number =
+        Number(
+            value || 0
+        );
+
+
+    if(
+        !Number.isFinite(number)
+    ){
+
+        return "₹0";
+
+    }
+
+
     return "₹" +
-        Number(value || 0)
-        .toLocaleString(
+        number.toLocaleString(
             "en-IN",
             {
                 maximumFractionDigits:0
@@ -819,72 +1219,209 @@ function money(value){
 }
 
 
+/* =========================================================
+   SHOW TOAST
+========================================================= */
+
+let toastTimer = null;
+
+
 function showToast(message){
 
+    if(!toast){
+        return;
+    }
+
+
     toast.textContent =
-        message;
+        String(
+            message ||
+            ""
+        );
 
-    toast.classList.add("show");
 
-    setTimeout(
-        () =>
-            toast.classList.remove("show"),
-        2200
+    toast.classList.add(
+        "show"
     );
+
+
+    if(toastTimer){
+
+        clearTimeout(
+            toastTimer
+        );
+
+    }
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2200
+        );
 
 }
 
 
-/* --------------------------------
-   LOAD PROFILE
--------------------------------- */
+/* =========================================================
+   ERROR PAGE
+========================================================= */
 
-async function loadProfile(user){
+function renderError(
+    message
+){
+
+    content.innerHTML = `
+
+        <section class="error-state">
+
+            <div class="error-state-icon">
+                ⚠
+            </div>
+
+            <div class="error-state-title">
+                Unable to load profile
+            </div>
+
+            <div class="error-state-text">
+                ${escapeHtml(
+                    message ||
+                    "Something went wrong. Please try again."
+                )}
+            </div>
+
+            <button
+                class="retry-btn"
+                id="retryBtn"
+                type="button"
+            >
+                Try Again
+            </button>
+
+        </section>
+
+    `;
+
+
+    document
+        .getElementById(
+            "retryBtn"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if(currentUser){
+
+                    loadProfile(
+                        currentUser
+                    );
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   LOAD PROFILE
+========================================================= */
+
+async function loadProfile(
+    user
+){
+
+    if(!user){
+
+        return;
+
+    }
+
 
     currentUser =
         user;
 
 
+    content.innerHTML = `
+
+        <div class="loading">
+
+            <div class="loader"></div>
+
+            Loading profile...
+
+        </div>
+
+    `;
+
+
     try{
 
-        const snap =
-            await getDoc(
-                doc(
-                    db,
-                    "riders",
-                    user.uid
-                )
+        /*
+         * First check rider document.
+         */
+
+        const riderRef =
+            doc(
+                db,
+                "riders",
+                user.uid
             );
 
 
-        if(snap.exists()){
+        const riderSnap =
+            await getDoc(
+                riderRef
+            );
+
+
+        if(
+            riderSnap.exists()
+        ){
 
             riderData =
-                snap.data();
+                riderSnap.data() || {};
 
         }
         else{
 
             /*
-             * Fallback for projects where
-             * user information is stored
-             * in users collection.
+             * Fallback to users collection.
              */
 
-            const userSnap =
-                await getDoc(
-                    doc(
-                        db,
-                        "users",
-                        user.uid
-                    )
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    user.uid
                 );
 
 
-            if(userSnap.exists()){
+            const userSnap =
+                await getDoc(
+                    userRef
+                );
+
+
+            if(
+                userSnap.exists()
+            ){
 
                 riderData =
-                    userSnap.data();
+                    userSnap.data() || {};
+
+            }
+            else{
+
+                riderData = {};
 
             }
 
@@ -897,22 +1434,24 @@ async function loadProfile(user){
     catch(error){
 
         console.error(
-            "Profile error:",
+            "RiderX profile load error:",
             error
         );
 
 
         /*
-         * Still show profile using
-         * Firebase Auth data.
+         * Even if Firestore fails,
+         * render using Auth information.
          */
 
         riderData = {};
 
+
         renderProfile();
 
+
         showToast(
-            "Some profile data could not load."
+            "Some profile data could not be loaded."
         );
 
     }
@@ -920,9 +1459,9 @@ async function loadProfile(user){
 }
 
 
-/* --------------------------------
+/* =========================================================
    RENDER PROFILE
--------------------------------- */
+========================================================= */
 
 function renderProfile(){
 
@@ -930,17 +1469,27 @@ function renderProfile(){
         currentUser;
 
 
+    if(!user){
+
+        return;
+
+    }
+
+
     const name =
-        pick(
-            riderData,
-            [
-                "name",
-                "fullName",
-                "displayName"
-            ],
-            user?.displayName ||
-            "Rider"
-        );
+        String(
+            pick(
+                riderData,
+                [
+                    "name",
+                    "fullName",
+                    "displayName"
+                ],
+                user.displayName ||
+                "Rider"
+            )
+        ).trim() ||
+        "Rider";
 
 
     const phone =
@@ -951,7 +1500,7 @@ function renderProfile(){
                 "mobile",
                 "phoneNumber"
             ],
-            user?.phoneNumber ||
+            user.phoneNumber ||
             "Mobile number not added"
         );
 
@@ -962,12 +1511,12 @@ function renderProfile(){
             [
                 "email"
             ],
-            user?.email ||
+            user.email ||
             ""
         );
 
 
-    const rating =
+    const ratingRaw =
         pick(
             riderData,
             [
@@ -976,6 +1525,18 @@ function renderProfile(){
             ],
             "5.0"
         );
+
+
+    const rating =
+        Number(
+            ratingRaw
+        );
+
+
+    const safeRating =
+        Number.isFinite(rating)
+            ? rating.toFixed(1)
+            : "5.0";
 
 
     const totalRides =
@@ -1026,11 +1587,8 @@ function renderProfile(){
 
 
     const online =
-        Boolean(
-            riderData.isOnline ??
-            riderData.online ??
-            false
-        );
+        riderData.isOnline === true ||
+        riderData.online === true;
 
 
     const photo =
@@ -1042,20 +1600,37 @@ function renderProfile(){
                 "photo",
                 "image"
             ],
-            user?.photoURL ||
+            user.photoURL ||
             ""
         );
 
 
     const initial =
         name
-            .trim()
             .charAt(0)
             .toUpperCase() ||
             "R";
 
 
+    const isCar =
+        String(
+            vehicle
+        )
+            .toLowerCase()
+            .includes(
+                "car"
+            );
+
+
+    const onlineText =
+        online
+            ? "You are online and can receive rides."
+            : "You are offline and won't receive rides.";
+
+
     content.innerHTML = `
+
+        <!-- PROFILE -->
 
         <section class="profile-card">
 
@@ -1065,28 +1640,46 @@ function renderProfile(){
 
                     <span
                         id="avatarInitial"
-                        ${photo ? 'style="display:none"' : ''}
+                        class="${
+                            photo
+                                ? "avatar-initial-hidden"
+                                : ""
+                        }"
                     >
-                        ${escapeHtml(initial)}
+                        ${escapeHtml(
+                            initial
+                        )}
                     </span>
+
 
                     <img
                         id="avatarImage"
-                        src="${escapeHtml(photo)}"
-                        alt="Rider profile"
-                        ${photo ? '' : 'style="display:none"'}
+                        src="${
+                            escapeHtml(
+                                photo
+                            )
+                        }"
+                        alt="Rider profile photo"
+                        class="${
+                            photo
+                                ? "avatar-image-visible"
+                                : ""
+                        }"
                     >
 
+
                     <span
-                        class="online-dot"
+                        class="online-dot ${
+                            online
+                                ? "online"
+                                : ""
+                        }"
                         id="onlineDot"
-                        style="
-                            background:
-                            ${online
-                                ? "var(--green)"
-                                : "#666"
-                            };
-                        "
+                        aria-label="${
+                            online
+                                ? "Online"
+                                : "Offline"
+                        }"
                     ></span>
 
                 </div>
@@ -1095,24 +1688,33 @@ function renderProfile(){
                 <div class="profile-info">
 
                     <div class="profile-name">
-                        ${escapeHtml(name)}
+                        ${escapeHtml(
+                            name
+                        )}
                     </div>
 
+
                     <div class="profile-phone">
-                        ${escapeHtml(phone)}
+                        ${escapeHtml(
+                            phone
+                        )}
                     </div>
+
 
                     ${
                         email
                         ?
                         `
-                        <div class="profile-phone">
-                            ${escapeHtml(email)}
-                        </div>
+                            <div class="profile-phone">
+                                ${escapeHtml(
+                                    email
+                                )}
+                            </div>
                         `
                         :
                         ""
                     }
+
 
                     <div class="verified">
                         ✓ Verified Rider
@@ -1134,12 +1736,16 @@ function renderProfile(){
         </section>
 
 
+        <!-- STATS -->
+
         <section class="stats">
 
             <div class="stat">
 
                 <div class="stat-value yellow">
-                    ★ ${escapeHtml(rating)}
+                    ★ ${escapeHtml(
+                        safeRating
+                    )}
                 </div>
 
                 <div class="stat-label">
@@ -1152,7 +1758,9 @@ function renderProfile(){
             <div class="stat">
 
                 <div class="stat-value">
-                    ${escapeHtml(totalRides)}
+                    ${escapeHtml(
+                        totalRides
+                    )}
                 </div>
 
                 <div class="stat-label">
@@ -1165,7 +1773,9 @@ function renderProfile(){
             <div class="stat">
 
                 <div class="stat-value yellow">
-                    ${money(earnings)}
+                    ${money(
+                        earnings
+                    )}
                 </div>
 
                 <div class="stat-label">
@@ -1177,11 +1787,21 @@ function renderProfile(){
         </section>
 
 
+        <!-- ONLINE -->
+
         <section class="online-card">
 
-            <div class="online-icon">
+            <div
+                class="online-icon ${
+                    online
+                        ? "online"
+                        : ""
+                }"
+                id="onlineIcon"
+            >
                 ●
             </div>
+
 
             <div class="online-info">
 
@@ -1189,31 +1809,41 @@ function renderProfile(){
                     Rider Availability
                 </div>
 
+
                 <div
                     class="online-sub"
                     id="onlineText"
                 >
-                    ${
-                        online
-                        ? "You are online and can receive rides."
-                        : "You are offline and won't receive rides."
-                    }
+                    ${escapeHtml(
+                        onlineText
+                    )}
                 </div>
 
             </div>
 
 
             <button
-                class="toggle ${online ? "active" : ""}"
+                class="toggle ${
+                    online
+                        ? "active"
+                        : ""
+                }"
                 id="onlineToggle"
                 type="button"
                 aria-label="Toggle online status"
+                aria-pressed="${
+                    online
+                        ? "true"
+                        : "false"
+                }"
             >
                 <span></span>
             </button>
 
         </section>
 
+
+        <!-- VEHICLE -->
 
         <div class="section-title">
             Vehicle
@@ -1226,11 +1856,9 @@ function renderProfile(){
 
                 <div class="vehicle-icon">
                     ${
-                        String(vehicle)
-                            .toLowerCase()
-                            .includes("car")
-                        ? "🚗"
-                        : "🏍"
+                        isCar
+                            ? "🚗"
+                            : "🏍"
                     }
                 </div>
 
@@ -1238,11 +1866,16 @@ function renderProfile(){
                 <div class="vehicle-info">
 
                     <div class="vehicle-name">
-                        ${escapeHtml(vehicle)}
+                        ${escapeHtml(
+                            vehicle
+                        )}
                     </div>
 
+
                     <div class="vehicle-number">
-                        ${escapeHtml(vehicleNumber)}
+                        ${escapeHtml(
+                            vehicleNumber
+                        )}
                     </div>
 
                 </div>
@@ -1256,6 +1889,8 @@ function renderProfile(){
 
         </section>
 
+
+        <!-- ACCOUNT -->
 
         <div class="section-title">
             Account
@@ -1274,6 +1909,7 @@ function renderProfile(){
                     📄
                 </div>
 
+
                 <div class="menu-content">
 
                     <div class="menu-title">
@@ -1285,6 +1921,7 @@ function renderProfile(){
                     </div>
 
                 </div>
+
 
                 <div class="menu-arrow">
                     ›
@@ -1303,6 +1940,7 @@ function renderProfile(){
                     💳
                 </div>
 
+
                 <div class="menu-content">
 
                     <div class="menu-title">
@@ -1314,6 +1952,7 @@ function renderProfile(){
                     </div>
 
                 </div>
+
 
                 <div class="menu-arrow">
                     ›
@@ -1332,6 +1971,7 @@ function renderProfile(){
                     🔔
                 </div>
 
+
                 <div class="menu-content">
 
                     <div class="menu-title">
@@ -1343,6 +1983,7 @@ function renderProfile(){
                     </div>
 
                 </div>
+
 
                 <div class="menu-arrow">
                     ›
@@ -1361,6 +2002,7 @@ function renderProfile(){
                     ⚙
                 </div>
 
+
                 <div class="menu-content">
 
                     <div class="menu-title">
@@ -1373,6 +2015,7 @@ function renderProfile(){
 
                 </div>
 
+
                 <div class="menu-arrow">
                     ›
                 </div>
@@ -1381,6 +2024,8 @@ function renderProfile(){
 
         </section>
 
+
+        <!-- LOGOUT -->
 
         <button
             class="logout"
@@ -1400,17 +2045,69 @@ function renderProfile(){
 
     bindActions();
 
+
+    /*
+     * Handle broken profile images.
+     */
+
+    const avatarImage =
+        document.getElementById(
+            "avatarImage"
+        );
+
+
+    const avatarInitial =
+        document.getElementById(
+            "avatarInitial"
+        );
+
+
+    if(avatarImage){
+
+        avatarImage.addEventListener(
+            "error",
+            () => {
+
+                avatarImage.classList.remove(
+                    "avatar-image-visible"
+                );
+
+                avatarImage.style.display =
+                    "none";
+
+
+                if(avatarInitial){
+
+                    avatarInitial.classList.remove(
+                        "avatar-initial-hidden"
+                    );
+
+                    avatarInitial.style.display =
+                        "block";
+
+                }
+
+            },
+            {
+                once:true
+            }
+        );
+
+    }
+
 }
 
 
-/* --------------------------------
-   ACTIONS
--------------------------------- */
+/* =========================================================
+   BIND ACTIONS
+========================================================= */
 
 function bindActions(){
 
     document
-        .getElementById("editBtn")
+        .getElementById(
+            "editBtn"
+        )
         ?.addEventListener(
             "click",
             () => {
@@ -1423,7 +2120,9 @@ function bindActions(){
 
 
     document
-        .getElementById("onlineToggle")
+        .getElementById(
+            "onlineToggle"
+        )
         ?.addEventListener(
             "click",
             toggleOnline
@@ -1431,7 +2130,9 @@ function bindActions(){
 
 
     document
-        .getElementById("documentsBtn")
+        .getElementById(
+            "documentsBtn"
+        )
         ?.addEventListener(
             "click",
             () => {
@@ -1444,7 +2145,9 @@ function bindActions(){
 
 
     document
-        .getElementById("paymentBtn")
+        .getElementById(
+            "paymentBtn"
+        )
         ?.addEventListener(
             "click",
             () => {
@@ -1457,7 +2160,9 @@ function bindActions(){
 
 
     document
-        .getElementById("notificationBtn")
+        .getElementById(
+            "notificationBtn"
+        )
         ?.addEventListener(
             "click",
             () => {
@@ -1470,7 +2175,9 @@ function bindActions(){
 
 
     document
-        .getElementById("settingsItem")
+        .getElementById(
+            "settingsItem"
+        )
         ?.addEventListener(
             "click",
             openSettings
@@ -1478,7 +2185,9 @@ function bindActions(){
 
 
     document
-        .getElementById("logoutBtn")
+        .getElementById(
+            "logoutBtn"
+        )
         ?.addEventListener(
             "click",
             logout
@@ -1487,9 +2196,9 @@ function bindActions(){
 }
 
 
-/* --------------------------------
+/* =========================================================
    ONLINE TOGGLE
--------------------------------- */
+========================================================= */
 
 async function toggleOnline(){
 
@@ -1499,46 +2208,133 @@ async function toggleOnline(){
         );
 
 
-    if(!button || !currentUser){
+    if(
+        !button ||
+        !currentUser
+    ){
+
         return;
+
     }
 
 
     const current =
-        Boolean(
-            riderData.isOnline ??
-            riderData.online ??
-            false
+        riderData.isOnline === true ||
+        riderData.online === true;
+
+
+    /*
+     * Turning ONLINE requires a real GPS location.
+     *
+     * The main online/location page already handles:
+     * - GPS permission
+     * - live location
+     * - riderLocations
+     * - continuous location updates
+     *
+     * Therefore do not create a fake "online" rider
+     * from the profile page.
+     */
+
+    if(!current){
+
+        showToast(
+            "Open the Rider Online page to go online."
         );
 
 
-    button.disabled = true;
+        setTimeout(
+            () => {
+
+                /*
+                 * Try common RiderX online page names.
+                 */
+
+                window.location.href =
+                    "online.html";
+
+            },
+            700
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * Going OFFLINE can safely be done here.
+     */
+
+    button.disabled =
+        true;
 
 
     try{
 
-        const newStatus =
-            !current;
-
-
-        await updateDoc(
+        await setDoc(
             doc(
                 db,
                 "riders",
                 currentUser.uid
             ),
             {
-                isOnline:newStatus,
-                online:newStatus
+                online:false,
+                isOnline:false,
+
+                updatedAt:
+                    serverTimestamp()
+            },
+            {
+                merge:true
             }
         );
 
 
-        riderData.isOnline =
-            newStatus;
+        /*
+         * Also update public/active
+         * rider location document.
+         */
+
+        await setDoc(
+            doc(
+                db,
+                "riderLocations",
+                currentUser.uid
+            ),
+            {
+                riderId:
+                    currentUser.uid,
+
+                online:false,
+
+                updatedAt:
+                    serverTimestamp()
+            },
+            {
+                merge:true
+            }
+        );
+
 
         riderData.online =
-            newStatus;
+            false;
+
+
+        riderData.isOnline =
+            false;
+
+
+        button.classList.remove(
+            "active"
+        );
+
+
+        button.setAttribute(
+            "aria-pressed",
+            "false"
+        );
 
 
         const onlineText =
@@ -1546,65 +2342,63 @@ async function toggleOnline(){
                 "onlineText"
             );
 
+
         const onlineDot =
             document.getElementById(
                 "onlineDot"
             );
 
 
-        if(newStatus){
-
-            button.classList.add(
-                "active"
+        const onlineIcon =
+            document.getElementById(
+                "onlineIcon"
             );
 
-            onlineText.textContent =
-                "You are online and can receive rides.";
 
-            if(onlineDot){
-
-                onlineDot.style.background =
-                    "var(--green)";
-
-            }
-
-            showToast(
-                "You are now online."
-            );
-
-        }
-        else{
-
-            button.classList.remove(
-                "active"
-            );
+        if(onlineText){
 
             onlineText.textContent =
                 "You are offline and won't receive rides.";
 
-            if(onlineDot){
+        }
 
-                onlineDot.style.background =
-                    "#666";
 
-            }
+        if(onlineDot){
 
-            showToast(
-                "You are now offline."
+            onlineDot.classList.remove(
+                "online"
             );
 
         }
+
+
+        if(onlineIcon){
+
+            onlineIcon.classList.remove(
+                "online"
+            );
+
+        }
+
+
+        showToast(
+            "You are now offline."
+        );
 
     }
     catch(error){
 
         console.error(
-            "Online update error:",
+            "Offline update error:",
             error
         );
 
+
         showToast(
-            "Unable to change online status."
+            getFirebaseErrorMessage(
+                error,
+                "Unable to change online status."
+            )
         );
 
     }
@@ -1618,16 +2412,66 @@ async function toggleOnline(){
 }
 
 
-/* --------------------------------
+/* =========================================================
+   FIREBASE ERROR MESSAGE
+========================================================= */
+
+function getFirebaseErrorMessage(
+    error,
+    fallback
+){
+
+    if(
+        !error
+    ){
+
+        return fallback;
+
+    }
+
+
+    const code =
+        String(
+            error.code ||
+            ""
+        );
+
+
+    switch(code){
+
+        case "permission-denied":
+
+            return "You don't have permission to update your rider status.";
+
+        case "unavailable":
+
+            return "Network unavailable. Please check your internet connection.";
+
+        case "failed-precondition":
+
+            return "Firebase request could not be completed right now.";
+
+        case "unauthenticated":
+
+            return "Your login session expired. Please login again.";
+
+        default:
+
+            return (
+                error.message ||
+                fallback
+            );
+
+    }
+
+}
+
+
+/* =========================================================
    SETTINGS
--------------------------------- */
+========================================================= */
 
 function openSettings(){
-
-    /*
-     * If rider/settings.html exists,
-     * open it. Otherwise use menu.
-     */
 
     window.location.href =
         "settings.html";
@@ -1635,11 +2479,18 @@ function openSettings(){
 }
 
 
-/* --------------------------------
+/* =========================================================
    LOGOUT
--------------------------------- */
+========================================================= */
 
 async function logout(){
+
+    if(!currentUser){
+
+        return;
+
+    }
+
 
     const confirmed =
         window.confirm(
@@ -1648,13 +2499,100 @@ async function logout(){
 
 
     if(!confirmed){
+
         return;
+
+    }
+
+
+    const button =
+        document.getElementById(
+            "logoutBtn"
+        );
+
+
+    if(button){
+
+        button.disabled =
+            true;
+
+        button.textContent =
+            "Logging out...";
+
     }
 
 
     try{
 
-        await signOut(auth);
+        /*
+         * If rider is currently online,
+         * mark it offline before logout.
+         */
+
+        const isCurrentlyOnline =
+            riderData.isOnline === true ||
+            riderData.online === true;
+
+
+        if(isCurrentlyOnline){
+
+            try{
+
+                await setDoc(
+                    doc(
+                        db,
+                        "riders",
+                        currentUser.uid
+                    ),
+                    {
+                        online:false,
+                        isOnline:false,
+
+                        updatedAt:
+                            serverTimestamp()
+                    },
+                    {
+                        merge:true
+                    }
+                );
+
+
+                await setDoc(
+                    doc(
+                        db,
+                        "riderLocations",
+                        currentUser.uid
+                    ),
+                    {
+                        riderId:
+                            currentUser.uid,
+
+                        online:false,
+
+                        updatedAt:
+                            serverTimestamp()
+                    },
+                    {
+                        merge:true
+                    }
+                );
+
+            }
+            catch(statusError){
+
+                console.warn(
+                    "Could not update offline status before logout:",
+                    statusError
+                );
+
+            }
+
+        }
+
+
+        await signOut(
+            auth
+        );
 
 
         window.location.replace(
@@ -1669,8 +2607,23 @@ async function logout(){
             error
         );
 
+
+        if(button){
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "Log Out";
+
+        }
+
+
         showToast(
-            "Logout failed. Please try again."
+            getFirebaseErrorMessage(
+                error,
+                "Logout failed. Please try again."
+            )
         );
 
     }
@@ -1678,15 +2631,17 @@ async function logout(){
 }
 
 
-/* --------------------------------
-   HEADER ACTIONS
--------------------------------- */
+/* =========================================================
+   HEADER - BACK
+========================================================= */
 
 backBtn.addEventListener(
     "click",
     () => {
 
-        if(history.length > 1){
+        if(
+            history.length > 1
+        ){
 
             history.back();
 
@@ -1694,13 +2649,17 @@ backBtn.addEventListener(
         else{
 
             window.location.href =
-                "dashboard.html";
+                "home.html";
 
         }
 
     }
 );
 
+
+/* =========================================================
+   HEADER - SETTINGS
+========================================================= */
 
 settingsBtn.addEventListener(
     "click",
@@ -1708,27 +2667,74 @@ settingsBtn.addEventListener(
 );
 
 
-/* --------------------------------
-   AUTH
--------------------------------- */
+/* =========================================================
+   AUTH STATE
+========================================================= */
 
 onAuthStateChanged(
     auth,
-    user => {
+    async user => {
+
+        authResolved =
+            true;
+
 
         if(!user){
+
+            currentUser =
+                null;
+
 
             window.location.replace(
                 "../auth/login.html"
             );
 
+
             return;
 
         }
 
-        loadProfile(user);
+
+        currentUser =
+            user;
+
+
+        await loadProfile(
+            user
+        );
 
     }
+);
+
+
+/* =========================================================
+   AUTH SAFETY
+========================================================= */
+
+setTimeout(
+    () => {
+
+        if(
+            !authResolved &&
+            content
+        ){
+
+            content.innerHTML = `
+
+                <div class="loading">
+
+                    <div class="loader"></div>
+
+                    Checking login...
+
+                </div>
+
+            `;
+
+        }
+
+    },
+    5000
 );
 
 </script>
