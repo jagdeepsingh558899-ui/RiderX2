@@ -78,7 +78,7 @@
                 "rider/home.html",
 
             dashboard:
-                "rider/dashboard.html",
+                "rider/home.html",
 
             rides:
                 "rider/rides.html",
