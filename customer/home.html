@@ -70,7 +70,9 @@ button:active{
     transform:scale(.97);
 }
 
-/* AUTH GATE */
+/* ==========================================================
+   AUTH GATE
+========================================================== */
 
 .auth-gate{
     position:fixed;
@@ -137,7 +139,9 @@ button:active{
     cursor:pointer;
 }
 
-/* APP */
+/* ==========================================================
+   APP
+========================================================== */
 
 .app{
     width:100%;
@@ -148,7 +152,9 @@ button:active{
     background:var(--bg);
 }
 
-/* HEADER */
+/* ==========================================================
+   HEADER
+========================================================== */
 
 .header{
     position:sticky;
@@ -224,7 +230,9 @@ button:active{
     text-overflow:ellipsis;
 }
 
-/* LOCATION */
+/* ==========================================================
+   LOCATION
+========================================================== */
 
 .location{
     margin:12px 13px 0;
@@ -284,7 +292,9 @@ button:active{
     cursor:pointer;
 }
 
-/* HERO */
+/* ==========================================================
+   HERO
+========================================================== */
 
 .hero{
     position:relative;
@@ -374,7 +384,9 @@ button:active{
     cursor:pointer;
 }
 
-/* SECTIONS */
+/* ==========================================================
+   SECTIONS
+========================================================== */
 
 .section{
     margin:0 13px 18px;
@@ -401,7 +413,9 @@ button:active{
     cursor:pointer;
 }
 
-/* SERVICES */
+/* ==========================================================
+   SERVICES
+========================================================== */
 
 .services{
     display:grid;
@@ -449,7 +463,9 @@ button:active{
     font-size:6px;
 }
 
-/* ACTIVE RIDE */
+/* ==========================================================
+   ACTIVE RIDE
+========================================================== */
 
 .active-card{
     display:none;
@@ -545,7 +561,9 @@ button:active{
     text-overflow:ellipsis;
 }
 
-/* QUICK ACTIONS */
+/* ==========================================================
+   QUICK ACTIONS
+========================================================== */
 
 .actions{
     display:grid;
@@ -594,7 +612,9 @@ button:active{
     font-size:6px;
 }
 
-/* RECENT */
+/* ==========================================================
+   RECENT
+========================================================== */
 
 .recent{
     display:flex;
@@ -658,7 +678,9 @@ button:active{
     text-align:right;
 }
 
-/* PROMO */
+/* ==========================================================
+   PROMO
+========================================================== */
 
 .promo{
     position:relative;
@@ -713,7 +735,9 @@ button:active{
     cursor:pointer;
 }
 
-/* EMPTY */
+/* ==========================================================
+   EMPTY
+========================================================== */
 
 .empty{
     padding:20px;
@@ -739,7 +763,9 @@ button:active{
     font-size:6px;
 }
 
-/* BOTTOM NAV */
+/* ==========================================================
+   BOTTOM NAV
+========================================================== */
 
 .bottom-nav{
     position:fixed;
@@ -797,7 +823,9 @@ button:active{
     font-size:18px;
 }
 
-/* TOAST */
+/* ==========================================================
+   TOAST
+========================================================== */
 
 .toast{
     position:fixed;
@@ -832,7 +860,9 @@ button:active{
     border-color:rgba(34,197,94,.5);
 }
 
-/* RESPONSIVE */
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
 
 @media(max-width:390px){
 
@@ -963,8 +993,6 @@ button:active{
 </header>
 
 
-<!-- LOCATION -->
-
 <section class="location">
 
     <div class="location-icon">
@@ -997,8 +1025,6 @@ button:active{
 </section>
 
 
-<!-- HERO -->
-
 <section class="hero">
 
     <div class="hero-content">
@@ -1027,8 +1053,6 @@ button:active{
 
 </section>
 
-
-<!-- ACTIVE RIDE -->
 
 <section
     class="section"
@@ -1121,8 +1145,6 @@ button:active{
 
 </section>
 
-
-<!-- SERVICES -->
 
 <section class="section">
 
@@ -1228,8 +1250,6 @@ button:active{
 
 </section>
 
-
-<!-- QUICK ACTIONS -->
 
 <section class="section">
 
@@ -1344,8 +1364,6 @@ button:active{
 </section>
 
 
-<!-- PROMO -->
-
 <section class="section">
 
     <div class="promo">
@@ -1370,8 +1388,6 @@ button:active{
 
 </section>
 
-
-<!-- RECENT RIDES -->
 
 <section class="section">
 
@@ -1514,8 +1530,6 @@ button:active{
 </nav>
 
 
-<!-- TOAST -->
-
 <div
     class="toast"
     id="toast"
@@ -1529,7 +1543,7 @@ button:active{
 
 /* ==========================================================
    RIDERX CUSTOMER HOME
-   Corrected / hardened version
+   FULL FIXED / HARDENED VERSION
 ========================================================== */
 
 
@@ -1538,9 +1552,7 @@ button:active{
 ========================================================== */
 
 const ROLE_KEY = "riderx_selected_role";
-
 const CUSTOMER_ROLE = "customer";
-
 const LOGIN_PATH = "../auth/role.html";
 
 let currentUser = null;
@@ -1550,6 +1562,8 @@ let activeRideTimer = null;
 let recentRideTimer = null;
 
 let firebaseAuthListenerStarted = false;
+let pageInitialized = false;
+let authGateInitialized = false;
 
 
 /* ==========================================================
@@ -1558,45 +1572,6 @@ let firebaseAuthListenerStarted = false;
 
 function $(id){
     return document.getElementById(id);
-}
-
-
-/* ==========================================================
-   SAFE JSON
-========================================================== */
-
-function readJSON(key){
-
-    try{
-
-        const raw =
-            localStorage.getItem(key);
-
-        if(!raw){
-            return null;
-        }
-
-        const parsed =
-            JSON.parse(raw);
-
-        if(
-            parsed &&
-            typeof parsed === "object"
-        ){
-            return parsed;
-        }
-
-    }catch(error){
-
-        console.warn(
-            "RiderX JSON read failed:",
-            key,
-            error
-        );
-
-    }
-
-    return null;
 }
 
 
@@ -1611,7 +1586,7 @@ function getStorage(key){
     }catch(error){
 
         console.warn(
-            "localStorage read failed:",
+            "RiderX localStorage read failed:",
             key,
             error
         );
@@ -1635,7 +1610,7 @@ function setStorage(key,value){
     }catch(error){
 
         console.warn(
-            "localStorage write failed:",
+            "RiderX localStorage write failed:",
             key,
             error
         );
@@ -1649,7 +1624,51 @@ function removeStorage(key){
 
     try{
         localStorage.removeItem(key);
-    }catch(error){}
+    }catch(error){
+        console.warn(
+            "RiderX localStorage remove failed:",
+            key,
+            error
+        );
+    }
+}
+
+
+/* ==========================================================
+   SAFE JSON
+========================================================== */
+
+function readJSON(key){
+
+    const raw =
+        getStorage(key);
+
+    if(!raw){
+        return null;
+    }
+
+    try{
+
+        const parsed =
+            JSON.parse(raw);
+
+        if(
+            parsed &&
+            typeof parsed === "object"
+        ){
+            return parsed;
+        }
+
+    }catch(error){
+
+        console.warn(
+            "RiderX JSON parse failed:",
+            key,
+            error
+        );
+    }
+
+    return null;
 }
 
 
@@ -1718,22 +1737,27 @@ function getLocalAuthenticatedUser(){
         return null;
     }
 
+
     const authenticated =
         user.loggedIn === true ||
         user.authenticated === true ||
         user.isAuthenticated === true ||
         user.sessionActive === true;
 
+
     if(!authenticated){
         return null;
     }
 
+
     const role =
         normalizeRole(user.role);
+
 
     if(!role){
         return null;
     }
+
 
     const status =
         String(
@@ -1741,6 +1765,7 @@ function getLocalAuthenticatedUser(){
         )
         .trim()
         .toLowerCase();
+
 
     if(
         [
@@ -1753,6 +1778,7 @@ function getLocalAuthenticatedUser(){
         return null;
     }
 
+
     const hasIdentity =
         Boolean(
             user.uid ||
@@ -1764,9 +1790,11 @@ function getLocalAuthenticatedUser(){
             user.phoneNumber
         );
 
+
     if(!hasIdentity){
         return null;
     }
+
 
     return {
         ...user,
@@ -1776,13 +1804,14 @@ function getLocalAuthenticatedUser(){
 
 
 /* ==========================================================
-   REDIRECT BY ROLE
+   ROLE REDIRECT
 ========================================================== */
 
 function redirectByRole(user){
 
     const role =
         normalizeRole(user?.role);
+
 
     if(role === "rider"){
 
@@ -1793,6 +1822,7 @@ function redirectByRole(user){
         return;
     }
 
+
     if(role === "admin"){
 
         window.location.replace(
@@ -1802,36 +1832,10 @@ function redirectByRole(user){
         return;
     }
 
+
     window.location.replace(
         LOGIN_PATH
     );
-}
-
-
-/* ==========================================================
-   CUSTOMER GUARD
-========================================================== */
-
-function guardCustomerPage(){
-
-    const user =
-        getLocalAuthenticatedUser();
-
-    if(!user){
-
-        showAuthGate();
-
-        return false;
-    }
-
-    if(user.role !== CUSTOMER_ROLE){
-
-        redirectByRole(user);
-
-        return false;
-    }
-
-    return true;
 }
 
 
@@ -1877,40 +1881,62 @@ function redirectToLogin(){
 }
 
 
-const authGateBtn =
-    $("authGateBtn");
+function initAuthGate(){
 
-if(authGateBtn){
+    if(authGateInitialized){
+        return;
+    }
 
-    authGateBtn.addEventListener(
-        "click",
-        redirectToLogin
-    );
+    authGateInitialized = true;
+
+    const button =
+        $("authGateBtn");
+
+    if(button){
+
+        button.addEventListener(
+            "click",
+            redirectToLogin
+        );
+    }
 }
 
 
 /* ==========================================================
-   INITIAL LOCAL AUTH
+   CUSTOMER GUARD
 ========================================================== */
 
-currentUser =
-    getLocalAuthenticatedUser();
+function guardCustomerPage(){
 
-if(!currentUser){
+    const user =
+        getLocalAuthenticatedUser();
 
-    showAuthGate();
 
-}else if(
-    currentUser.role !== CUSTOMER_ROLE
-){
+    if(!user){
 
-    redirectByRole(
-        currentUser
-    );
+        showAuthGate();
 
-}else{
+        return false;
+    }
 
-    hideAuthGate();
+
+    if(
+        user.role !== CUSTOMER_ROLE
+    ){
+
+        redirectByRole(
+            user
+        );
+
+        return false;
+    }
+
+
+    currentUser =
+        user;
+
+
+    return true;
 }
 
 
@@ -1927,11 +1953,13 @@ function updateUserName(name){
         return;
     }
 
+
     const clean =
         String(
             name ||
             "RiderX Customer"
         ).trim();
+
 
     element.textContent =
         clean ||
@@ -1950,6 +1978,7 @@ function loadSavedCustomer(){
             "riderxCustomerName"
         );
 
+
     if(savedName){
 
         updateUserName(
@@ -1959,10 +1988,12 @@ function loadSavedCustomer(){
         return;
     }
 
+
     const customer =
         readJSON(
             "riderx_customer"
         );
+
 
     if(customer){
 
@@ -1976,6 +2007,7 @@ function loadSavedCustomer(){
 
         return;
     }
+
 
     updateUserName(
         currentUser?.name ||
@@ -2015,49 +2047,84 @@ function getFirebaseAuth(){
 
 
 /* ==========================================================
+   FIREBASE USER MERGE
+========================================================== */
+
+function mergeFirebaseUser(firebaseUser){
+
+    if(!firebaseUser){
+        return;
+    }
+
+
+    const localUser =
+        getLocalAuthenticatedUser();
+
+
+    currentUser = {
+        ...(localUser || {}),
+        uid:
+            firebaseUser.uid ||
+            localUser?.uid ||
+            "",
+        email:
+            firebaseUser.email ||
+            localUser?.email ||
+            "",
+        displayName:
+            firebaseUser.displayName ||
+            localUser?.displayName ||
+            "",
+        phoneNumber:
+            firebaseUser.phoneNumber ||
+            localUser?.phoneNumber ||
+            "",
+        role:
+            CUSTOMER_ROLE,
+        loggedIn:true,
+        authenticated:true,
+        sessionActive:true
+    };
+
+
+    setStorage(
+        "riderx_user",
+        JSON.stringify(currentUser)
+    );
+}
+
+
+/* ==========================================================
    AUTH INITIALIZATION
 ========================================================== */
 
 function initAuth(){
 
-    const localUser =
-        getLocalAuthenticatedUser();
-
-    if(
-        localUser &&
-        localUser.role === CUSTOMER_ROLE
-    ){
-
-        currentUser =
-            localUser;
-
-        loadSavedCustomer();
-
-    }else{
-
-        showAuthGate();
-
+    if(firebaseAuthListenerStarted){
         return;
     }
+
+
+    firebaseAuthListenerStarted = true;
 
 
     const auth =
         getFirebaseAuth();
 
+
     if(!auth){
 
+        /*
+         * Firebase is optional here.
+         * Local RiderX authentication remains valid.
+         */
+
+        loadSavedCustomer();
         loadActiveRide();
         loadRecentRides();
 
         return;
     }
-
-
-    if(firebaseAuthListenerStarted){
-        return;
-    }
-
-    firebaseAuthListenerStarted = true;
 
 
     try{
@@ -2068,24 +2135,27 @@ function initAuth(){
                 /*
                  * IMPORTANT:
                  *
-                 * Firebase may not be the only authentication
-                 * mechanism in this project. We therefore don't
-                 * immediately destroy a valid local customer session
-                 * when Firebase returns null.
+                 * Firebase null does NOT automatically mean
+                 * RiderX local session is invalid.
                  */
 
                 if(firebaseUser){
 
-                    currentUser =
-                        firebaseUser;
+                    mergeFirebaseUser(
+                        firebaseUser
+                    );
+
 
                     updateUserName(
                         firebaseUser.displayName ||
                         firebaseUser.email?.split("@")[0] ||
+                        currentUser?.name ||
                         "RiderX Customer"
                     );
 
+
                     hideAuthGate();
+
 
                     await loadCustomer();
 
@@ -2094,12 +2164,13 @@ function initAuth(){
 
 
                 /*
-                 * Firebase is signed out.
-                 * Check whether local RiderX customer session exists.
+                 * Firebase signed out.
+                 * Fall back to the project's local session.
                  */
 
                 const saved =
                     getLocalAuthenticatedUser();
+
 
                 if(
                     saved &&
@@ -2121,20 +2192,45 @@ function initAuth(){
                 }
 
 
-                showAuthGate();
+                currentUser = null;
 
+                showAuthGate();
             }
         );
 
     }catch(error){
 
         console.error(
-            "Firebase auth listener failed:",
+            "RiderX Firebase auth listener failed:",
             error
         );
 
-        loadActiveRide();
-        loadRecentRides();
+        /*
+         * Do not break the page if Firebase listener fails.
+         */
+
+        const saved =
+            getLocalAuthenticatedUser();
+
+
+        if(
+            saved &&
+            saved.role === CUSTOMER_ROLE
+        ){
+
+            currentUser =
+                saved;
+
+            hideAuthGate();
+
+            loadSavedCustomer();
+            loadActiveRide();
+            loadRecentRides();
+
+        }else{
+
+            showAuthGate();
+        }
     }
 }
 
@@ -2149,6 +2245,7 @@ async function loadCustomer(){
         return;
     }
 
+
     try{
 
         if(
@@ -2160,6 +2257,7 @@ async function loadCustomer(){
                 await window.getCustomerProfile(
                     currentUser
                 );
+
 
             if(data){
 
@@ -2177,12 +2275,13 @@ async function loadCustomer(){
     }catch(error){
 
         console.error(
-            "Customer profile:",
+            "RiderX customer profile error:",
             error
         );
 
         loadSavedCustomer();
     }
+
 
     await loadActiveRide();
     await loadRecentRides();
@@ -2202,6 +2301,7 @@ function getLocation(showMessage = false){
         setLocationText(
             "Location not supported"
         );
+
 
         if(showMessage){
 
@@ -2228,6 +2328,7 @@ function getLocation(showMessage = false){
                 Number(
                     position.coords.latitude
                 );
+
 
             const lng =
                 Number(
@@ -2258,6 +2359,7 @@ function getLocation(showMessage = false){
                 "riderxCurrentLocation",
                 JSON.stringify(location)
             );
+
 
             setStorage(
                 "riderx_customer_location",
@@ -2290,49 +2392,54 @@ function getLocation(showMessage = false){
             }
         },
 
+
         function(error){
 
             console.warn(
-                "GPS:",
+                "RiderX GPS error:",
                 error
             );
+
 
             setLocationText(
                 "Location unavailable"
             );
 
 
-            if(showMessage){
+            if(!showMessage){
+                return;
+            }
 
-                if(
-                    error.code ===
-                    error.PERMISSION_DENIED
-                ){
 
-                    showToast(
-                        "Please allow location permission.",
-                        "error"
-                    );
+            if(
+                error.code ===
+                error.PERMISSION_DENIED
+            ){
 
-                }else if(
-                    error.code ===
-                    error.TIMEOUT
-                ){
+                showToast(
+                    "Please allow location permission.",
+                    "error"
+                );
 
-                    showToast(
-                        "GPS request timed out. Try again.",
-                        "error"
-                    );
+            }else if(
+                error.code ===
+                error.TIMEOUT
+            ){
 
-                }else{
+                showToast(
+                    "GPS request timed out. Try again.",
+                    "error"
+                );
 
-                    showToast(
-                        "Unable to get your location.",
-                        "error"
-                    );
-                }
+            }else{
+
+                showToast(
+                    "Unable to get your location.",
+                    "error"
+                );
             }
         },
+
 
         {
             enableHighAccuracy:true,
@@ -2352,11 +2459,14 @@ function setLocationText(text){
     const element =
         $("locationText");
 
+
     if(element){
 
         element.textContent =
-            text ||
-            "Current location";
+            String(
+                text ||
+                "Current location"
+            );
     }
 }
 
@@ -2367,8 +2477,17 @@ function setLocationText(text){
 
 async function reverseGeocode(lat,lng){
 
+    if(
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng)
+    ){
+        return;
+    }
+
+
     const controller =
         new AbortController();
+
 
     const timeout =
         setTimeout(
@@ -2381,8 +2500,7 @@ async function reverseGeocode(lat,lng){
 
     try{
 
-        const url =
-            "https://nominatim.openstreetmap.org/reverse?" +
+        const params =
             new URLSearchParams({
                 lat:String(lat),
                 lon:String(lng),
@@ -2394,7 +2512,8 @@ async function reverseGeocode(lat,lng){
 
         const response =
             await fetch(
-                url,
+                "https://nominatim.openstreetmap.org/reverse?" +
+                params.toString(),
                 {
                     method:"GET",
                     headers:{
@@ -2408,7 +2527,8 @@ async function reverseGeocode(lat,lng){
         if(!response.ok){
 
             throw new Error(
-                "Reverse geocoding failed"
+                "Reverse geocoding HTTP " +
+                response.status
             );
         }
 
@@ -2417,8 +2537,14 @@ async function reverseGeocode(lat,lng){
             await response.json();
 
 
+        const address =
+            String(
+                data?.display_name || ""
+            ).trim();
+
+
         setLocationText(
-            data?.display_name ||
+            address ||
             "Current location"
         );
 
@@ -2426,9 +2552,10 @@ async function reverseGeocode(lat,lng){
     }catch(error){
 
         console.warn(
-            "Reverse geocode:",
+            "RiderX reverse geocoding failed:",
             error
         );
+
 
         setLocationText(
             "Current location"
@@ -2453,6 +2580,7 @@ function selectService(service){
         return;
     }
 
+
     const allowed = [
         "bike",
         "cab",
@@ -2460,16 +2588,19 @@ function selectService(service){
         "food"
     ];
 
+
     if(
         !allowed.includes(service)
     ){
         service = "bike";
     }
 
+
     setStorage(
         "riderxSelectedService",
         service
     );
+
 
     window.location.href =
         "booking.html?service=" +
@@ -2483,12 +2614,22 @@ function bookRide(){
         return;
     }
 
+
     const selected =
         getStorage(
             "riderxSelectedService"
         );
 
-    if(selected){
+
+    if(
+        selected &&
+        [
+            "bike",
+            "cab",
+            "parcel",
+            "food"
+        ].includes(selected)
+    ){
 
         window.location.href =
             "booking.html?service=" +
@@ -2496,6 +2637,7 @@ function bookRide(){
 
         return;
     }
+
 
     window.location.href =
         "booking.html";
@@ -2508,10 +2650,23 @@ function bookRide(){
 
 async function loadActiveRide(){
 
+    const user =
+        getLocalAuthenticatedUser();
+
+
     if(
-        !getLocalAuthenticatedUser()
+        !user ||
+        user.role !== CUSTOMER_ROLE
     ){
+
+        hideActiveRide();
+
         return;
+    }
+
+
+    if(!currentUser){
+        currentUser = user;
     }
 
 
@@ -2534,11 +2689,16 @@ async function loadActiveRide(){
     }catch(error){
 
         console.error(
-            "Active ride:",
+            "RiderX active ride error:",
             error
         );
     }
 
+
+    /*
+     * Firebase/backend function may not exist.
+     * Local active ride is used as fallback.
+     */
 
     if(!ride){
 
@@ -2611,30 +2771,40 @@ function getSavedActiveRide(){
             "riderxActiveRide"
         );
 
+
     if(!raw){
         return null;
     }
+
 
     try{
 
         const ride =
             JSON.parse(raw);
 
-        return (
+
+        if(
             ride &&
             typeof ride === "object"
-        )
-            ? ride
-            : null;
+        ){
+
+            return ride;
+        }
 
     }catch(error){
+
+        console.warn(
+            "RiderX active ride JSON invalid:",
+            error
+        );
 
         removeStorage(
             "riderxActiveRide"
         );
-
-        return null;
     }
+
+
+    return null;
 }
 
 
@@ -2650,6 +2820,7 @@ function renderActiveRide(ride){
     const card =
         $("activeCard");
 
+
     if(
         !section ||
         !card
@@ -2660,6 +2831,7 @@ function renderActiveRide(ride){
 
     section.style.display =
         "block";
+
 
     card.classList.add(
         "show"
@@ -2702,35 +2874,64 @@ function renderActiveRide(ride){
     }
 
 
-    $("activeIcon").textContent =
-        icon;
+    const activeIcon =
+        $("activeIcon");
 
-    $("activeTitle").textContent =
-        title;
+    const activeTitle =
+        $("activeTitle");
 
-    $("activeStatus").textContent =
-        formatStatus(
-            ride.status ||
-            "searching"
-        );
+    const activeStatus =
+        $("activeStatus");
 
+    const pickupText =
+        $("pickupText");
 
-    $("pickupText").textContent =
-        getAddress(
-            ride.pickup,
-            ride.pickupAddress,
-            ride.fromAddress
-        ) ||
-        "Pickup location";
+    const dropText =
+        $("dropText");
 
 
-    $("dropText").textContent =
-        getAddress(
-            ride.drop,
-            ride.dropAddress,
-            ride.destinationAddress
-        ) ||
-        "Destination";
+    if(activeIcon){
+        activeIcon.textContent = icon;
+    }
+
+
+    if(activeTitle){
+        activeTitle.textContent = title;
+    }
+
+
+    if(activeStatus){
+
+        activeStatus.textContent =
+            formatStatus(
+                ride.status ||
+                "searching"
+            );
+    }
+
+
+    if(pickupText){
+
+        pickupText.textContent =
+            getAddress(
+                ride.pickup,
+                ride.pickupAddress,
+                ride.fromAddress
+            ) ||
+            "Pickup location";
+    }
+
+
+    if(dropText){
+
+        dropText.textContent =
+            getAddress(
+                ride.drop,
+                ride.dropAddress,
+                ride.destinationAddress
+            ) ||
+            "Destination";
+    }
 }
 
 
@@ -2747,6 +2948,7 @@ function hideActiveRide(){
         section.style.display =
             "none";
     }
+
 
     if(card){
         card.classList.remove(
@@ -2766,13 +2968,14 @@ function getRideId(ride){
         return "";
     }
 
+
     return String(
         ride.id ||
         ride.rideId ||
         ride.bookingId ||
         ride.bookingID ||
         ""
-    );
+    ).trim();
 }
 
 
@@ -2791,19 +2994,20 @@ function getAddress(
         typeof object === "object"
     ){
 
-        return (
+        return String(
             object.address ||
             object.formattedAddress ||
             object.name ||
             ""
-        );
+        ).trim();
     }
 
-    return (
+
+    return String(
         directAddress ||
         fallbackAddress ||
         ""
-    );
+    ).trim();
 }
 
 
@@ -2820,6 +3024,7 @@ function isRideFinished(status){
                 /[-_\s]/g,
                 ""
             );
+
 
     return [
         "completed",
@@ -2873,10 +3078,22 @@ function openActiveRide(){
 
 async function loadRecentRides(){
 
+    const user =
+        getLocalAuthenticatedUser();
+
+
     if(
-        !getLocalAuthenticatedUser()
+        !user ||
+        user.role !== CUSTOMER_ROLE
     ){
+        renderRecent([]);
+
         return;
+    }
+
+
+    if(!currentUser){
+        currentUser = user;
     }
 
 
@@ -2900,7 +3117,7 @@ async function loadRecentRides(){
     }catch(error){
 
         console.error(
-            "Recent rides:",
+            "RiderX recent rides error:",
             error
         );
     }
@@ -2938,32 +3155,15 @@ function getSavedRideHistory(){
         const key of keys
     ){
 
-        const raw =
-            getStorage(key);
-
-        if(!raw){
-            continue;
-        }
+        const data =
+            readJSON(key);
 
 
-        try{
+        if(
+            Array.isArray(data)
+        ){
 
-            const data =
-                JSON.parse(raw);
-
-            if(
-                Array.isArray(data)
-            ){
-
-                return data;
-            }
-
-        }catch(error){
-
-            console.warn(
-                "History parse failed:",
-                key
-            );
+            return data;
         }
     }
 
@@ -3023,7 +3223,10 @@ function renderRecent(rides){
     rides.forEach(
         function(ride){
 
-            if(!ride){
+            if(
+                !ride ||
+                typeof ride !== "object"
+            ){
                 return;
             }
 
@@ -3032,6 +3235,7 @@ function renderRecent(rides){
                 document.createElement(
                     "div"
                 );
+
 
             item.className =
                 "recent-item";
@@ -3094,7 +3298,13 @@ function renderRecent(rides){
                     ride.amount ??
                     ride.price ??
                     0
-                ) || 0;
+                );
+
+
+            const safeFare =
+                Number.isFinite(fare)
+                    ? fare
+                    : 0;
 
 
             const status =
@@ -3184,7 +3394,9 @@ function renderRecent(rides){
 
             price.textContent =
                 "₹" +
-                Math.round(fare);
+                Math.round(
+                    safeFare
+                );
 
 
             const statusElement =
@@ -3268,8 +3480,18 @@ function customerNavigate(path){
         return;
     }
 
+
+    const safePath =
+        String(path || "").trim();
+
+
+    if(!safePath){
+        return;
+    }
+
+
     window.location.href =
-        path;
+        safePath;
 }
 
 
@@ -3328,14 +3550,23 @@ function openSupport(){
 
 function formatStatus(status){
 
-    return String(
-        status || ""
-    )
-    .replace(
-        /[-_]/g,
-        " "
-    )
-    .replace(
+    const value =
+        String(
+            status || ""
+        )
+        .replace(
+            /[-_]+/g,
+            " "
+        )
+        .trim();
+
+
+    if(!value){
+        return "";
+    }
+
+
+    return value.replace(
         /\b\w/g,
         function(char){
             return char.toUpperCase();
@@ -3380,11 +3611,6 @@ function formatDate(value){
             typeof value === "number"
         ){
 
-            /*
-             * Support both milliseconds and
-             * Unix seconds.
-             */
-
             date =
                 new Date(
                     value < 10000000000
@@ -3427,38 +3653,6 @@ function formatDate(value){
 
 
 /* ==========================================================
-   HTML ESCAPE
-========================================================== */
-
-function escapeHTML(value){
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-}
-
-
-/* ==========================================================
    TOAST
 ========================================================== */
 
@@ -3469,6 +3663,7 @@ function showToast(
 
     const toast =
         $("toast");
+
 
     if(!toast){
         return;
@@ -3517,18 +3712,23 @@ function checkNotificationDot(){
     const dot =
         $("notificationDot");
 
+
     if(!dot){
         return;
     }
 
 
-    const raw =
-        getStorage(
+    const notifications =
+        readJSON(
             "riderxNotifications"
         );
 
 
-    if(!raw){
+    if(
+        !Array.isArray(
+            notifications
+        )
+    ){
 
         dot.classList.remove(
             "show"
@@ -3538,41 +3738,25 @@ function checkNotificationDot(){
     }
 
 
-    try{
+    const hasUnread =
+        notifications.some(
+            function(item){
 
-        const notifications =
-            JSON.parse(raw);
-
-
-        const hasUnread =
-            Array.isArray(
-                notifications
-            ) &&
-            notifications.some(
-                function(item){
-
-                    return (
-                        item &&
-                        (
-                            item.read === false ||
-                            item.unread === true
-                        )
-                    );
-                }
-            );
-
-
-        dot.classList.toggle(
-            "show",
-            hasUnread
+                return (
+                    item &&
+                    (
+                        item.read === false ||
+                        item.unread === true
+                    )
+                );
+            }
         );
 
-    }catch(error){
 
-        dot.classList.remove(
-            "show"
-        );
-    }
+    dot.classList.toggle(
+        "show",
+        hasUnread
+    );
 }
 
 
@@ -3591,6 +3775,14 @@ function startActiveRideRefresh(){
         setInterval(
             async function(){
 
+                if(
+                    document.visibilityState !==
+                    "visible"
+                ){
+                    return;
+                }
+
+
                 const user =
                     getLocalAuthenticatedUser();
 
@@ -3605,7 +3797,18 @@ function startActiveRideRefresh(){
                         currentUser ||
                         user;
 
-                    await loadActiveRide();
+
+                    try{
+
+                        await loadActiveRide();
+
+                    }catch(error){
+
+                        console.warn(
+                            "Active ride refresh failed:",
+                            error
+                        );
+                    }
                 }
 
             },
@@ -3629,6 +3832,14 @@ function startRecentRideRefresh(){
         setInterval(
             async function(){
 
+                if(
+                    document.visibilityState !==
+                    "visible"
+                ){
+                    return;
+                }
+
+
                 const user =
                     getLocalAuthenticatedUser();
 
@@ -3643,7 +3854,18 @@ function startRecentRideRefresh(){
                         currentUser ||
                         user;
 
-                    await loadRecentRides();
+
+                    try{
+
+                        await loadRecentRides();
+
+                    }catch(error){
+
+                        console.warn(
+                            "Recent ride refresh failed:",
+                            error
+                        );
+                    }
                 }
 
             },
@@ -3684,9 +3906,19 @@ document.addEventListener(
             user;
 
 
-        await loadActiveRide();
+        try{
 
-        await loadRecentRides();
+            await loadActiveRide();
+            await loadRecentRides();
+
+        }catch(error){
+
+            console.warn(
+                "Visibility refresh failed:",
+                error
+            );
+        }
+
 
         checkNotificationDot();
     }
@@ -3694,60 +3926,117 @@ document.addEventListener(
 
 
 /* ==========================================================
-   INIT
+   PAGE INIT
 ========================================================== */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+function initializeCustomerHome(){
 
-        const user =
-            getLocalAuthenticatedUser();
-
-
-        if(
-            !user
-        ){
-
-            showAuthGate();
-
-            return;
-        }
-
-
-        if(
-            user.role !==
-            CUSTOMER_ROLE
-        ){
-
-            redirectByRole(
-                user
-            );
-
-            return;
-        }
-
-
-        currentUser =
-            user;
-
-
-        hideAuthGate();
-
-        loadSavedCustomer();
-
-        initAuth();
-
-        checkNotificationDot();
-
-        getLocation(false);
-
-        startActiveRideRefresh();
-
-        startRecentRideRefresh();
-
+    if(pageInitialized){
+        return;
     }
-);
+
+
+    pageInitialized = true;
+
+
+    initAuthGate();
+
+
+    const user =
+        getLocalAuthenticatedUser();
+
+
+    if(!user){
+
+        showAuthGate();
+
+        return;
+    }
+
+
+    if(
+        user.role !==
+        CUSTOMER_ROLE
+    ){
+
+        redirectByRole(
+            user
+        );
+
+        return;
+    }
+
+
+    currentUser =
+        user;
+
+
+    hideAuthGate();
+
+
+    loadSavedCustomer();
+
+
+    initAuth();
+
+
+    checkNotificationDot();
+
+
+    /*
+     * GPS is intentionally non-blocking.
+     * The page remains usable if GPS is denied.
+     */
+
+    getLocation(false);
+
+
+    startActiveRideRefresh();
+
+
+    startRecentRideRefresh();
+
+
+    /*
+     * Initial data load.
+     */
+
+    Promise.allSettled([
+        loadActiveRide(),
+        loadRecentRides()
+    ]).catch(
+        function(error){
+
+            console.warn(
+                "Initial customer data load failed:",
+                error
+            );
+        }
+    );
+}
+
+
+/* ==========================================================
+   DOM READY
+========================================================== */
+
+if(
+    document.readyState ===
+    "loading"
+){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeCustomerHome,
+        {
+            once:true
+        }
+    );
+
+}else{
+
+    initializeCustomerHome();
+}
 
 
 /* ==========================================================
@@ -3766,15 +4055,45 @@ window.addEventListener(
             recentRideTimer
         );
 
+
         activeRideTimer =
             null;
+
 
         recentRideTimer =
             null;
     }
 );
 
+
+/* ==========================================================
+   PAGE ERROR PROTECTION
+========================================================== */
+
+window.addEventListener(
+    "error",
+    function(event){
+
+        console.error(
+            "RiderX Customer Home runtime error:",
+            event.error || event.message
+        );
+    }
+);
+
+
+window.addEventListener(
+    "unhandledrejection",
+    function(event){
+
+        console.error(
+            "RiderX Customer Home promise error:",
+            event.reason
+        );
+    }
+);
+
 </script>
 
 </body>
-    </html>
+</html>
