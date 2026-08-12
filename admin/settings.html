@@ -3,15 +3,34 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>RiderX Admin - Settings</title>
 
-<meta name="theme-color" content="#FFD400">
+<meta
+    name="theme-color"
+    content="#FFD400"
+>
 
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
+<!-- Correct filename casing -->
+<link
+    rel="stylesheet"
+    href="../css/style.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/dashboard.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/responsive.css"
+>
 
 <style>
 
@@ -41,6 +60,7 @@ body{
 body{
     color:#fff;
     font-family:Arial,Helvetica,sans-serif;
+    -webkit-tap-highlight-color:transparent;
 }
 
 button,
@@ -53,12 +73,24 @@ button{
     cursor:pointer;
 }
 
+button:disabled{
+    cursor:not-allowed;
+    opacity:.6;
+}
+
+input,
+select{
+    outline:none;
+}
+
 .app{
     min-height:100vh;
 }
 
 
-/* HEADER */
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header{
     position:sticky;
@@ -67,17 +99,24 @@ button{
 
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:11px;
 
-    padding:12px;
+    min-height:65px;
 
-    background:#0c0c0c;
+    padding:12px 15px;
+
+    background:rgba(12,12,12,.96);
     border-bottom:1px solid #292929;
+
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
 }
 
 .back-btn{
-    width:40px;
-    height:40px;
+    width:42px;
+    height:42px;
+
+    flex:none;
 
     border:1px solid #363636;
     border-radius:11px;
@@ -85,12 +124,23 @@ button{
     background:#1b1b1b;
     color:#fff;
 
-    font-size:20px;
+    font-size:24px;
+    line-height:1;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.back-btn:active{
+    transform:scale(.96);
 }
 
 .logo{
-    width:38px;
-    height:38px;
+    width:40px;
+    height:40px;
+
+    flex:none;
 
     display:flex;
     align-items:center;
@@ -101,72 +151,102 @@ button{
     background:var(--yellow);
     color:#000;
 
-    font-size:9px;
+    font-size:12px;
     font-weight:900;
 }
 
 .header-info{
     flex:1;
+    min-width:0;
 }
 
 .header-title{
-    font-size:10px;
+    font-size:14px;
     font-weight:900;
 }
 
 .header-subtitle{
-    margin-top:3px;
+    margin-top:4px;
+
     color:#777;
-    font-size:5px;
+
+    font-size:10px;
+    line-height:1.3;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 
-/* MAIN */
+/* =========================================================
+   MAIN
+========================================================= */
 
 .main{
     width:100%;
     max-width:1050px;
 
-    margin:auto;
-    padding:15px;
+    margin:0 auto;
+
+    padding:20px 15px 35px;
 }
 
 .page-top{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:12px;
 
-    margin-bottom:13px;
+    gap:15px;
+
+    margin-bottom:16px;
 }
 
 .page-title{
-    font-size:14px;
+    font-size:21px;
     font-weight:900;
 }
 
 .page-description{
-    margin-top:4px;
+    margin-top:5px;
+
     color:#777;
-    font-size:6px;
+
+    font-size:12px;
+    line-height:1.5;
 }
 
 .save-btn{
-    height:38px;
-    padding:0 15px;
+    height:42px;
+
+    flex:none;
+
+    padding:0 17px;
 
     border:1px solid #665900;
-    border-radius:10px;
+    border-radius:11px;
 
     background:var(--yellow);
     color:#000;
 
-    font-size:6px;
+    font-size:12px;
     font-weight:900;
+
+    transition:.2s;
+}
+
+.save-btn:hover{
+    filter:brightness(1.05);
+}
+
+.save-btn:active{
+    transform:scale(.97);
 }
 
 
-/* GRID */
+/* =========================================================
+   GRID
+========================================================= */
 
 .settings-grid{
     display:grid;
@@ -174,14 +254,16 @@ button{
     grid-template-columns:
         repeat(2,minmax(0,1fr));
 
-    gap:12px;
+    gap:14px;
 }
 
 .card{
-    padding:15px;
+    min-width:0;
+
+    padding:18px;
 
     border:1px solid var(--border);
-    border-radius:16px;
+    border-radius:17px;
 
     background:var(--card);
 }
@@ -191,22 +273,24 @@ button{
 }
 
 .card-title{
-    font-size:8px;
+    font-size:15px;
     font-weight:900;
 }
 
 .card-description{
-    margin-top:4px;
-    margin-bottom:13px;
+    margin-top:5px;
+    margin-bottom:15px;
 
     color:#777;
 
-    font-size:5px;
+    font-size:11px;
     line-height:1.5;
 }
 
 
-/* FIELDS */
+/* =========================================================
+   FIELDS
+========================================================= */
 
 .fields{
     display:grid;
@@ -214,14 +298,16 @@ button{
     grid-template-columns:
         repeat(2,minmax(0,1fr));
 
-    gap:9px;
+    gap:10px;
 }
 
 .field{
-    padding:10px;
+    min-width:0;
+
+    padding:11px;
 
     border:1px solid #2e2e2e;
-    border-radius:10px;
+    border-radius:11px;
 
     background:var(--card2);
 }
@@ -233,52 +319,64 @@ button{
 .label{
     display:block;
 
-    margin-bottom:6px;
+    margin-bottom:7px;
 
-    color:#777;
+    color:#888;
 
-    font-size:5px;
+    font-size:10px;
     font-weight:800;
+
+    letter-spacing:.3px;
 }
 
 .input,
 .select{
     width:100%;
-    height:37px;
+    height:40px;
 
-    padding:0 9px;
+    padding:0 10px;
 
     border:1px solid #383838;
-    border-radius:8px;
-
-    outline:none;
+    border-radius:9px;
 
     background:#111;
     color:#fff;
 
-    font-size:6px;
+    font-size:12px;
+}
+
+.input::placeholder{
+    color:#555;
 }
 
 .input:focus,
 .select:focus{
-    border-color:#776800;
+    border-color:#9a8700;
+    box-shadow:0 0 0 2px rgba(255,212,0,.08);
+}
+
+.select{
+    appearance:auto;
 }
 
 
-/* SWITCH ROW */
+/* =========================================================
+   SWITCH ROW
+========================================================= */
 
 .switch-row{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:12px;
 
-    padding:11px;
+    gap:15px;
 
-    margin-bottom:8px;
+    padding:13px;
+
+    margin-bottom:9px;
 
     border:1px solid #2e2e2e;
-    border-radius:10px;
+    border-radius:11px;
 
     background:var(--card2);
 }
@@ -289,37 +387,46 @@ button{
 
 .switch-info{
     flex:1;
+    min-width:0;
 }
 
 .switch-title{
-    font-size:6px;
+    font-size:12px;
     font-weight:800;
 }
 
 .switch-description{
-    margin-top:3px;
+    margin-top:4px;
 
     color:#666;
 
-    font-size:4.8px;
+    font-size:10px;
+    line-height:1.4;
 }
 
 
-/* SWITCH */
+/* =========================================================
+   SWITCH
+========================================================= */
 
 .switch{
     position:relative;
 
-    width:42px;
-    height:24px;
+    width:46px;
+    height:26px;
 
-    flex-shrink:0;
+    flex:none;
+
+    display:block;
 }
 
 .switch input{
+    position:absolute;
+
+    width:1px;
+    height:1px;
+
     opacity:0;
-    width:0;
-    height:0;
 }
 
 .slider{
@@ -338,8 +445,8 @@ button{
 
     position:absolute;
 
-    width:18px;
-    height:18px;
+    width:20px;
+    height:20px;
 
     top:3px;
     left:3px;
@@ -351,25 +458,33 @@ button{
     transition:.2s;
 }
 
+.switch input:focus-visible + .slider{
+    box-shadow:
+        0 0 0 2px #000,
+        0 0 0 4px var(--yellow);
+}
+
 .switch input:checked + .slider{
     background:var(--yellow);
 }
 
 .switch input:checked + .slider:before{
-    transform:translateX(18px);
+    transform:translateX(20px);
     background:#000;
 }
 
 
-/* DANGER */
+/* =========================================================
+   DANGER
+========================================================= */
 
 .danger-zone{
-    margin-top:12px;
+    margin-top:14px;
 
-    padding:15px;
+    padding:18px;
 
     border:1px solid #522525;
-    border-radius:16px;
+    border-radius:17px;
 
     background:#171010;
 }
@@ -377,42 +492,54 @@ button{
 .danger-title{
     color:#ff7070;
 
-    font-size:8px;
+    font-size:14px;
     font-weight:900;
 }
 
 .danger-description{
-    margin-top:5px;
+    margin-top:6px;
 
-    color:#8c6666;
+    max-width:800px;
 
-    font-size:5px;
-    line-height:1.5;
+    color:#9a6d6d;
+
+    font-size:11px;
+    line-height:1.6;
 }
 
 .danger-btn{
-    height:37px;
+    height:40px;
 
-    margin-top:11px;
-    padding:0 13px;
+    margin-top:13px;
+    padding:0 15px;
 
     border:1px solid #702525;
-    border-radius:9px;
+    border-radius:10px;
 
     background:#2a1414;
     color:#ff7777;
 
-    font-size:5.5px;
+    font-size:11px;
     font-weight:900;
 }
 
+.danger-btn:hover{
+    background:#351818;
+}
 
-/* FOOTER */
+.danger-btn:active{
+    transform:scale(.97);
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
 
 .footer-note{
-    margin-top:12px;
+    margin-top:14px;
 
-    padding:12px;
+    padding:13px;
 
     border:1px solid #343000;
     border-radius:11px;
@@ -421,25 +548,27 @@ button{
 
     color:#aaa04b;
 
-    font-size:5px;
+    font-size:10px;
     line-height:1.6;
 }
 
 
-/* TOAST */
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:fixed;
 
     left:50%;
-    bottom:20px;
+    bottom:22px;
 
     z-index:100;
 
     width:calc(100% - 30px);
     max-width:450px;
 
-    padding:11px;
+    padding:12px 14px;
 
     border:1px solid #383838;
     border-radius:11px;
@@ -449,14 +578,17 @@ button{
 
     text-align:center;
 
-    font-size:6px;
+    font-size:11px;
+    font-weight:700;
 
     opacity:0;
     pointer-events:none;
 
     transform:translate(-50%,20px);
 
-    transition:.25s;
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
 }
 
 .toast.show{
@@ -465,7 +597,9 @@ button{
 }
 
 
-/* RESPONSIVE */
+/* =========================================================
+   RESPONSIVE
+========================================================= */
 
 @media(max-width:800px){
 
@@ -479,14 +613,32 @@ button{
 
 }
 
-@media(max-width:520px){
+@media(max-width:600px){
 
     .main{
-        padding:11px;
+        padding:15px 11px 30px;
     }
 
     .page-top{
         align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .save-btn{
+        width:100%;
+    }
+
+}
+
+@media(max-width:520px){
+
+    .header{
+        padding-left:11px;
+        padding-right:11px;
+    }
+
+    .header-subtitle{
+        font-size:9px;
     }
 
     .fields{
@@ -495,6 +647,39 @@ button{
 
     .field.full{
         grid-column:auto;
+    }
+
+    .card{
+        padding:15px;
+    }
+
+    .page-title{
+        font-size:19px;
+    }
+
+}
+
+@media(max-width:370px){
+
+    .main{
+        padding-left:9px;
+        padding-right:9px;
+    }
+
+    .card{
+        padding:13px;
+    }
+
+    .switch-row{
+        padding:11px;
+    }
+
+    .switch-title{
+        font-size:11px;
+    }
+
+    .switch-description{
+        font-size:9px;
     }
 
 }
@@ -513,15 +698,18 @@ button{
 
     <button
         class="back-btn"
-        onclick="goBack()"
+        id="backBtn"
+        type="button"
         aria-label="Back"
     >
         ‹
     </button>
 
+
     <div class="logo">
         RX
     </div>
+
 
     <div class="header-info">
 
@@ -555,9 +743,11 @@ button{
 
     </div>
 
+
     <button
         class="save-btn"
-        onclick="saveSettings()"
+        id="saveBtn"
+        type="button"
     >
         SAVE CHANGES
     </button>
@@ -568,7 +758,9 @@ button{
 <section class="settings-grid">
 
 
-<!-- GENERAL -->
+<!-- =====================================================
+     GENERAL
+====================================================== -->
 
 <div class="card">
 
@@ -585,7 +777,10 @@ button{
 
         <div class="field full">
 
-            <label class="label">
+            <label
+                class="label"
+                for="appName"
+            >
                 APP NAME
             </label>
 
@@ -594,6 +789,8 @@ button{
                 id="appName"
                 type="text"
                 value="RiderX"
+                maxlength="60"
+                autocomplete="off"
             >
 
         </div>
@@ -601,7 +798,10 @@ button{
 
         <div class="field">
 
-            <label class="label">
+            <label
+                class="label"
+                for="serviceCity"
+            >
                 SERVICE CITY
             </label>
 
@@ -610,6 +810,8 @@ button{
                 id="serviceCity"
                 type="text"
                 value="Chandigarh"
+                maxlength="80"
+                autocomplete="off"
             >
 
         </div>
@@ -617,7 +819,10 @@ button{
 
         <div class="field">
 
-            <label class="label">
+            <label
+                class="label"
+                for="currency"
+            >
                 CURRENCY
             </label>
 
@@ -626,9 +831,17 @@ button{
                 id="currency"
             >
 
-                <option value="INR">INR ₹</option>
-                <option value="USD">USD $</option>
-                <option value="AED">AED د.إ</option>
+                <option value="INR">
+                    INR ₹
+                </option>
+
+                <option value="USD">
+                    USD $
+                </option>
+
+                <option value="AED">
+                    AED د.إ
+                </option>
 
             </select>
 
@@ -639,7 +852,9 @@ button{
 </div>
 
 
-<!-- CONTACT -->
+<!-- =====================================================
+     CONTACT
+====================================================== -->
 
 <div class="card">
 
@@ -656,7 +871,10 @@ button{
 
         <div class="field full">
 
-            <label class="label">
+            <label
+                class="label"
+                for="supportEmail"
+            >
                 SUPPORT EMAIL
             </label>
 
@@ -665,6 +883,8 @@ button{
                 id="supportEmail"
                 type="email"
                 placeholder="support@example.com"
+                maxlength="120"
+                autocomplete="email"
             >
 
         </div>
@@ -672,7 +892,10 @@ button{
 
         <div class="field">
 
-            <label class="label">
+            <label
+                class="label"
+                for="supportPhone"
+            >
                 SUPPORT PHONE
             </label>
 
@@ -681,6 +904,8 @@ button{
                 id="supportPhone"
                 type="tel"
                 placeholder="+91"
+                maxlength="20"
+                autocomplete="tel"
             >
 
         </div>
@@ -688,7 +913,10 @@ button{
 
         <div class="field">
 
-            <label class="label">
+            <label
+                class="label"
+                for="supportHours"
+            >
                 SUPPORT HOURS
             </label>
 
@@ -697,6 +925,8 @@ button{
                 id="supportHours"
                 type="text"
                 value="24/7"
+                maxlength="60"
+                autocomplete="off"
             >
 
         </div>
@@ -706,7 +936,9 @@ button{
 </div>
 
 
-<!-- PLATFORM -->
+<!-- =====================================================
+     PLATFORM CONTROLS
+====================================================== -->
 
 <div class="card">
 
@@ -732,6 +964,7 @@ button{
             </div>
 
         </div>
+
 
         <label class="switch">
 
@@ -762,6 +995,7 @@ button{
 
         </div>
 
+
         <label class="switch">
 
             <input
@@ -790,6 +1024,7 @@ button{
             </div>
 
         </div>
+
 
         <label class="switch">
 
@@ -820,6 +1055,7 @@ button{
 
         </div>
 
+
         <label class="switch">
 
             <input
@@ -836,7 +1072,9 @@ button{
 </div>
 
 
-<!-- NOTIFICATIONS -->
+<!-- =====================================================
+     NOTIFICATIONS
+====================================================== -->
 
 <div class="card">
 
@@ -862,6 +1100,7 @@ button{
             </div>
 
         </div>
+
 
         <label class="switch">
 
@@ -892,6 +1131,7 @@ button{
 
         </div>
 
+
         <label class="switch">
 
             <input
@@ -921,6 +1161,7 @@ button{
 
         </div>
 
+
         <label class="switch">
 
             <input
@@ -938,7 +1179,9 @@ button{
 </div>
 
 
-<!-- SECURITY -->
+<!-- =====================================================
+     SECURITY
+====================================================== -->
 
 <div class="card full">
 
@@ -955,7 +1198,10 @@ button{
 
         <div class="field">
 
-            <label class="label">
+            <label
+                class="label"
+                for="sessionTimeout"
+            >
                 SESSION TIMEOUT
             </label>
 
@@ -964,12 +1210,29 @@ button{
                 id="sessionTimeout"
             >
 
-                <option value="30">30 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="120">2 hours</option>
-                <option value="360">6 hours</option>
-                <option value="720">12 hours</option>
-                <option value="1440">24 hours</option>
+                <option value="30">
+                    30 minutes
+                </option>
+
+                <option value="60">
+                    1 hour
+                </option>
+
+                <option value="120">
+                    2 hours
+                </option>
+
+                <option value="360">
+                    6 hours
+                </option>
+
+                <option value="720">
+                    12 hours
+                </option>
+
+                <option value="1440">
+                    24 hours
+                </option>
 
             </select>
 
@@ -978,7 +1241,10 @@ button{
 
         <div class="field">
 
-            <label class="label">
+            <label
+                class="label"
+                for="otpExpiry"
+            >
                 OTP EXPIRY
             </label>
 
@@ -987,10 +1253,21 @@ button{
                 id="otpExpiry"
             >
 
-                <option value="60">1 minute</option>
-                <option value="120">2 minutes</option>
-                <option value="300">5 minutes</option>
-                <option value="600">10 minutes</option>
+                <option value="60">
+                    1 minute
+                </option>
+
+                <option value="120">
+                    2 minutes
+                </option>
+
+                <option value="300">
+                    5 minutes
+                </option>
+
+                <option value="600">
+                    10 minutes
+                </option>
 
             </select>
 
@@ -1004,7 +1281,9 @@ button{
 </section>
 
 
-<!-- DANGER -->
+<!-- =====================================================
+     DANGER
+====================================================== -->
 
 <section class="danger-zone">
 
@@ -1018,9 +1297,11 @@ button{
         users, rides or other application data.
     </div>
 
+
     <button
         class="danger-btn"
-        onclick="resetSettings()"
+        id="resetBtn"
+        type="button"
     >
         RESET SETTINGS
     </button>
@@ -1030,9 +1311,10 @@ button{
 
 <div class="footer-note">
 
-    RiderX Admin settings are stored locally in this browser.
-    Connect these controls to your Firebase admin configuration
-    when server-side settings synchronization is enabled.
+    RiderX Admin settings are currently stored locally in this
+    browser. These controls must be connected to a secure
+    server-side/Firebase admin configuration before they are
+    treated as global platform settings.
 
 </div>
 
@@ -1045,328 +1327,125 @@ button{
 <div
     class="toast"
     id="toast"
+    role="status"
+    aria-live="polite"
 ></div>
 
 
 <script>
 
+/* =========================================================
+   RIDERX ADMIN SETTINGS
+========================================================= */
+
+"use strict";
+
+
 const STORAGE_KEY =
     "riderxAdminSettings";
 
 
+const SHARED_STORAGE_KEY =
+    "riderx_platform_settings";
+
+
 const DEFAULT_SETTINGS = {
 
-    appName:"RiderX",
+    appName:
+        "RiderX",
 
-    serviceCity:"Chandigarh",
+    serviceCity:
+        "Chandigarh",
 
-    currency:"INR",
+    currency:
+        "INR",
 
-    supportEmail:"",
+    supportEmail:
+        "",
 
-    supportPhone:"",
+    supportPhone:
+        "",
 
-    supportHours:"24/7",
+    supportHours:
+        "24/7",
 
-    customerRegistration:true,
+    customerRegistration:
+        true,
 
-    riderRegistration:true,
+    riderRegistration:
+        true,
 
-    rideBooking:true,
+    rideBooking:
+        true,
 
-    maintenanceMode:false,
+    maintenanceMode:
+        false,
 
-    pushNotifications:true,
+    pushNotifications:
+        true,
 
-    rideAlerts:true,
+    rideAlerts:
+        true,
 
-    soundAlerts:true,
+    soundAlerts:
+        true,
 
-    sessionTimeout:"60",
+    sessionTimeout:
+        "60",
 
-    otpExpiry:"120"
+    otpExpiry:
+        "120"
 
 };
 
 
-/* =========================================
-   LOAD SETTINGS
-========================================= */
+const SETTING_IDS = [
 
-function loadSettings(){
+    "appName",
+    "serviceCity",
+    "currency",
 
-    let stored = {};
+    "supportEmail",
+    "supportPhone",
+    "supportHours",
 
-    try{
+    "customerRegistration",
+    "riderRegistration",
+    "rideBooking",
+    "maintenanceMode",
 
-        const raw =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
+    "pushNotifications",
+    "rideAlerts",
+    "soundAlerts",
 
-        if(raw){
+    "sessionTimeout",
+    "otpExpiry"
 
-            stored =
-                JSON.parse(
-                    raw
-                );
-
-        }
-
-    }catch(error){
-
-        console.log(
-            "Settings load error:",
-            error
-        );
-
-    }
+];
 
 
-    const settings =
-        Object.assign(
-            {},
-            DEFAULT_SETTINGS,
-            stored
-        );
+let toastTimer = null;
 
 
-    Object.keys(
-        settings
-    ).forEach(
-        function(key){
+/* =========================================================
+   DOM HELPERS
+========================================================= */
 
-            const element =
-                document.getElementById(
-                    key
-                );
+function getElement(id){
 
-            if(!element){
-                return;
-            }
-
-
-            if(
-                element.type ===
-                "checkbox"
-            ){
-
-                element.checked =
-                    Boolean(
-                        settings[key]
-                    );
-
-            }
-            else{
-
-                element.value =
-                    settings[key];
-
-            }
-
-        }
-    );
+    return document.getElementById(id);
 
 }
 
 
-/* =========================================
-   SAVE SETTINGS
-========================================= */
-
-function saveSettings(){
-
-    const ids = [
-
-        "appName",
-        "serviceCity",
-        "currency",
-
-        "supportEmail",
-        "supportPhone",
-        "supportHours",
-
-        "customerRegistration",
-        "riderRegistration",
-        "rideBooking",
-        "maintenanceMode",
-
-        "pushNotifications",
-        "rideAlerts",
-        "soundAlerts",
-
-        "sessionTimeout",
-        "otpExpiry"
-
-    ];
-
-
-    const settings = {};
-
-
-    ids.forEach(
-        function(id){
-
-            const element =
-                document.getElementById(
-                    id
-                );
-
-            if(!element){
-                return;
-            }
-
-
-            if(
-                element.type ===
-                "checkbox"
-            ){
-
-                settings[id] =
-                    element.checked;
-
-            }
-            else{
-
-                settings[id] =
-                    element.value;
-
-            }
-
-        }
-    );
-
-
-    try{
-
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(
-                settings
-            )
-        );
-
-
-        /*
-         * Keep a shared copy so
-         * RiderX pages can read
-         * platform controls.
-         */
-
-        localStorage.setItem(
-            "riderx_platform_settings",
-            JSON.stringify(
-                settings
-            )
-        );
-
-
-        showToast(
-            "Admin settings saved successfully."
-        );
-
-    }catch(error){
-
-        console.log(error);
-
-        showToast(
-            "Unable to save settings."
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   RESET
-========================================= */
-
-function resetSettings(){
-
-    const confirmed =
-        window.confirm(
-            "Reset all RiderX admin settings to their default values?"
-        );
-
-
-    if(!confirmed){
-        return;
-    }
-
-
-    try{
-
-        localStorage.removeItem(
-            STORAGE_KEY
-        );
-
-        localStorage.removeItem(
-            "riderx_platform_settings"
-        );
-
-
-        loadSettings();
-
-
-        showToast(
-            "Settings restored to default."
-        );
-
-    }catch(error){
-
-        console.log(error);
-
-        showToast(
-            "Unable to reset settings."
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   NAVIGATION
-========================================= */
-
-function goBack(){
-
-    if(
-        document.referrer &&
-        document.referrer.includes(
-            window.location.host
-        )
-    ){
-
-        history.back();
-
-    }
-    else{
-
-        window.location.href =
-            "dashboard.html";
-
-    }
-
-}
-
-
-/* =========================================
+/* =========================================================
    TOAST
-========================================= */
+========================================================= */
 
-let toastTimer;
-
-
-function showToast(
-    message
-){
+function showToast(message){
 
     const toast =
-        document.getElementById(
-            "toast"
-        );
+        getElement("toast");
 
 
     if(!toast){
@@ -1375,7 +1454,7 @@ function showToast(
 
 
     toast.textContent =
-        message;
+        String(message || "");
 
 
     toast.classList.add(
@@ -1403,20 +1482,642 @@ function showToast(
 }
 
 
-/* =========================================
-   INIT
-========================================= */
+/* =========================================================
+   STORAGE
+========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+function readStoredSettings(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if(!raw){
+            return {};
+        }
+
+
+        const parsed =
+            JSON.parse(
+                raw
+            );
+
+
+        if(
+            !parsed ||
+            typeof parsed !== "object" ||
+            Array.isArray(parsed)
+        ){
+
+            return {};
+
+        }
+
+
+        return parsed;
+
+    }
+    catch(error){
+
+        console.error(
+            "RiderX settings load error:",
+            error
+        );
+
+
+        return {};
+
+    }
+
+}
+
+
+function getSettings(){
+
+    return {
+        ...DEFAULT_SETTINGS,
+        ...readStoredSettings()
+    };
+
+}
+
+
+function writeSettings(settings){
+
+    const serialized =
+        JSON.stringify(
+            settings
+        );
+
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        serialized
+    );
+
+
+    /*
+     * Shared browser copy.
+     *
+     * Important:
+     * This is NOT a secure global Firebase
+     * configuration. Other devices/browsers
+     * will not receive this value.
+     */
+
+    localStorage.setItem(
+        SHARED_STORAGE_KEY,
+        serialized
+    );
+
+}
+
+
+/* =========================================================
+   VALUE NORMALIZATION
+========================================================= */
+
+function normalizeSettings(settings){
+
+    const source = {
+        ...DEFAULT_SETTINGS,
+        ...(settings || {})
+    };
+
+
+    return {
+
+        appName:
+            String(
+                source.appName ?? ""
+            ).trim() ||
+            DEFAULT_SETTINGS.appName,
+
+        serviceCity:
+            String(
+                source.serviceCity ?? ""
+            ).trim() ||
+            DEFAULT_SETTINGS.serviceCity,
+
+        currency:
+            [
+                "INR",
+                "USD",
+                "AED"
+            ].includes(
+                String(source.currency)
+            )
+                ? String(source.currency)
+                : DEFAULT_SETTINGS.currency,
+
+        supportEmail:
+            String(
+                source.supportEmail ?? ""
+            ).trim(),
+
+        supportPhone:
+            String(
+                source.supportPhone ?? ""
+            ).trim(),
+
+        supportHours:
+            String(
+                source.supportHours ?? ""
+            ).trim() ||
+            DEFAULT_SETTINGS.supportHours,
+
+        customerRegistration:
+            Boolean(
+                source.customerRegistration
+            ),
+
+        riderRegistration:
+            Boolean(
+                source.riderRegistration
+            ),
+
+        rideBooking:
+            Boolean(
+                source.rideBooking
+            ),
+
+        maintenanceMode:
+            Boolean(
+                source.maintenanceMode
+            ),
+
+        pushNotifications:
+            Boolean(
+                source.pushNotifications
+            ),
+
+        rideAlerts:
+            Boolean(
+                source.rideAlerts
+            ),
+
+        soundAlerts:
+            Boolean(
+                source.soundAlerts
+            ),
+
+        sessionTimeout:
+            [
+                "30",
+                "60",
+                "120",
+                "360",
+                "720",
+                "1440"
+            ].includes(
+                String(
+                    source.sessionTimeout
+                )
+            )
+                ? String(
+                    source.sessionTimeout
+                )
+                : DEFAULT_SETTINGS.sessionTimeout,
+
+        otpExpiry:
+            [
+                "60",
+                "120",
+                "300",
+                "600"
+            ].includes(
+                String(
+                    source.otpExpiry
+                )
+            )
+                ? String(
+                    source.otpExpiry
+                )
+                : DEFAULT_SETTINGS.otpExpiry
+
+    };
+
+}
+
+
+/* =========================================================
+   LOAD SETTINGS INTO FORM
+========================================================= */
+
+function loadSettings(){
+
+    const settings =
+        normalizeSettings(
+            getSettings()
+        );
+
+
+    SETTING_IDS.forEach(
+        function(id){
+
+            const element =
+                getElement(id);
+
+
+            if(!element){
+                return;
+            }
+
+
+            if(
+                element.type ===
+                "checkbox"
+            ){
+
+                element.checked =
+                    settings[id];
+
+            }
+            else{
+
+                element.value =
+                    settings[id];
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   COLLECT SETTINGS FROM FORM
+========================================================= */
+
+function collectSettings(){
+
+    const settings = {};
+
+
+    SETTING_IDS.forEach(
+        function(id){
+
+            const element =
+                getElement(id);
+
+
+            if(!element){
+                return;
+            }
+
+
+            if(
+                element.type ===
+                "checkbox"
+            ){
+
+                settings[id] =
+                    element.checked;
+
+            }
+            else{
+
+                settings[id] =
+                    element.value;
+
+            }
+
+        }
+    );
+
+
+    return normalizeSettings(
+        settings
+    );
+
+}
+
+
+/* =========================================================
+   VALIDATION
+========================================================= */
+
+function validateSettings(settings){
+
+    if(!settings.appName){
+
+        showToast(
+            "App name is required."
+        );
+
+
+        getElement(
+            "appName"
+        )?.focus();
+
+
+        return false;
+
+    }
+
+
+    if(!settings.serviceCity){
+
+        showToast(
+            "Service city is required."
+        );
+
+
+        getElement(
+            "serviceCity"
+        )?.focus();
+
+
+        return false;
+
+    }
+
+
+    if(
+        settings.supportEmail &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+            settings.supportEmail
+        )
+    ){
+
+        showToast(
+            "Please enter a valid support email."
+        );
+
+
+        getElement(
+            "supportEmail"
+        )?.focus();
+
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   SAVE SETTINGS
+========================================================= */
+
+function saveSettings(){
+
+    try{
+
+        const settings =
+            collectSettings();
+
+
+        if(
+            !validateSettings(
+                settings
+            )
+        ){
+
+            return;
+
+        }
+
+
+        writeSettings(
+            settings
+        );
+
+
+        showToast(
+            "Admin settings saved successfully."
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "RiderX settings save error:",
+            error
+        );
+
+
+        showToast(
+            "Unable to save settings."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RESET SETTINGS
+========================================================= */
+
+function resetSettings(){
+
+    const confirmed =
+        window.confirm(
+            "Reset all RiderX admin settings to their default values?"
+        );
+
+
+    if(!confirmed){
+        return;
+    }
+
+
+    try{
+
+        localStorage.removeItem(
+            STORAGE_KEY
+        );
+
+
+        localStorage.removeItem(
+            SHARED_STORAGE_KEY
+        );
+
 
         loadSettings();
 
+
+        showToast(
+            "Settings restored to default."
+        );
+
     }
-);
+    catch(error){
+
+        console.error(
+            "RiderX settings reset error:",
+            error
+        );
+
+
+        showToast(
+            "Unable to reset settings."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function goBack(){
+
+    try{
+
+        const referrer =
+            document.referrer;
+
+
+        if(
+            referrer &&
+            new URL(referrer).origin ===
+            window.location.origin
+        ){
+
+            history.back();
+
+            return;
+
+        }
+
+    }
+    catch(error){
+
+        console.warn(
+            "Back navigation check failed:",
+            error
+        );
+
+    }
+
+
+    window.location.href =
+        "dashboard.html";
+
+}
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+function setupEvents(){
+
+    const saveBtn =
+        getElement(
+            "saveBtn"
+        );
+
+
+    const resetBtn =
+        getElement(
+            "resetBtn"
+        );
+
+
+    const backBtn =
+        getElement(
+            "backBtn"
+        );
+
+
+    saveBtn?.addEventListener(
+        "click",
+        saveSettings
+    );
+
+
+    resetBtn?.addEventListener(
+        "click",
+        resetSettings
+    );
+
+
+    backBtn?.addEventListener(
+        "click",
+        goBack
+    );
+
+
+    /*
+     * Prevent accidental form-like submission
+     * if this page is later wrapped in a form.
+     */
+
+    document.addEventListener(
+        "keydown",
+        function(event){
+
+            if(
+                event.key ===
+                "Enter" &&
+                event.target instanceof
+                HTMLInputElement
+            ){
+
+                /*
+                 * Do not save automatically.
+                 * User should press SAVE CHANGES.
+                 */
+
+                return;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+function init(){
+
+    loadSettings();
+
+    setupEvents();
+
+}
+
+
+if(
+    document.readyState ===
+    "loading"
+){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        init,
+        {
+            once:true
+        }
+    );
+
+}
+else{
+
+    init();
+
+}
 
 </script>
 
+
 </body>
-</html>
+        </html>
