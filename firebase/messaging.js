@@ -49,7 +49,7 @@ import {
     onMessage,
     deleteToken,
     isSupported
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-messaging.js";
 
 
 /* ============================================================
