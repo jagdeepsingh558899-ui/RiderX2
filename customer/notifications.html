@@ -4,15 +4,38 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<meta
+    name="theme-color"
+    content="#FFD400"
+>
+
+<meta
+    name="description"
+    content="RiderX customer notifications"
+>
 
 <title>RiderX - Notifications</title>
 
-<meta name="theme-color" content="#FFD400">
+<link
+    rel="stylesheet"
+    href="../css/style.css"
+>
 
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
-<link rel="stylesheet" href="../css/responsive.css">
+<link
+    rel="stylesheet"
+    href="../css/dashboard.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/responsive.css"
+>
 
 <style>
 
@@ -48,6 +71,11 @@ button{
     cursor:pointer;
 }
 
+button:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
 .app{
     width:100%;
     max-width:650px;
@@ -65,26 +93,39 @@ button{
     position:sticky;
     top:0;
     z-index:50;
+
     display:flex;
     align-items:center;
     gap:10px;
-    padding:12px;
+
+    padding:
+        max(12px,env(safe-area-inset-top))
+        12px
+        12px;
+
     border-bottom:1px solid #252525;
+
     background:rgba(10,10,10,.96);
+
     backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
 }
 
 .back-btn{
     width:40px;
     height:40px;
     min-width:40px;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     border:1px solid #303030;
     border-radius:50%;
+
     background:#1b1b1b;
     color:#fff;
+
     font-size:22px;
 }
 
@@ -98,21 +139,21 @@ button{
 }
 
 .title{
-    font-size:12px;
+    font-size:16px;
     font-weight:900;
 }
 
 .subtitle{
     margin-top:3px;
     color:#777;
-    font-size:6px;
+    font-size:10px;
 }
 
 .header-action{
     border:0;
     background:transparent;
     color:var(--yellow);
-    font-size:7px;
+    font-size:11px;
     font-weight:900;
 }
 
@@ -123,7 +164,8 @@ button{
 
 .content{
     padding:13px;
-    padding-bottom:35px;
+    padding-bottom:
+        max(35px,env(safe-area-inset-bottom));
 }
 
 
@@ -136,12 +178,13 @@ button{
     align-items:center;
     justify-content:space-between;
     gap:10px;
+
     margin-bottom:10px;
 }
 
 .unread-text{
     color:#777;
-    font-size:7px;
+    font-size:11px;
 }
 
 .unread-text strong{
@@ -149,12 +192,15 @@ button{
 }
 
 .clear-btn{
-    padding:7px 10px;
+    padding:8px 11px;
+
     border:1px solid #343434;
     border-radius:9px;
+
     background:#191919;
     color:#aaa;
-    font-size:6px;
+
+    font-size:10px;
     font-weight:900;
 }
 
@@ -170,7 +216,9 @@ button{
 .filters{
     display:flex;
     gap:7px;
+
     margin-bottom:12px;
+
     overflow-x:auto;
     scrollbar-width:none;
 }
@@ -181,12 +229,16 @@ button{
 
 .filter{
     flex:0 0 auto;
-    padding:7px 11px;
+
+    padding:8px 12px;
+
     border:1px solid #303030;
     border-radius:20px;
+
     background:#181818;
     color:#777;
-    font-size:6px;
+
+    font-size:10px;
     font-weight:900;
 }
 
@@ -209,13 +261,19 @@ button{
 
 .notification{
     position:relative;
+
     display:flex;
     gap:10px;
+
     padding:12px;
+
     border:1px solid var(--border);
     border-radius:15px;
+
     background:var(--card);
+
     cursor:pointer;
+
     transition:
         transform .15s ease,
         background .15s ease,
@@ -233,6 +291,7 @@ button{
 
 .notification.unread{
     border-color:#3a350f;
+
     background:
         linear-gradient(
             135deg,
@@ -243,25 +302,34 @@ button{
 
 .notification.unread::before{
     content:"";
+
     position:absolute;
+
     top:12px;
     right:12px;
-    width:6px;
-    height:6px;
+
+    width:7px;
+    height:7px;
+
     border-radius:50%;
+
     background:var(--yellow);
 }
 
 .notification-icon{
-    width:38px;
-    height:38px;
-    min-width:38px;
+    width:42px;
+    height:42px;
+    min-width:42px;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     border-radius:11px;
+
     background:#252525;
-    font-size:14px;
+
+    font-size:16px;
 }
 
 .notification-icon.yellow{
@@ -283,27 +351,130 @@ button{
 .notification-content{
     flex:1;
     min-width:0;
+
     padding-right:8px;
 }
 
 .notification-title{
     padding-right:10px;
-    font-size:8px;
+
+    font-size:13px;
     font-weight:900;
     line-height:1.3;
 }
 
 .notification-message{
     margin-top:5px;
+
     color:#858585;
-    font-size:6px;
+
+    font-size:11px;
     line-height:1.45;
+
+    overflow-wrap:anywhere;
 }
 
 .notification-time{
     margin-top:7px;
+
     color:#505050;
-    font-size:5px;
+
+    font-size:9px;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading{
+    padding:55px 20px;
+
+    text-align:center;
+
+    color:#777;
+
+    font-size:11px;
+}
+
+.spinner{
+    width:30px;
+    height:30px;
+
+    margin:0 auto 12px;
+
+    border:3px solid #303030;
+    border-top-color:var(--yellow);
+
+    border-radius:50%;
+
+    animation:riderxSpin .8s linear infinite;
+}
+
+@keyframes riderxSpin{
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error{
+    display:none;
+
+    margin:20px 0;
+    padding:20px;
+
+    text-align:center;
+
+    border:1px solid #402020;
+    border-radius:15px;
+
+    background:#180909;
+}
+
+.error.show{
+    display:block;
+}
+
+.error-icon{
+    font-size:25px;
+}
+
+.error-title{
+    margin-top:9px;
+
+    font-size:13px;
+    font-weight:900;
+}
+
+.error-text{
+    margin-top:6px;
+
+    color:#888;
+
+    font-size:10px;
+    line-height:1.5;
+}
+
+.retry-btn{
+    margin-top:13px;
+
+    padding:9px 17px;
+
+    border:0;
+    border-radius:10px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:10px;
+    font-weight:900;
 }
 
 
@@ -313,7 +484,9 @@ button{
 
 .empty{
     display:none;
+
     padding:60px 20px;
+
     text-align:center;
 }
 
@@ -324,25 +497,33 @@ button{
 .empty-icon{
     width:65px;
     height:65px;
+
     margin:0 auto 13px;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     border-radius:50%;
+
     background:#191919;
+
     font-size:25px;
 }
 
 .empty-title{
-    font-size:10px;
+    font-size:15px;
     font-weight:900;
 }
 
 .empty-text{
-    max-width:260px;
+    max-width:280px;
+
     margin:7px auto 0;
+
     color:#666;
-    font-size:6px;
+
+    font-size:10px;
     line-height:1.5;
 }
 
@@ -353,9 +534,12 @@ button{
 
 .date-label{
     margin:14px 2px 7px;
+
     color:#555;
-    font-size:6px;
+
+    font-size:9px;
     font-weight:900;
+
     text-transform:uppercase;
 }
 
@@ -368,9 +552,12 @@ button{
     position:fixed;
     inset:0;
     z-index:100;
+
     display:none;
+
     align-items:flex-end;
     justify-content:center;
+
     background:rgba(0,0,0,.72);
 }
 
@@ -382,49 +569,69 @@ button{
     width:100%;
     max-width:650px;
     max-height:75vh;
+
     overflow:auto;
-    padding:18px 14px 25px;
+
+    padding:
+        18px
+        14px
+        max(25px,env(safe-area-inset-bottom));
+
     border-top:1px solid #333;
     border-radius:22px 22px 0 0;
+
     background:#151515;
 }
 
 .handle{
     width:40px;
     height:4px;
+
     margin:0 auto 15px;
+
     border-radius:20px;
+
     background:#444;
 }
 
 .modal-icon{
     width:48px;
     height:48px;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     margin-bottom:11px;
+
     border-radius:14px;
+
     background:#292929;
+
     font-size:18px;
 }
 
 .modal-title{
-    font-size:11px;
+    font-size:15px;
     font-weight:900;
 }
 
 .modal-time{
     margin-top:4px;
+
     color:#666;
-    font-size:6px;
+
+    font-size:9px;
 }
 
 .modal-message{
     margin-top:13px;
+
     color:#999;
-    font-size:7px;
+
+    font-size:11px;
     line-height:1.6;
+
     white-space:pre-wrap;
     overflow-wrap:anywhere;
 }
@@ -432,12 +639,16 @@ button{
 .modal-close{
     width:100%;
     height:42px;
+
     margin-top:17px;
+
     border:0;
     border-radius:11px;
+
     background:var(--yellow);
     color:#000;
-    font-size:7px;
+
+    font-size:11px;
     font-weight:900;
 }
 
@@ -448,21 +659,33 @@ button{
 
 .toast{
     position:fixed;
+
     left:50%;
-    bottom:25px;
+    bottom:
+        max(25px,env(safe-area-inset-bottom));
+
     z-index:200;
+
     width:calc(100% - 28px);
     max-width:500px;
+
     padding:11px 13px;
+
     transform:translate(-50%,20px);
+
     border:1px solid #333;
     border-radius:11px;
+
     background:#222;
     color:#fff;
+
     text-align:center;
-    font-size:7px;
+
+    font-size:10px;
+
     opacity:0;
     pointer-events:none;
+
     transition:.25s;
 }
 
@@ -484,11 +707,11 @@ button{
     }
 
     .title{
-        font-size:11px;
+        font-size:14px;
     }
 
     .header-action{
-        font-size:6px;
+        font-size:9px;
     }
 
 }
@@ -497,9 +720,15 @@ button{
 
 </head>
 
+
 <body>
 
 <div class="app">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <header class="header">
 
@@ -511,6 +740,7 @@ button{
         >
             ‹
         </button>
+
 
         <div class="title-box">
 
@@ -524,6 +754,7 @@ button{
 
         </div>
 
+
         <button
             type="button"
             class="header-action"
@@ -535,14 +766,25 @@ button{
     </header>
 
 
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
+
     <main class="content">
+
 
         <div class="topbar">
 
             <div class="unread-text">
-                <strong id="unreadCount">0</strong>
+
+                <strong id="unreadCount">
+                    0
+                </strong>
+
                 unread notifications
+
             </div>
+
 
             <button
                 type="button"
@@ -555,6 +797,8 @@ button{
         </div>
 
 
+        <!-- FILTERS -->
+
         <div class="filters">
 
             <button
@@ -565,6 +809,7 @@ button{
                 All
             </button>
 
+
             <button
                 type="button"
                 class="filter"
@@ -572,6 +817,7 @@ button{
             >
                 Rides
             </button>
+
 
             <button
                 type="button"
@@ -581,6 +827,7 @@ button{
                 Payments
             </button>
 
+
             <button
                 type="button"
                 class="filter"
@@ -588,6 +835,7 @@ button{
             >
                 Offers
             </button>
+
 
             <button
                 type="button"
@@ -600,12 +848,63 @@ button{
         </div>
 
 
+        <!-- LOADING -->
+
+        <div
+            id="loadingState"
+            class="loading"
+        >
+
+            <div class="spinner"></div>
+
+            Loading notifications...
+
+        </div>
+
+
+        <!-- ERROR -->
+
+        <div
+            id="errorState"
+            class="error"
+        >
+
+            <div class="error-icon">
+                ⚠️
+            </div>
+
+            <div class="error-title">
+                Unable to load notifications
+            </div>
+
+            <div
+                class="error-text"
+                id="errorText"
+            >
+                Please check your connection and try again.
+            </div>
+
+            <button
+                type="button"
+                class="retry-btn"
+                id="retryButton"
+            >
+                Retry
+            </button>
+
+        </div>
+
+
+        <!-- NOTIFICATION LIST -->
+
         <div
             id="notificationList"
             class="notification-list"
             aria-live="polite"
         ></div>
 
+
+        <!-- EMPTY -->
 
         <div
             id="emptyState"
@@ -651,12 +950,14 @@ button{
 
         <div class="handle"></div>
 
+
         <div
             class="modal-icon"
             id="modalIcon"
         >
             🔔
         </div>
+
 
         <div
             class="modal-title"
@@ -665,6 +966,7 @@ button{
             Notification
         </div>
 
+
         <div
             class="modal-time"
             id="modalTime"
@@ -672,10 +974,12 @@ button{
             Just now
         </div>
 
+
         <div
             class="modal-message"
             id="modalMessage"
         ></div>
+
 
         <button
             type="button"
@@ -690,6 +994,8 @@ button{
 </div>
 
 
+<!-- TOAST -->
+
 <div
     class="toast"
     id="toast"
@@ -698,450 +1004,994 @@ button{
 ></div>
 
 
-<script>
+<!-- =======================================================
+     FIREBASE + NOTIFICATIONS
+======================================================= -->
+
+<script type="module">
 
 /* =========================================================
    RIDERX CUSTOMER NOTIFICATIONS
-   Final notification center
+   =========================================================
 
-   Supports:
-   - Ride notifications
-   - Payment notifications
-   - Promo notifications
-   - System notifications
-   - Unread/read state
-   - Filters
-   - Notification detail modal
-   - Clear all
-   - Cross-tab localStorage sync
-   - Multiple legacy RiderX storage keys
-   - Safe normalization
+   IMPORTANT FIRESTORE STRUCTURE:
+
+   notifications/{notificationId}
+
+   {
+       userId: "CUSTOMER_UID",
+       type: "ride",
+       title: "Ride accepted",
+       message: "Your ride has been accepted.",
+       rideId: "RIDE_ID",
+       createdAt: serverTimestamp(),
+       read: false
+   }
+
+   Also supports:
+   body
+   description
+   category
+   notificationType
+   timestamp
+   isRead
+
+   ========================================================= */
+
+
+/* =========================================================
+   FIREBASE IMPORTS
 ========================================================= */
 
-(function(){
-
-    "use strict";
-
-
-    /* =====================================================
-       STORAGE
-    ===================================================== */
-
-    const STORAGE_KEYS = [
-        "riderxNotifications",
-        "notifications",
-        "customerNotifications"
-    ];
-
-    const PRIMARY_STORAGE_KEY =
-        "riderxNotifications";
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
 
-    /* =====================================================
-       STATE
-    ===================================================== */
-
-    let notifications = [];
-
-    let currentFilter = "all";
-
-    let toastTimer = null;
-
-
-    /* =====================================================
-       DEFAULT NOTIFICATIONS
-    ===================================================== */
-
-    const defaultNotifications = [
-
-        {
-            id:"welcome",
-            type:"system",
-            icon:"👋",
-            title:"Welcome to RiderX",
-            message:
-                "Welcome to RiderX. Book Bike Taxi, Cab, Parcel and Food Delivery from one app.",
-            time:Date.now(),
-            read:false
-        },
-
-        {
-            id:"payment-ready",
-            type:"payment",
-            icon:"💳",
-            title:"Payments are ready",
-            message:
-                "You can now manage your RiderX wallet and payment methods from the Wallet section.",
-            time:Date.now() - 3600000,
-            read:false
-        }
-
-    ];
+import {
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot,
+    doc,
+    updateDoc,
+    deleteDoc,
+    writeBatch,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-    /* =====================================================
-       DOM
-    ===================================================== */
-
-    const $ = function(id){
-
-        return document.getElementById(id);
-
-    };
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
-    /* =====================================================
-       LOAD NOTIFICATIONS
-    ===================================================== */
+/* =========================================================
+   DOM
+========================================================= */
 
-    function loadNotifications(){
+const notificationList =
+    document.getElementById(
+        "notificationList"
+    );
 
-        let loaded = null;
 
-        for(
-            const key of STORAGE_KEYS
+const loadingState =
+    document.getElementById(
+        "loadingState"
+    );
+
+
+const emptyState =
+    document.getElementById(
+        "emptyState"
+    );
+
+
+const errorState =
+    document.getElementById(
+        "errorState"
+    );
+
+
+const errorText =
+    document.getElementById(
+        "errorText"
+    );
+
+
+const retryButton =
+    document.getElementById(
+        "retryButton"
+    );
+
+
+const unreadCount =
+    document.getElementById(
+        "unreadCount"
+    );
+
+
+const markAllButton =
+    document.getElementById(
+        "markAllButton"
+    );
+
+
+const clearButton =
+    document.getElementById(
+        "clearButton"
+    );
+
+
+const detailModal =
+    document.getElementById(
+        "detailModal"
+    );
+
+
+const modalIcon =
+    document.getElementById(
+        "modalIcon"
+    );
+
+
+const modalTitle =
+    document.getElementById(
+        "modalTitle"
+    );
+
+
+const modalTime =
+    document.getElementById(
+        "modalTime"
+    );
+
+
+const modalMessage =
+    document.getElementById(
+        "modalMessage"
+    );
+
+
+const modalCloseButton =
+    document.getElementById(
+        "modalCloseButton"
+    );
+
+
+const toast =
+    document.getElementById(
+        "toast"
+    );
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let currentUser = null;
+
+let unsubscribeNotifications = null;
+
+let notifications = [];
+
+let currentFilter = "all";
+
+let toastTimer = null;
+
+let loading = true;
+
+
+/* =========================================================
+   LEGACY LOCAL STORAGE
+========================================================= */
+
+const LEGACY_STORAGE_KEYS = [
+    "riderxNotifications",
+    "notifications",
+    "customerNotifications"
+];
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(message){
+
+    toast.textContent =
+        String(
+            message || ""
+        );
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+function showError(message){
+
+    loading = false;
+
+    loadingState.style.display =
+        "none";
+
+    errorText.textContent =
+        String(
+            message ||
+            "Unable to load notifications."
+        );
+
+    errorState.classList.add(
+        "show"
+    );
+
+}
+
+
+function hideError(){
+
+    errorState.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function showLoading(){
+
+    loading = true;
+
+    loadingState.style.display =
+        "block";
+
+    emptyState.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(
+            unsubscribeNotifications
         ){
 
-            try{
+            unsubscribeNotifications();
 
-                const raw =
-                    localStorage.getItem(key);
+            unsubscribeNotifications =
+                null;
 
-                if(
-                    !raw
-                ){
-
-                    continue;
-
-                }
+        }
 
 
-                const parsed =
-                    JSON.parse(raw);
+        if(!user){
+
+            currentUser =
+                null;
+
+            notifications =
+                [];
+
+            renderNotifications();
+
+            location.replace(
+                "../auth/login.html"
+            );
+
+            return;
+
+        }
 
 
-                if(
-                    Array.isArray(parsed)
-                ){
+        currentUser =
+            user;
 
-                    loaded = parsed;
 
-                    break;
+        listenToNotifications(
+            user.uid
+        );
 
-                }
+    }
+);
 
-            }catch(error){
+
+/* =========================================================
+   FIRESTORE LISTENER
+========================================================= */
+
+function listenToNotifications(uid){
+
+    if(!uid){
+
+        return;
+
+    }
+
+
+    if(
+        unsubscribeNotifications
+    ){
+
+        unsubscribeNotifications();
+
+        unsubscribeNotifications =
+            null;
+
+    }
+
+
+    showLoading();
+
+    hideError();
+
+
+    const notificationsRef =
+        collection(
+            db,
+            "notifications"
+        );
+
+
+    /*
+     * Primary query.
+     *
+     * This is the query admin-created
+     * notifications are expected to match.
+     */
+
+    const primaryQuery =
+        query(
+            notificationsRef,
+            where(
+                "userId",
+                "==",
+                uid
+            ),
+            orderBy(
+                "createdAt",
+                "desc"
+            )
+        );
+
+
+    unsubscribeNotifications =
+        onSnapshot(
+            primaryQuery,
+
+            snapshot => {
+
+                processFirestoreSnapshot(
+                    snapshot
+                );
+
+            },
+
+            error => {
 
                 console.warn(
-                    "RiderX notification storage read failed:",
-                    key,
+                    "Primary notification query failed:",
                     error
                 );
 
+
+                /*
+                 * If composite index is missing,
+                 * use userId-only query.
+                 */
+
+                startFallbackListener(
+                    uid
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   FALLBACK LISTENER
+========================================================= */
+
+function startFallbackListener(uid){
+
+    if(
+        unsubscribeNotifications
+    ){
+
+        unsubscribeNotifications();
+
+        unsubscribeNotifications =
+            null;
+
+    }
+
+
+    const notificationsRef =
+        collection(
+            db,
+            "notifications"
+        );
+
+
+    const fallbackQuery =
+        query(
+            notificationsRef,
+            where(
+                "userId",
+                "==",
+                uid
+            )
+        );
+
+
+    unsubscribeNotifications =
+        onSnapshot(
+            fallbackQuery,
+
+            snapshot => {
+
+                processFirestoreSnapshot(
+                    snapshot
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "Fallback notification listener failed:",
+                    error
+                );
+
+
+                /*
+                 * If Firebase is unavailable,
+                 * keep legacy local notifications
+                 * instead of showing a blank page.
+                 */
+
+                loadLegacyNotifications();
+
+                showError(
+                    error.message ||
+                    "Unable to load notifications."
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   FIRESTORE SNAPSHOT
+========================================================= */
+
+function processFirestoreSnapshot(
+    snapshot
+){
+
+    const firestoreNotifications =
+        snapshot.docs.map(
+            item => {
+
+                const data =
+                    item.data() || {};
+
+
+                return normalizeNotification(
+                    {
+                        ...data,
+                        id:item.id,
+                        source:"firestore"
+                    }
+                );
+
+            }
+        )
+        .filter(Boolean);
+
+
+    notifications =
+        firestoreNotifications;
+
+
+    /*
+     * If Firestore has no notifications,
+     * optionally preserve old local notifications.
+     */
+
+    if(
+        !notifications.length
+    ){
+
+        const legacy =
+            readLegacyNotifications();
+
+
+        if(
+            legacy.length
+        ){
+
+            notifications =
+                legacy;
+
+        }
+
+    }
+
+
+    sortNotifications();
+
+    loading = false;
+
+    loadingState.style.display =
+        "none";
+
+    hideError();
+
+    renderNotifications();
+
+}
+
+
+/* =========================================================
+   NORMALIZE NOTIFICATION
+========================================================= */
+
+function normalizeNotification(
+    item
+){
+
+    if(
+        !item ||
+        typeof item !== "object"
+    ){
+
+        return null;
+
+    }
+
+
+    const type =
+        normalizeType(
+            item.type ||
+            item.category ||
+            item.kind ||
+            item.notificationType
+        );
+
+
+    const timestamp =
+        getTimestampValue(
+            item.createdAt ??
+            item.timestamp ??
+            item.time
+        );
+
+
+    return {
+
+        id:
+            String(
+                item.id ||
+                item.notificationId ||
+                (
+                    "notification-" +
+                    Date.now() +
+                    "-" +
+                    Math.random()
+                        .toString(36)
+                        .slice(2,8)
+                )
+            ),
+
+        userId:
+            item.userId
+                ? String(item.userId)
+                : "",
+
+        type:
+            type,
+
+        icon:
+            safeIcon(
+                item.icon,
+                type
+            ),
+
+        title:
+            String(
+                item.title ||
+                item.heading ||
+                "RiderX Notification"
+            ),
+
+        message:
+            String(
+                item.message ||
+                item.body ||
+                item.description ||
+                item.text ||
+                ""
+            ),
+
+        time:
+            timestamp || Date.now(),
+
+        read:
+            item.read === true ||
+            item.isRead === true,
+
+        rideId:
+            item.rideId ||
+            item.rideID ||
+            item.ride ||
+            "",
+
+        actionUrl:
+            typeof item.actionUrl === "string"
+                ? item.actionUrl
+                : (
+                    typeof item.url === "string"
+                        ? item.url
+                        : ""
+                ),
+
+        source:
+            item.source ||
+            "firestore"
+
+    };
+
+}
+
+
+/* =========================================================
+   TYPE
+========================================================= */
+
+function normalizeType(type){
+
+    const value =
+        String(
+            type || "system"
+        )
+        .toLowerCase()
+        .trim();
+
+
+    if(
+        [
+            "ride",
+            "booking",
+            "trip",
+            "driver",
+            "rider",
+            "request",
+            "pickup"
+        ].includes(value)
+    ){
+
+        return "ride";
+
+    }
+
+
+    if(
+        [
+            "payment",
+            "wallet",
+            "transaction",
+            "refund",
+            "earning",
+            "fare"
+        ].includes(value)
+    ){
+
+        return "payment";
+
+    }
+
+
+    if(
+        [
+            "promo",
+            "offer",
+            "coupon",
+            "promotion"
+        ].includes(value)
+    ){
+
+        return "promo";
+
+    }
+
+
+    return "system";
+
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+function safeIcon(
+    icon,
+    type
+){
+
+    if(
+        typeof icon === "string" &&
+        icon.trim()
+    ){
+
+        return icon;
+
+    }
+
+
+    switch(type){
+
+        case "ride":
+            return "🚕";
+
+        case "payment":
+            return "💳";
+
+        case "promo":
+            return "🎁";
+
+        case "system":
+            return "⚙️";
+
+        default:
+            return "🔔";
+
+    }
+
+}
+
+
+/* =========================================================
+   TIMESTAMP
+========================================================= */
+
+function getTimestampValue(
+    timestamp
+){
+
+    if(!timestamp){
+
+        return 0;
+
+    }
+
+
+    try{
+
+        /*
+         * Firestore Timestamp
+         */
+
+        if(
+            typeof timestamp.toMillis ===
+            "function"
+        ){
+
+            return timestamp.toMillis();
+
+        }
+
+
+        /*
+         * Firestore Timestamp
+         * alternative.
+         */
+
+        if(
+            typeof timestamp.toDate ===
+            "function"
+        ){
+
+            return timestamp
+                .toDate()
+                .getTime();
+
+        }
+
+
+        /*
+         * JS Date
+         */
+
+        if(
+            timestamp instanceof Date
+        ){
+
+            return timestamp.getTime();
+
+        }
+
+
+        /*
+         * Numeric milliseconds
+         */
+
+        if(
+            typeof timestamp === "number"
+        ){
+
+            /*
+             * If seconds were supplied,
+             * convert to milliseconds.
+             */
+
+            if(
+                timestamp < 10000000000
+            ){
+
+                return timestamp * 1000;
+
             }
 
+            return timestamp;
+
         }
 
+
+        /*
+         * Firestore-like object:
+         * { seconds, nanoseconds }
+         */
 
         if(
-            loaded &&
-            loaded.length
+            typeof timestamp === "object" &&
+            typeof timestamp.seconds === "number"
         ){
 
-            notifications =
-                normalizeNotifications(
-                    loaded
-                );
-
-        }else{
-
-            notifications =
-                defaultNotifications.map(
-                    function(item){
-
-                        return {
-                            ...item
-                        };
-
-                    }
-                );
-
-        }
-
-
-        removeDuplicateNotifications();
-
-        saveNotifications();
-
-        renderNotifications();
-
-    }
-
-
-    /* =====================================================
-       NORMALIZE
-    ===================================================== */
-
-    function normalizeNotifications(data){
-
-        if(
-            !Array.isArray(data)
-        ){
-
-            return [];
-
-        }
-
-
-        return data
-            .map(
-                function(item,index){
-
-                    if(
-                        !item ||
-                        typeof item !== "object"
-                    ){
-
-                        return null;
-
-                    }
-
-
-                    const type =
-                        normalizeType(
-                            item.type ||
-                            item.category ||
-                            item.kind
-                        );
-
-
-                    const rawTime =
-                        item.time ??
-                        item.createdAt ??
-                        item.timestamp ??
-                        Date.now();
-
-
-                    const numericTime =
-                        Number(
-                            rawTime
-                        );
-
-
-                    return {
-
-                        id:
-                            String(
-                                item.id ||
-                                item.notificationId ||
-                                "notification-" +
-                                Date.now() +
-                                "-" +
-                                index
-                            ),
-
-                        type:
-                            type,
-
-                        icon:
-                            safeIcon(
-                                item.icon,
-                                type
-                            ),
-
-                        title:
-                            String(
-                                item.title ||
-                                item.heading ||
-                                "RiderX Notification"
-                            ),
-
-                        message:
-                            String(
-                                item.message ||
-                                item.body ||
-                                item.text ||
-                                ""
-                            ),
-
-                        time:
-                            Number.isFinite(
-                                numericTime
-                            )
-                                ? numericTime
-                                : Date.now(),
-
-                        read:
-                            item.read === true ||
-                            item.isRead === true
-
-                    };
-
-                }
-            )
-            .filter(
-                Boolean
+            return (
+                timestamp.seconds * 1000
+            ) +
+            Math.floor(
+                (timestamp.nanoseconds || 0) /
+                1000000
             );
 
-    }
-
-
-    /* =====================================================
-       TYPE
-    ===================================================== */
-
-    function normalizeType(type){
-
-        const value =
-            String(
-                type || "system"
-            )
-            .toLowerCase()
-            .trim();
-
-
-        if(
-            [
-                "ride",
-                "booking",
-                "trip",
-                "driver",
-                "rider"
-            ].includes(value)
-        ){
-
-            return "ride";
-
         }
 
 
-        if(
-            [
-                "payment",
-                "wallet",
-                "transaction",
-                "refund"
-            ].includes(value)
-        ){
-
-            return "payment";
-
-        }
+        const parsed =
+            new Date(
+                timestamp
+            ).getTime();
 
 
-        if(
-            [
-                "promo",
-                "offer",
-                "coupon",
-                "promotion"
-            ].includes(value)
-        ){
+        return Number.isFinite(parsed)
+            ? parsed
+            : 0;
 
-            return "promo";
+    }catch{
 
-        }
-
-
-        return "system";
+        return 0;
 
     }
 
-
-    /* =====================================================
-       ICON
-    ===================================================== */
-
-    function safeIcon(icon,type){
-
-        if(
-            typeof icon === "string" &&
-            icon.trim()
-        ){
-
-            return icon;
-
-        }
+}
 
 
-        return getIcon(type);
+/* =========================================================
+   SORT
+========================================================= */
 
-    }
+function sortNotifications(){
 
+    notifications.sort(
+        (a,b) => {
 
-    function getIcon(type){
-
-        switch(type){
-
-            case "ride":
-                return "🚕";
-
-            case "payment":
-                return "💳";
-
-            case "promo":
-                return "🎁";
-
-            case "system":
-                return "⚙️";
-
-            default:
-                return "🔔";
-
-        }
-
-    }
-
-
-    /* =====================================================
-       REMOVE DUPLICATES
-    ===================================================== */
-
-    function removeDuplicateNotifications(){
-
-        const seen = new Set();
-
-        notifications =
-            notifications.filter(
-                function(item){
-
-                    if(
-                        seen.has(item.id)
-                    ){
-
-                        return false;
-
-                    }
-
-                    seen.add(item.id);
-
-                    return true;
-
-                }
+            return (
+                Number(b.time || 0) -
+                Number(a.time || 0)
             );
 
-    }
+        }
+    );
+
+}
 
 
-    /* =====================================================
-       SAVE
-    ===================================================== */
+/* =========================================================
+   LEGACY LOCAL STORAGE
+========================================================= */
 
-    function saveNotifications(){
+function readLegacyNotifications(){
+
+    let loaded = [];
+
+
+    for(
+        const key of LEGACY_STORAGE_KEYS
+    ){
 
         try{
 
-            localStorage.setItem(
-                PRIMARY_STORAGE_KEY,
-                JSON.stringify(
-                    notifications
-                )
-            );
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(!raw){
+
+                continue;
+
+            }
+
+
+            const parsed =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                Array.isArray(parsed)
+            ){
+
+                loaded =
+                    parsed;
+
+                break;
+
+            }
 
         }catch(error){
 
             console.warn(
-                "RiderX notification save failed:",
+                "Legacy notification read failed:",
+                key,
                 error
             );
 
@@ -1150,73 +2000,73 @@ button{
     }
 
 
-    /* =====================================================
-       RENDER
-    ===================================================== */
+    return loaded
+        .map(
+            item =>
+                normalizeNotification(
+                    {
+                        ...item,
+                        source:"legacy"
+                    }
+                )
+        )
+        .filter(Boolean);
 
-    function renderNotifications(){
-
-        const list =
-            $("notificationList");
-
-        const empty =
-            $("emptyState");
-
-
-        if(
-            !list ||
-            !empty
-        ){
-
-            return;
-
-        }
+}
 
 
-        list.innerHTML = "";
+function loadLegacyNotifications(){
+
+    notifications =
+        readLegacyNotifications();
+
+    sortNotifications();
+
+    loadingState.style.display =
+        "none";
+
+    renderNotifications();
+
+}
 
 
-        let filtered =
-            notifications.filter(
-                function(item){
+/* =========================================================
+   RENDER
+========================================================= */
 
-                    return (
-                        currentFilter === "all" ||
-                        item.type === currentFilter
-                    );
+function renderNotifications(){
 
-                }
-            );
+    notificationList.innerHTML =
+        "";
 
 
-        filtered.sort(
-            function(a,b){
+    const filtered =
+        notifications.filter(
+            item => {
 
                 return (
-                    Number(b.time) -
-                    Number(a.time)
+                    currentFilter === "all" ||
+                    item.type === currentFilter
                 );
 
             }
         );
 
 
-        if(
-            !filtered.length
-        ){
-
-            empty.classList.add(
-                "show"
-            );
-
-            updateUnreadCount();
-
-            return;
-
-        }
+    sortNotifications();
 
 
-        empty.classList.remove(
+    if(
+        !filtered.length
+    ){
+
+        emptyState.classList.add(
+            "show"
+        );
+
+    }else{
+
+        emptyState.classList.remove(
             "show"
         );
 
@@ -1229,30 +2079,33 @@ button{
 
         Object.keys(groups)
             .forEach(
-                function(group){
+                group => {
 
                     const label =
                         document.createElement(
                             "div"
                         );
 
+
                     label.className =
                         "date-label";
+
 
                     label.textContent =
                         group;
 
-                    list.appendChild(
+
+                    notificationList.appendChild(
                         label
                     );
 
 
                     groups[group].forEach(
-                        function(notification){
+                        item => {
 
-                            list.appendChild(
+                            notificationList.appendChild(
                                 createNotificationElement(
-                                    notification
+                                    item
                                 )
                             );
 
@@ -1262,367 +2115,404 @@ button{
                 }
             );
 
+    }
 
-        updateUnreadCount();
+
+    updateUnreadCount();
+
+
+    markAllButton.disabled =
+        !notifications.some(
+            item => !item.read
+        );
+
+
+    clearButton.disabled =
+        !notifications.length;
+
+}
+
+
+/* =========================================================
+   CREATE ELEMENT
+========================================================= */
+
+function createNotificationElement(
+    item
+){
+
+    const element =
+        document.createElement(
+            "div"
+        );
+
+
+    element.className =
+        "notification" +
+        (
+            item.read
+                ? ""
+                : " unread"
+        );
+
+
+    element.setAttribute(
+        "role",
+        "button"
+    );
+
+
+    element.setAttribute(
+        "tabindex",
+        "0"
+    );
+
+
+    element.setAttribute(
+        "aria-label",
+        item.title
+    );
+
+
+    element.innerHTML = `
+
+        <div
+            class="notification-icon ${escapeHtml(
+                getIconClass(
+                    item.type
+                )
+            )}"
+        >
+            ${escapeHtml(item.icon)}
+        </div>
+
+
+        <div class="notification-content">
+
+            <div class="notification-title">
+                ${escapeHtml(item.title)}
+            </div>
+
+
+            <div class="notification-message">
+                ${escapeHtml(item.message)}
+            </div>
+
+
+            <div class="notification-time">
+                ${escapeHtml(
+                    formatTime(item.time)
+                )}
+            </div>
+
+        </div>
+
+    `;
+
+
+    const open =
+        () => {
+
+            openNotification(
+                item
+            );
+
+        };
+
+
+    element.addEventListener(
+        "click",
+        open
+    );
+
+
+    element.addEventListener(
+        "keydown",
+        event => {
+
+            if(
+                event.key === "Enter" ||
+                event.key === " "
+            ){
+
+                event.preventDefault();
+
+                open();
+
+            }
+
+        }
+    );
+
+
+    return element;
+
+}
+
+
+/* =========================================================
+   ICON CLASS
+========================================================= */
+
+function getIconClass(type){
+
+    switch(type){
+
+        case "ride":
+            return "yellow";
+
+        case "payment":
+            return "green";
+
+        case "promo":
+            return "blue";
+
+        case "system":
+            return "yellow";
+
+        default:
+            return "";
+
+    }
+
+}
+
+
+/* =========================================================
+   GROUP BY DATE
+========================================================= */
+
+function groupByDate(
+    list
+){
+
+    const groups = {};
+
+
+    list.forEach(
+        item => {
+
+            const label =
+                getDateLabel(
+                    item.time
+                );
+
+
+            if(
+                !groups[label]
+            ){
+
+                groups[label] = [];
+
+            }
+
+
+            groups[label].push(
+                item
+            );
+
+        }
+    );
+
+
+    return groups;
+
+}
+
+
+/* =========================================================
+   DATE LABEL
+========================================================= */
+
+function getDateLabel(
+    timestamp
+){
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        return "Earlier";
 
     }
 
 
-    /* =====================================================
-       CREATE NOTIFICATION
-    ===================================================== */
+    const now =
+        new Date();
 
-    function createNotificationElement(item){
 
-        const el =
-            document.createElement(
-                "div"
+    const today =
+        new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+        );
+
+
+    const yesterday =
+        new Date(
+            today
+        );
+
+
+    yesterday.setDate(
+        yesterday.getDate() - 1
+    );
+
+
+    const target =
+        new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        );
+
+
+    if(
+        target.getTime() ===
+        today.getTime()
+    ){
+
+        return "Today";
+
+    }
+
+
+    if(
+        target.getTime() ===
+        yesterday.getTime()
+    ){
+
+        return "Yesterday";
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"numeric",
+            month:"short",
+            year:"numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT TIME
+========================================================= */
+
+function formatTime(
+    timestamp
+){
+
+    const value =
+        getTimestampValue(
+            timestamp
+        );
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if(
+        !value ||
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        return "Recently";
+
+    }
+
+
+    const diff =
+        Math.max(
+            0,
+            Date.now() -
+            date.getTime()
+        );
+
+
+    const minute =
+        60000;
+
+    const hour =
+        minute * 60;
+
+    const day =
+        hour * 24;
+
+
+    if(
+        diff < minute
+    ){
+
+        return "Just now";
+
+    }
+
+
+    if(
+        diff < hour
+    ){
+
+        const value =
+            Math.floor(
+                diff / minute
             );
 
 
-        el.className =
-            "notification" +
+        return (
+            value +
             (
-                item.read
-                    ? ""
-                    : " unread"
-            );
-
-
-        el.setAttribute(
-            "role",
-            "button"
-        );
-
-
-        el.setAttribute(
-            "tabindex",
-            "0"
-        );
-
-
-        el.setAttribute(
-            "aria-label",
-            item.title
-        );
-
-
-        const iconClass =
-            getIconClass(
-                item.type
-            );
-
-
-        el.innerHTML = `
-
-            <div class="notification-icon ${iconClass}">
-                ${escapeHtml(item.icon)}
-            </div>
-
-            <div class="notification-content">
-
-                <div class="notification-title">
-                    ${escapeHtml(item.title)}
-                </div>
-
-                <div class="notification-message">
-                    ${escapeHtml(item.message)}
-                </div>
-
-                <div class="notification-time">
-                    ${escapeHtml(
-                        formatTime(item.time)
-                    )}
-                </div>
-
-            </div>
-
-        `;
-
-
-        const open =
-            function(){
-
-                openNotification(
-                    item.id
-                );
-
-            };
-
-
-        el.addEventListener(
-            "click",
-            open
-        );
-
-
-        el.addEventListener(
-            "keydown",
-            function(event){
-
-                if(
-                    event.key === "Enter" ||
-                    event.key === " "
-                ){
-
-                    event.preventDefault();
-
-                    open();
-
-                }
-
-            }
-        );
-
-
-        return el;
-
-    }
-
-
-    /* =====================================================
-       ICON CLASS
-    ===================================================== */
-
-    function getIconClass(type){
-
-        switch(type){
-
-            case "ride":
-                return "yellow";
-
-            case "payment":
-                return "green";
-
-            case "promo":
-                return "blue";
-
-            case "system":
-                return "yellow";
-
-            default:
-                return "";
-
-        }
-
-    }
-
-
-    /* =====================================================
-       GROUP BY DATE
-    ===================================================== */
-
-    function groupByDate(list){
-
-        const groups = {};
-
-
-        list.forEach(
-            function(item){
-
-                const label =
-                    getDateLabel(
-                        item.time
-                    );
-
-
-                if(
-                    !groups[label]
-                ){
-
-                    groups[label] = [];
-
-                }
-
-
-                groups[label].push(
-                    item
-                );
-
-            }
-        );
-
-
-        return groups;
-
-    }
-
-
-    /* =====================================================
-       DATE LABEL
-    ===================================================== */
-
-    function getDateLabel(timestamp){
-
-        const date =
-            new Date(
-                timestamp
-            );
-
-
-        if(
-            Number.isNaN(
-                date.getTime()
+                value === 1
+                    ? " minute ago"
+                    : " minutes ago"
             )
-        ){
-
-            return "Earlier";
-
-        }
-
-
-        const now =
-            new Date();
-
-
-        const today =
-            new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                now.getDate()
-            );
-
-
-        const yesterday =
-            new Date(
-                today
-            );
-
-
-        yesterday.setDate(
-            yesterday.getDate() - 1
-        );
-
-
-        const target =
-            new Date(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate()
-            );
-
-
-        if(
-            target.getTime() ===
-            today.getTime()
-        ){
-
-            return "Today";
-
-        }
-
-
-        if(
-            target.getTime() ===
-            yesterday.getTime()
-        ){
-
-            return "Yesterday";
-
-        }
-
-
-        return date.toLocaleDateString(
-            "en-IN",
-            {
-                day:"numeric",
-                month:"short",
-                year:"numeric"
-            }
         );
 
     }
 
 
-    /* =====================================================
-       TIME
-    ===================================================== */
+    if(
+        diff < day
+    ){
 
-    function formatTime(timestamp){
-
-        const date =
-            new Date(
-                timestamp
+        const value =
+            Math.floor(
+                diff / hour
             );
 
 
-        if(
-            Number.isNaN(
-                date.getTime()
+        return (
+            value +
+            (
+                value === 1
+                    ? " hour ago"
+                    : " hours ago"
             )
-        ){
+        );
 
-            return "Recently";
-
-        }
+    }
 
 
-        const diff =
-            Math.max(
-                0,
-                Date.now() -
-                date.getTime()
-            );
-
-
-        const minute =
-            60000;
-
-        const hour =
-            minute * 60;
-
-        const day =
-            hour * 24;
-
-
-        if(
-            diff < minute
-        ){
-
-            return "Just now";
-
-        }
-
-
-        if(
-            diff < hour
-        ){
-
-            const value =
-                Math.floor(
-                    diff / minute
-                );
-
-            return value +
-                (
-                    value === 1
-                        ? " minute ago"
-                        : " minutes ago"
-                );
-
-        }
-
-
-        if(
-            diff < day
-        ){
-
-            const value =
-                Math.floor(
-                    diff / hour
-                );
-
-            return value +
-                (
-                    value === 1
-                        ? " hour ago"
-                        : " hours ago"
-                );
-
-        }
-
-
-        return date.toLocaleDateString(
+    return (
+        date.toLocaleDateString(
             "en-IN",
             {
                 day:"numeric",
@@ -1636,607 +2526,309 @@ button{
                 hour:"numeric",
                 minute:"2-digit"
             }
-        );
+        )
+    );
 
-    }
-
-
-    /* =====================================================
-       FILTER
-    ===================================================== */
-
-    function setFilter(filter){
-
-        currentFilter =
-            normalizeType(
-                filter
-            );
+}
 
 
-        if(
-            filter === "all"
-        ){
+/* =========================================================
+   FILTER
+========================================================= */
 
-            currentFilter = "all";
+function setFilter(
+    filter
+){
 
-        }
-
-
-        document
-            .querySelectorAll(
-                ".filter"
-            )
-            .forEach(
-                function(button){
-
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.filter ===
-                        currentFilter
-                    );
-
-                }
-            );
+    const allowed = [
+        "all",
+        "ride",
+        "payment",
+        "promo",
+        "system"
+    ];
 
 
-        renderNotifications();
-
-    }
-
-
-    /* =====================================================
-       OPEN
-    ===================================================== */
-
-    function openNotification(id){
-
-        const item =
-            notifications.find(
-                function(notification){
-
-                    return (
-                        notification.id ===
-                        id
-                    );
-
-                }
-            );
+    currentFilter =
+        allowed.includes(
+            filter
+        )
+            ? filter
+            : "all";
 
 
-        if(
-            !item
-        ){
+    document
+        .querySelectorAll(
+            ".filter"
+        )
+        .forEach(
+            button => {
 
-            return;
-
-        }
-
-
-        item.read = true;
-
-        saveNotifications();
-
-        renderNotifications();
-
-
-        $("modalIcon").textContent =
-            item.icon;
-
-
-        $("modalTitle").textContent =
-            item.title;
-
-
-        $("modalTime").textContent =
-            formatTime(
-                item.time
-            );
-
-
-        $("modalMessage").textContent =
-            item.message;
-
-
-        $("detailModal").classList.add(
-            "show"
-        );
-
-
-        document.body.style.overflow =
-            "hidden";
-
-    }
-
-
-    /* =====================================================
-       CLOSE
-    ===================================================== */
-
-    function closeModal(){
-
-        $("detailModal").classList.remove(
-            "show"
-        );
-
-        document.body.style.overflow =
-            "";
-
-    }
-
-
-    /* =====================================================
-       MARK ALL READ
-    ===================================================== */
-
-    function markAllRead(){
-
-        let changed = false;
-
-
-        notifications.forEach(
-            function(item){
-
-                if(
-                    !item.read
-                ){
-
-                    item.read = true;
-
-                    changed = true;
-
-                }
+                button.classList.toggle(
+                    "active",
+                    button.dataset.filter ===
+                    currentFilter
+                );
 
             }
         );
 
 
-        if(
-            changed
-        ){
+    renderNotifications();
 
-            saveNotifications();
+}
 
-            renderNotifications();
 
-            showToast(
-                "All notifications marked as read."
-            );
+/* =========================================================
+   OPEN NOTIFICATION
+========================================================= */
 
-        }else{
+async function openNotification(
+    item
+){
 
-            showToast(
-                "All notifications are already read."
-            );
+    if(!item){
 
-        }
+        return;
 
     }
 
 
-    /* =====================================================
-       CLEAR
-    ===================================================== */
+    /*
+     * Mark read locally immediately
+     * so UI responds without waiting.
+     */
 
-    function clearNotifications(){
+    item.read = true;
 
-        if(
-            !notifications.length
-        ){
-
-            showToast(
-                "No notifications to clear."
-            );
-
-            return;
-
-        }
+    renderNotifications();
 
 
-        const confirmed =
-            window.confirm(
-                "Clear all RiderX notifications?"
-            );
+    /*
+     * Persist Firestore read state.
+     */
 
-
-        if(
-            !confirmed
-        ){
-
-            return;
-
-        }
-
-
-        notifications = [];
-
-        saveNotifications();
-
-        renderNotifications();
-
-        showToast(
-            "Notifications cleared."
-        );
-
-    }
-
-
-    /* =====================================================
-       UNREAD COUNT
-    ===================================================== */
-
-    function updateUnreadCount(){
-
-        const count =
-            notifications.filter(
-                function(item){
-
-                    return !item.read;
-
-                }
-            ).length;
-
-
-        $("unreadCount").textContent =
-            count;
-
-    }
-
-
-    /* =====================================================
-       BACK
-    ===================================================== */
-
-    function goBack(){
+    if(
+        currentUser &&
+        item.source === "firestore"
+    ){
 
         try{
 
-            if(
-                document.referrer &&
-                new URL(
-                    document.referrer
-                ).origin ===
-                window.location.origin
-            ){
-
-                window.history.back();
-
-                return;
-
-            }
+            await updateDoc(
+                doc(
+                    db,
+                    "notifications",
+                    item.id
+                ),
+                {
+                    read:true,
+                    isRead:true,
+                    readAt:
+                        serverTimestamp()
+                }
+            );
 
         }catch(error){
 
             console.warn(
-                "Back navigation check failed:",
+                "Unable to mark notification read:",
                 error
             );
 
         }
 
-
-        window.location.href =
-            "home.html";
-
     }
 
 
-    /* =====================================================
-       ESCAPE HTML
-    ===================================================== */
-
-    function escapeHtml(value){
-
-        return String(
-            value ?? ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-    }
+    modalIcon.textContent =
+        item.icon;
 
 
-    /* =====================================================
-       TOAST
-    ===================================================== */
-
-    function showToast(message){
-
-        const toast =
-            $("toast");
+    modalTitle.textContent =
+        item.title;
 
 
-        toast.textContent =
-            message;
-
-
-        toast.classList.add(
-            "show"
+    modalTime.textContent =
+        formatTime(
+            item.time
         );
 
 
-        clearTimeout(
-            toastTimer
-        );
+    modalMessage.textContent =
+        item.message;
 
 
-        toastTimer =
-            setTimeout(
-                function(){
+    detailModal.classList.add(
+        "show"
+    );
 
-                    toast.classList.remove(
-                        "show"
-                    );
 
-                },
-                2500
+    document.body.style.overflow =
+        "hidden";
+
+
+    /*
+     * Ride notification navigation
+     */
+
+    if(
+        item.rideId
+    ){
+
+        const rideId =
+            String(
+                item.rideId
             );
 
+
+        try{
+
+            sessionStorage.setItem(
+                "riderx_selected_ride",
+                rideId
+            );
+
+
+            sessionStorage.setItem(
+                "riderx_active_ride_id",
+                rideId
+            );
+
+        }catch{}
+
+
+        /*
+         * Don't automatically navigate
+         * away from detail modal.
+         *
+         * User can close it first.
+         */
+
+    }
+
+}
+
+
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
+
+function closeModal(){
+
+    detailModal.classList.remove(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =========================================================
+   MARK ALL READ
+========================================================= */
+
+async function markAllRead(){
+
+    if(!currentUser){
+
+        showToast(
+            "Please login first."
+        );
+
+        return;
+
     }
 
 
-    /* =====================================================
-       CROSS TAB / PAGE SYNC
-    ===================================================== */
+    const unread =
+        notifications.filter(
+            item =>
+                !item.read &&
+                item.source === "firestore"
+        );
 
-    window.addEventListener(
-        "storage",
-        function(event){
 
-            if(
-                STORAGE_KEYS.includes(
-                    event.key
-                )
-            ){
+    /*
+     * Mark legacy items locally too.
+     */
 
-                loadNotifications();
+    notifications.forEach(
+        item => {
 
-            }
+            item.read = true;
 
         }
     );
 
 
-    /* =====================================================
-       PUBLIC RIDERX NOTIFICATION API
-       
-       Other RiderX pages can call:
-
-       RiderXNotifications.add({...})
-
-       Example:
-
-       RiderXNotifications.add({
-           type:"ride",
-           title:"Ride accepted",
-           message:"Your rider has accepted the ride."
-       });
-    ===================================================== */
-
-    window.RiderXNotifications = {
-
-        getAll:function(){
-
-            return notifications.map(
-                function(item){
-
-                    return {
-                        ...item
-                    };
-
-                }
-            );
-
-        },
+    renderNotifications();
 
 
-        getUnreadCount:function(){
+    if(
+        !unread.length
+    ){
 
-            return notifications.filter(
-                function(item){
+        showToast(
+            "All notifications are already read."
+        );
 
-                    return !item.read;
+        return;
 
-                }
-            ).length;
-
-        },
-
-
-        add:function(data){
-
-            if(
-                !data ||
-                typeof data !== "object"
-            ){
-
-                return null;
-
-            }
+    }
 
 
-            const type =
-                normalizeType(
-                    data.type
+    markAllButton.disabled =
+        true;
+
+
+    try{
+
+        /*
+         * Firestore batch limit is 500.
+         * 450 gives a safe margin.
+         */
+
+        const chunkSize =
+            450;
+
+
+        for(
+            let i = 0;
+            i < unread.length;
+            i += chunkSize
+        ){
+
+            const chunk =
+                unread.slice(
+                    i,
+                    i + chunkSize
                 );
 
 
-            const item = {
-
-                id:
-                    String(
-                        data.id ||
-                        "notification-" +
-                        Date.now() +
-                        "-" +
-                        Math.random()
-                            .toString(36)
-                            .slice(2,8)
-                    ),
-
-                type:
-                    type,
-
-                icon:
-                    safeIcon(
-                        data.icon,
-                        type
-                    ),
-
-                title:
-                    String(
-                        data.title ||
-                        "RiderX Notification"
-                    ),
-
-                message:
-                    String(
-                        data.message ||
-                        data.body ||
-                        ""
-                    ),
-
-                time:
-                    Number(
-                        data.time ||
-                        Date.now()
-                    ),
-
-                read:
-                    data.read === true
-
-            };
-
-
-            notifications.unshift(
-                item
-            );
-
-
-            removeDuplicateNotifications();
-
-            saveNotifications();
-
-            renderNotifications();
-
-
-            return {
-                ...item
-            };
-
-        },
-
-
-        markRead:function(id){
-
-            const item =
-                notifications.find(
-                    function(notification){
-
-                        return (
-                            notification.id ===
-                            String(id)
-                        );
-
-                    }
+            const batch =
+                writeBatch(
+                    db
                 );
 
 
-            if(
-                !item
-            ){
+            chunk.forEach(
+                item => {
 
-                return false;
-
-            }
-
-
-            item.read = true;
-
-            saveNotifications();
-
-            renderNotifications();
-
-            return true;
-
-        },
-
-
-        markAllRead:function(){
-
-            markAllRead();
-
-        }
-
-    };
-
-
-    /* =====================================================
-       EVENT BINDINGS
-    ===================================================== */
-
-    function bindEvents(){
-
-        $("backButton")
-            .addEventListener(
-                "click",
-                goBack
-            );
-
-
-        $("markAllButton")
-            .addEventListener(
-                "click",
-                markAllRead
-            );
-
-
-        $("clearButton")
-            .addEventListener(
-                "click",
-                clearNotifications
-            );
-
-
-        $("modalCloseButton")
-            .addEventListener(
-                "click",
-                closeModal
-            );
-
-
-        document
-            .querySelectorAll(
-                ".filter"
-            )
-            .forEach(
-                function(button){
-
-                    button.addEventListener(
-                        "click",
-                        function(){
-
-                            setFilter(
-                                button.dataset.filter
-                            );
-
+                    batch.update(
+                        doc(
+                            db,
+                            "notifications",
+                            item.id
+                        ),
+                        {
+                            read:true,
+                            isRead:true,
+                            readAt:
+                                serverTimestamp()
                         }
                     );
 
@@ -2244,75 +2836,484 @@ button{
             );
 
 
-        $("detailModal")
-            .addEventListener(
-                "click",
-                function(event){
+            await batch.commit();
 
-                    if(
-                        event.target ===
-                        $("detailModal")
-                    ){
+        }
 
-                        closeModal();
 
-                    }
+        showToast(
+            "All notifications marked as read."
+        );
+
+    }catch(error){
+
+        console.error(
+            "Mark all notifications read failed:",
+            error
+        );
+
+
+        showToast(
+            "Unable to update notifications."
+        );
+
+    }finally{
+
+        markAllButton.disabled =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   CLEAR ALL
+========================================================= */
+
+async function clearNotifications(){
+
+    if(!currentUser){
+
+        showToast(
+            "Please login first."
+        );
+
+        return;
+
+    }
+
+
+    const firestoreItems =
+        notifications.filter(
+            item =>
+                item.source === "firestore"
+        );
+
+
+    if(
+        !firestoreItems.length
+    ){
+
+        /*
+         * Clear old local notifications too.
+         */
+
+        notifications = [];
+
+        removeLegacyStorage();
+
+        renderNotifications();
+
+        showToast(
+            "Notifications cleared."
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Clear all RiderX notifications?"
+        );
+
+
+    if(
+        !confirmed
+    ){
+
+        return;
+
+    }
+
+
+    clearButton.disabled =
+        true;
+
+
+    try{
+
+        const chunkSize =
+            450;
+
+
+        for(
+            let i = 0;
+            i < firestoreItems.length;
+            i += chunkSize
+        ){
+
+            const chunk =
+                firestoreItems.slice(
+                    i,
+                    i + chunkSize
+                );
+
+
+            const batch =
+                writeBatch(
+                    db
+                );
+
+
+            chunk.forEach(
+                item => {
+
+                    batch.delete(
+                        doc(
+                            db,
+                            "notifications",
+                            item.id
+                        )
+                    );
 
                 }
             );
 
 
-        document.addEventListener(
-            "keydown",
-            function(event){
+            await batch.commit();
 
-                if(
-                    event.key === "Escape"
-                ){
+        }
 
-                    closeModal();
+
+        notifications = [];
+
+        removeLegacyStorage();
+
+        renderNotifications();
+
+
+        showToast(
+            "Notifications cleared."
+        );
+
+    }catch(error){
+
+        console.error(
+            "Clear notifications failed:",
+            error
+        );
+
+
+        showToast(
+            "Unable to clear notifications."
+        );
+
+    }finally{
+
+        clearButton.disabled =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   REMOVE LEGACY STORAGE
+========================================================= */
+
+function removeLegacyStorage(){
+
+    LEGACY_STORAGE_KEYS.forEach(
+        key => {
+
+            try{
+
+                localStorage.removeItem(
+                    key
+                );
+
+            }catch(error){
+
+                console.warn(
+                    "Unable to remove legacy storage:",
+                    key,
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UNREAD COUNT
+========================================================= */
+
+function updateUnreadCount(){
+
+    const count =
+        notifications.filter(
+            item =>
+                !item.read
+        ).length;
+
+
+    unreadCount.textContent =
+        String(
+            count
+        );
+
+}
+
+
+/* =========================================================
+   BACK
+========================================================= */
+
+function goBack(){
+
+    try{
+
+        if(
+            document.referrer &&
+            new URL(
+                document.referrer
+            ).origin ===
+            window.location.origin
+        ){
+
+            window.history.back();
+
+            return;
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Back navigation check failed:",
+            error
+        );
+
+    }
+
+
+    window.location.href =
+        "home.html";
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   EVENT BINDINGS
+========================================================= */
+
+document
+    .getElementById(
+        "backButton"
+    )
+    .addEventListener(
+        "click",
+        goBack
+    );
+
+
+markAllButton.addEventListener(
+    "click",
+    markAllRead
+);
+
+
+clearButton.addEventListener(
+    "click",
+    clearNotifications
+);
+
+
+retryButton.addEventListener(
+    "click",
+    () => {
+
+        if(
+            currentUser
+        ){
+
+            listenToNotifications(
+                currentUser.uid
+            );
+
+        }else{
+
+            location.replace(
+                "../auth/login.html"
+            );
+
+        }
+
+    }
+);
+
+
+modalCloseButton.addEventListener(
+    "click",
+    closeModal
+);
+
+
+document
+    .querySelectorAll(
+        ".filter"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    setFilter(
+                        button.dataset.filter
+                    );
 
                 }
+            );
+
+        }
+    );
+
+
+detailModal.addEventListener(
+    "click",
+    event => {
+
+        if(
+            event.target ===
+            detailModal
+        ){
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Escape"
+        ){
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PAGE CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "pagehide",
+    () => {
+
+        if(
+            unsubscribeNotifications
+        ){
+
+            unsubscribeNotifications();
+
+            unsubscribeNotifications =
+                null;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   LEGACY CROSS-TAB SYNC
+========================================================= */
+
+window.addEventListener(
+    "storage",
+    event => {
+
+        if(
+            LEGACY_STORAGE_KEYS.includes(
+                event.key
+            )
+        ){
+
+            /*
+             * Don't replace active Firestore
+             * notifications with local data.
+             */
+
+            if(
+                !currentUser
+            ){
+
+                loadLegacyNotifications();
 
             }
-        );
+
+        }
 
     }
+);
 
 
-    /* =====================================================
-       INIT
-    ===================================================== */
+/* =========================================================
+   INITIAL UI
+========================================================= */
 
-    function init(){
+markAllButton.disabled =
+    true;
 
-        bindEvents();
+clearButton.disabled =
+    true;
 
-        loadNotifications();
-
-    }
-
-
-    if(
-        document.readyState ===
-        "loading"
-    ){
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            init,
-            {
-                once:true
-            }
-        );
-
-    }else{
-
-        init();
-
-    }
-
-})();
+showLoading();
 
 </script>
 
