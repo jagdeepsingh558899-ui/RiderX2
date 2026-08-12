@@ -117,6 +117,12 @@
         }
 
 
+        button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+
         #riderx-loader {
             position: fixed;
 
@@ -311,6 +317,10 @@
             font-weight: 800;
 
             cursor: pointer;
+
+            transition:
+                transform 0.15s ease,
+                opacity 0.15s ease;
         }
 
 
@@ -353,6 +363,11 @@
                 transition: none;
             }
 
+
+            .fallback button {
+                transition: none;
+            }
+
         }
 
     </style>
@@ -368,7 +383,6 @@
     aria-label="RiderX loading"
 >
 
-
     <div class="loader-content">
 
 
@@ -377,25 +391,19 @@
             <img
                 src="./assets/logo.png"
                 alt="RiderX"
-                onerror="
-                    this.style.display='none';
-                "
+                onerror="this.style.display='none';"
             >
 
         </div>
 
 
         <div class="brand">
-
             Rider<span>X</span>
-
         </div>
 
 
         <div class="tagline">
-
             Ride. Deliver. Move.
-
         </div>
 
 
@@ -432,7 +440,6 @@
 
     </div>
 
-
 </main>
 
 
@@ -446,10 +453,15 @@
    ROOT ENTRY / SPLASH ROUTER
    File: index.html
 
-   IMPORTANT:
-   Firebase is loaded dynamically so module/CDN/configuration
-   failures can be handled instead of silently leaving the
-   splash screen stuck forever.
+   RESPONSIBILITIES
+   ------------------------------------------------------------
+   1. Load Firebase configuration.
+   2. Wait for Firebase Authentication state.
+   3. Detect user role.
+   4. Check rider approval when required.
+   5. Save a safe local session cache.
+   6. Redirect to the correct application area.
+   7. Never leave the splash screen permanently stuck.
 ============================================================ */
 
 
@@ -469,7 +481,7 @@ let getDoc = null;
 
 
 /* ============================================================
-   DOM
+   DOM REFERENCES
 ============================================================ */
 
 const loader =
@@ -518,7 +530,7 @@ const ROUTES = Object.freeze({
 
 
 /* ============================================================
-   TIMING
+   CONFIGURATION
 ============================================================ */
 
 const CONFIG = Object.freeze({
@@ -577,8 +589,16 @@ let authUnsubscribe =
     null;
 
 
+let redirectTimer =
+    null;
+
+
+let authSafetyTimer =
+    null;
+
+
 /* ============================================================
-   STATUS
+   STATUS HELPER
 ============================================================ */
 
 function setStatus(text) {
@@ -589,13 +609,15 @@ function setStatus(text) {
 
 
     statusElement.textContent =
-        String(text || "");
+        String(
+            text || ""
+        );
 
 }
 
 
 /* ============================================================
-   LOADER
+   LOADER HELPERS
 ============================================================ */
 
 function hideLoader() {
@@ -644,12 +666,26 @@ function redirectTo(route) {
         !route ||
         redirectStarted
     ) {
+
         return;
+
     }
 
 
     redirectStarted =
         true;
+
+
+    if (redirectTimer !== null) {
+
+        window.clearTimeout(
+            redirectTimer
+        );
+
+        redirectTimer =
+            null;
+
+    }
 
 
     hideLoader();
@@ -673,6 +709,11 @@ function redirectTo(route) {
             false;
 
 
+        setStatus(
+            "Unable to open RiderX page."
+        );
+
+
         showFallback();
 
     }
@@ -685,8 +726,13 @@ function delayedRedirect(
     statusText
 ) {
 
-    if (redirectStarted) {
+    if (
+        redirectStarted ||
+        !route
+    ) {
+
         return;
+
     }
 
 
@@ -699,16 +745,33 @@ function delayedRedirect(
     }
 
 
-    window.setTimeout(
-        function () {
+    if (redirectTimer !== null) {
 
-            redirectTo(
-                route
-            );
+        window.clearTimeout(
+            redirectTimer
+        );
 
-        },
-        CONFIG.REDIRECT_DELAY
-    );
+    }
+
+
+    redirectTimer =
+        window.setTimeout(
+
+            function () {
+
+                redirectTimer =
+                    null;
+
+
+                redirectTo(
+                    route
+                );
+
+            },
+
+            CONFIG.REDIRECT_DELAY
+
+        );
 
 }
 
@@ -745,7 +808,9 @@ function normalizeRole(value) {
             "administrator",
             "superadmin",
             "super_admin"
-        ].includes(role)
+        ].includes(
+            role
+        )
     ) {
 
         return ROLES.ADMIN;
@@ -764,7 +829,9 @@ function normalizeRole(value) {
             "partners",
             "driver_partner",
             "driverpartner"
-        ].includes(role)
+        ].includes(
+            role
+        )
     ) {
 
         return ROLES.RIDER;
@@ -780,7 +847,9 @@ function normalizeRole(value) {
             "users",
             "passenger",
             "client"
-        ].includes(role)
+        ].includes(
+            role
+        )
     ) {
 
         return ROLES.CUSTOMER;
@@ -794,7 +863,7 @@ function normalizeRole(value) {
 
 
 /* ============================================================
-   BOOLEAN NORMALIZATION
+   BOOLEAN / STATUS NORMALIZATION
 ============================================================ */
 
 function isTruthyApprovalValue(value) {
@@ -813,21 +882,32 @@ function isTruthyApprovalValue(value) {
     }
 
 
+    if (
+        typeof value !== "string"
+    ) {
+
+        return false;
+
+    }
+
+
     const normalized =
-        String(
-            value ?? ""
-        )
-        .trim()
-        .toLowerCase();
+        value
+            .trim()
+            .toLowerCase();
 
 
     return [
+
         "true",
         "1",
         "yes",
         "approved",
         "active",
-        "verified"
+        "verified",
+        "accepted",
+        "enabled"
+
     ].includes(
         normalized
     );
@@ -851,22 +931,33 @@ function isFalseApprovalValue(value) {
     }
 
 
+    if (
+        typeof value !== "string"
+    ) {
+
+        return false;
+
+    }
+
+
     const normalized =
-        String(
-            value ?? ""
-        )
-        .trim()
-        .toLowerCase();
+        value
+            .trim()
+            .toLowerCase();
 
 
     return [
+
         "false",
         "0",
         "no",
         "rejected",
+        "declined",
         "blocked",
         "disabled",
-        "suspended"
+        "suspended",
+        "banned"
+
     ].includes(
         normalized
     );
@@ -884,7 +975,14 @@ function withTimeout(
     label
 ) {
 
-    let timer = null;
+    let timer =
+        null;
+
+
+    const operation =
+        Promise.resolve(
+            promise
+        );
 
 
     const timeoutPromise =
@@ -893,6 +991,7 @@ function withTimeout(
 
                 timer =
                     window.setTimeout(
+
                         function () {
 
                             const error =
@@ -911,7 +1010,9 @@ function withTimeout(
                             );
 
                         },
+
                         timeout
+
                     );
 
             }
@@ -920,9 +1021,7 @@ function withTimeout(
 
     return Promise.race([
 
-        Promise.resolve(
-            promise
-        ),
+        operation,
 
         timeoutPromise
 
@@ -937,6 +1036,10 @@ function withTimeout(
                 window.clearTimeout(
                     timer
                 );
+
+
+                timer =
+                    null;
 
             }
 
@@ -980,6 +1083,7 @@ function safeSetStorage(
             String(value)
         );
 
+
         return true;
 
     } catch (error) {
@@ -1008,8 +1112,7 @@ function safeRemoveStorage(key) {
     } catch (error) {
 
         /*
-         * Ignore restricted/private
-         * browser storage.
+         * Ignore storage errors.
          */
 
     }
@@ -1028,8 +1131,7 @@ function saveSessionCache(
 
     if (
         !user ||
-        !user.uid ||
-        !role
+        !user.uid
     ) {
 
         return;
@@ -1143,6 +1245,23 @@ function saveSessionCache(
 
     }
 
+
+    if (
+        normalizedRole ===
+        ROLES.ADMIN
+    ) {
+
+        safeRemoveStorage(
+            "riderx_customer_id"
+        );
+
+
+        safeRemoveStorage(
+            "riderx_rider_id"
+        );
+
+    }
+
 }
 
 
@@ -1207,6 +1326,7 @@ async function getUserProfile(
 
 
     if (
+        !db ||
         typeof doc !== "function" ||
         typeof getDoc !== "function"
     ) {
@@ -1241,6 +1361,7 @@ async function getUserProfile(
 
 
     if (
+        !snapshot ||
         !snapshot.exists()
     ) {
 
@@ -1293,7 +1414,9 @@ function getRoleFromProfile(
 
         data.accountRole,
 
-        data.account_role
+        data.account_role,
+
+        data.user_role
 
     ];
 
@@ -1340,6 +1463,10 @@ async function getUserRole(
     }
 
 
+    /*
+     * First try the main users/{uid} profile.
+     */
+
     try {
 
         const profile =
@@ -1360,13 +1487,37 @@ async function getUserRole(
 
         }
 
+    } catch (error) {
 
-        try {
+        console.error(
+            "RiderX: Firestore user profile lookup failed:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+
+    /*
+     * If no role is stored in the user profile,
+     * check Firebase custom claims.
+     */
+
+    try {
+
+        if (
+            typeof user.getIdTokenResult ===
+            "function"
+        ) {
 
             const tokenResult =
                 await withTimeout(
 
-                    user.getIdTokenResult(),
+                    user.getIdTokenResult(
+                        false
+                    ),
 
                     CONFIG.FIRESTORE_TIMEOUT,
 
@@ -1376,8 +1527,10 @@ async function getUserRole(
 
 
             const claims =
-                tokenResult?.claims ||
-                {};
+                tokenResult &&
+                tokenResult.claims
+                    ? tokenResult.claims
+                    : {};
 
 
             const claimRole =
@@ -1392,29 +1545,19 @@ async function getUserRole(
 
             }
 
-        } catch (claimError) {
-
-            console.warn(
-                "RiderX: custom claim lookup failed:",
-                claimError
-            );
-
         }
 
+    } catch (claimError) {
 
-        return "";
-
-    } catch (error) {
-
-        console.error(
-            "RiderX: Firestore role lookup failed:",
-            error
+        console.warn(
+            "RiderX: custom claim lookup failed:",
+            claimError
         );
 
-
-        throw error;
-
     }
+
+
+    return "";
 
 }
 
@@ -1438,6 +1581,7 @@ async function checkRiderAccess(
 
 
     if (
+        !db ||
         typeof doc !== "function" ||
         typeof getDoc !== "function"
     ) {
@@ -1471,7 +1615,13 @@ async function checkRiderAccess(
         );
 
 
+    /*
+     * A missing rider document means that the rider
+     * has not completed/received the rider profile.
+     */
+
     if (
+        !snapshot ||
         !snapshot.exists()
     ) {
 
@@ -1485,6 +1635,10 @@ async function checkRiderAccess(
         {};
 
 
+    /*
+     * Explicit blocking flags always win.
+     */
+
     if (
         isTruthyApprovalValue(
             data.disabled
@@ -1494,6 +1648,9 @@ async function checkRiderAccess(
         ) ||
         isTruthyApprovalValue(
             data.suspended
+        ) ||
+        isTruthyApprovalValue(
+            data.banned
         )
     ) {
 
@@ -1575,6 +1732,10 @@ async function checkRiderAccess(
     }
 
 
+    /*
+     * Explicit approval flags.
+     */
+
     if (
         isTruthyApprovalValue(
             data.approved
@@ -1600,6 +1761,10 @@ async function checkRiderAccess(
 
     }
 
+
+    /*
+     * Explicit approved states.
+     */
 
     const approvedStates = [
 
@@ -1636,6 +1801,11 @@ async function checkRiderAccess(
     }
 
 
+    /*
+     * Do not assume an unknown state is approved.
+     * This keeps unverified riders away from the rider area.
+     */
+
     return false;
 
 }
@@ -1654,29 +1824,33 @@ async function registerServiceWorker() {
         )
     ) {
 
-        return;
+        return null;
 
     }
 
 
     try {
 
-        await navigator.serviceWorker.register(
+        const registration =
+            await navigator.serviceWorker.register(
 
-            "./sw.js",
+                "./sw.js",
 
-            {
-                scope:
-                    "./"
-            }
+                {
+                    scope:
+                        "./"
+                }
 
-        );
+            );
+
+
+        return registration;
 
     } catch (error) {
 
         /*
-         * Service worker failure must NEVER prevent
-         * Firebase authentication or routing.
+         * Service-worker failure must NEVER block
+         * authentication or routing.
          */
 
         console.warn(
@@ -1684,13 +1858,16 @@ async function registerServiceWorker() {
             error
         );
 
+
+        return null;
+
     }
 
 }
 
 
 /* ============================================================
-   LOGGED OUT ROUTE
+   LOGGED-OUT ROUTE
 ============================================================ */
 
 function routeLoggedOut() {
@@ -1734,7 +1911,8 @@ async function routeLoggedIn(
     );
 
 
-    let role = "";
+    let role =
+        "";
 
 
     try {
@@ -1769,6 +1947,10 @@ async function routeLoggedIn(
     }
 
 
+    /*
+     * No role found.
+     */
+
     if (!role) {
 
         safeRemoveStorage(
@@ -1795,6 +1977,10 @@ async function routeLoggedIn(
     }
 
 
+    /*
+     * ADMIN
+     */
+
     if (
         role ===
         ROLES.ADMIN
@@ -1819,6 +2005,10 @@ async function routeLoggedIn(
 
     }
 
+
+    /*
+     * RIDER
+     */
 
     if (
         role ===
@@ -1921,6 +2111,10 @@ async function routeLoggedIn(
     }
 
 
+    /*
+     * CUSTOMER
+     */
+
     if (
         role ===
         ROLES.CUSTOMER
@@ -1946,6 +2140,10 @@ async function routeLoggedIn(
     }
 
 
+    /*
+     * Unknown role.
+     */
+
     clearAuthCache();
 
 
@@ -1968,6 +2166,12 @@ async function handleAuthState(
     user
 ) {
 
+    /*
+     * Firebase can theoretically trigger callbacks more
+     * than once during initialization. Prevent duplicate
+     * routing.
+     */
+
     if (
         routingStarted ||
         redirectStarted
@@ -1984,6 +2188,19 @@ async function handleAuthState(
 
     authResolved =
         true;
+
+
+    if (authSafetyTimer !== null) {
+
+        window.clearTimeout(
+            authSafetyTimer
+        );
+
+
+        authSafetyTimer =
+            null;
+
+    }
 
 
     try {
@@ -2025,7 +2242,7 @@ async function handleAuthState(
 
 
 /* ============================================================
-   RETRY
+   RETRY BUTTON
 ============================================================ */
 
 if (retryButton) {
@@ -2085,17 +2302,14 @@ if (retryButton) {
 
 
     /*
-     * Service worker is deliberately started without
-     * blocking authentication.
+     * Service worker is intentionally non-blocking.
      */
 
     void registerServiceWorker();
 
 
     /*
-     * Dynamically load Firebase so module/CDN/configuration
-     * failures can be displayed instead of leaving the
-     * splash screen permanently stuck.
+     * Load Firebase dynamically.
      */
 
     setStatus(
@@ -2103,7 +2317,8 @@ if (retryButton) {
     );
 
 
-    let firebaseModule;
+    let firebaseModule =
+        null;
 
 
     try {
@@ -2112,27 +2327,6 @@ if (retryButton) {
             await import(
                 "./firebase/firebase-config.js"
             );
-
-
-        auth =
-            firebaseModule.auth;
-
-
-        db =
-            firebaseModule.db;
-
-
-        onAuthStateChanged =
-            firebaseModule.onAuthStateChanged;
-
-
-        doc =
-            firebaseModule.doc;
-
-
-        getDoc =
-            firebaseModule.getDoc;
-
 
     } catch (error) {
 
@@ -2144,6 +2338,62 @@ if (retryButton) {
 
         setStatus(
             "Unable to load RiderX services."
+        );
+
+
+        showFallback();
+
+
+        return;
+
+    }
+
+
+    /*
+     * Read the expected named exports.
+     */
+
+    try {
+
+        auth =
+            firebaseModule.auth ||
+            firebaseModule.default?.auth ||
+            null;
+
+
+        db =
+            firebaseModule.db ||
+            firebaseModule.default?.db ||
+            null;
+
+
+        onAuthStateChanged =
+            firebaseModule.onAuthStateChanged ||
+            firebaseModule.default?.onAuthStateChanged ||
+            null;
+
+
+        doc =
+            firebaseModule.doc ||
+            firebaseModule.default?.doc ||
+            null;
+
+
+        getDoc =
+            firebaseModule.getDoc ||
+            firebaseModule.default?.getDoc ||
+            null;
+
+    } catch (error) {
+
+        console.error(
+            "RiderX: Firebase export parsing failed:",
+            error
+        );
+
+
+        setStatus(
+            "Unable to initialize RiderX services."
         );
 
 
@@ -2171,7 +2421,26 @@ if (retryButton) {
     ) {
 
         console.error(
-            "RiderX: Firebase module loaded but required exports are missing."
+            "RiderX: Firebase module loaded but required exports are missing.",
+            {
+                hasAuth:
+                    Boolean(auth),
+
+                hasDb:
+                    Boolean(db),
+
+                hasAuthListener:
+                    typeof onAuthStateChanged ===
+                    "function",
+
+                hasDoc:
+                    typeof doc ===
+                    "function",
+
+                hasGetDoc:
+                    typeof getDoc ===
+                    "function"
+            }
         );
 
 
@@ -2187,6 +2456,10 @@ if (retryButton) {
 
     }
 
+
+    /*
+     * Subscribe to Firebase Authentication state.
+     */
 
     try {
 
@@ -2205,6 +2478,10 @@ if (retryButton) {
                     );
 
 
+                    authResolved =
+                        true;
+
+
                     if (
                         routingStarted ||
                         redirectStarted
@@ -2215,16 +2492,16 @@ if (retryButton) {
                     }
 
 
+                    routingStarted =
+                        false;
+
+
                     setStatus(
                         "Authentication service unavailable."
                     );
 
 
                     showFallback();
-
-
-                    routingStarted =
-                        false;
 
                 }
 
@@ -2254,35 +2531,40 @@ if (retryButton) {
     /*
      * Safety timeout.
      *
-     * This does NOT force logout.
-     * It only exposes Retry when Firebase Auth takes
-     * longer than expected.
+     * This does NOT log the user out.
+     * It only shows Retry if Firebase Auth does not
+     * resolve within the expected time.
      */
 
-    window.setTimeout(
+    authSafetyTimer =
+        window.setTimeout(
 
-        function () {
+            function () {
 
-            if (
-                !authResolved &&
-                !routingStarted &&
-                !redirectStarted
-            ) {
-
-                setStatus(
-                    "Authentication is taking longer than expected."
-                );
+                authSafetyTimer =
+                    null;
 
 
-                showFallback();
+                if (
+                    !authResolved &&
+                    !routingStarted &&
+                    !redirectStarted
+                ) {
 
-            }
+                    setStatus(
+                        "Authentication is taking longer than expected."
+                    );
 
-        },
 
-        CONFIG.AUTH_TIMEOUT
+                    showFallback();
 
-    );
+                }
+
+            },
+
+            CONFIG.AUTH_TIMEOUT
+
+        );
 
 })();
 
@@ -2296,6 +2578,12 @@ window.RiderXEntry =
 
         routes:
             ROUTES,
+
+        roles:
+            ROLES,
+
+        config:
+            CONFIG,
 
         normalizeRole,
 
@@ -2321,6 +2609,36 @@ window.addEventListener(
     "pagehide",
 
     function () {
+
+        if (
+            redirectTimer !== null
+        ) {
+
+            window.clearTimeout(
+                redirectTimer
+            );
+
+
+            redirectTimer =
+                null;
+
+        }
+
+
+        if (
+            authSafetyTimer !== null
+        ) {
+
+            window.clearTimeout(
+                authSafetyTimer
+            );
+
+
+            authSafetyTimer =
+                null;
+
+        }
+
 
         if (
             typeof authUnsubscribe ===
