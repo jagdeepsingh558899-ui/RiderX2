@@ -232,7 +232,7 @@ async function initializeFirebase() {
 
                 const authModule =
                     await import(
-                        "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"
+                        "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"
                     );
 
                 auth =
