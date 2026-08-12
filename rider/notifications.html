@@ -10,7 +10,10 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 >
 
-<meta name="theme-color" content="#000000">
+<meta
+    name="theme-color"
+    content="#000000"
+>
 
 <meta
     name="description"
@@ -63,8 +66,11 @@ body{
 
 body{
     min-height:100vh;
-    padding-bottom:
-        max(25px,env(safe-area-inset-bottom));
+    padding-bottom:max(25px,env(safe-area-inset-bottom));
+}
+
+button{
+    font-family:inherit;
 }
 
 
@@ -473,9 +479,11 @@ body{
 }
 
 @keyframes riderxSpin{
+
     to{
         transform:rotate(360deg);
     }
+
 }
 
 
@@ -534,6 +542,8 @@ body{
 
     font-size:11px;
     font-weight:800;
+
+    cursor:pointer;
 }
 
 
@@ -545,8 +555,8 @@ body{
     position:fixed;
 
     left:50%;
-    bottom:
-        max(25px,env(safe-area-inset-bottom));
+
+    bottom:max(25px,env(safe-area-inset-bottom));
 
     transform:translate(-50%,20px);
 
@@ -790,27 +800,11 @@ body{
 
 <script type="module">
 
-/* =========================================================
-   RIDERX
-   NOTIFICATIONS
-   File: rider/notifications.html
-
-   Handles:
-   - Firebase authentication
-   - Real-time notifications
-   - Read / unread state
-   - Mark all read
-   - Delete notification
-   - Clear all notifications
-   - Notification count
-   - Ride notification navigation
-   - Safe HTML rendering
-   - Firestore query fallback
-========================================================= */
+"use strict";
 
 
 /* =========================================================
-   FIREBASE CONFIG
+   FIREBASE
 ========================================================= */
 
 import {
@@ -829,7 +823,6 @@ import {
     updateDoc,
     deleteDoc,
     writeBatch,
-    getDocs,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
@@ -837,6 +830,13 @@ import {
 import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const BATCH_SIZE = 450;
 
 
 /* =========================================================
@@ -919,16 +919,24 @@ const refreshButton =
    STATE
 ========================================================= */
 
-let currentUser = null;
+let currentUser =
+    null;
+
 
 let unsubscribe =
     null;
 
+
 let notificationData =
     [];
 
-let listenerStarted =
-    false;
+
+let listenerGeneration =
+    0;
+
+
+let toastTimer =
+    null;
 
 
 /* =========================================================
@@ -938,7 +946,9 @@ let listenerStarted =
 function showToast(message){
 
     toast.textContent =
-        String(message || "");
+        String(
+            message || ""
+        );
 
 
     toast.classList.add(
@@ -947,13 +957,13 @@ function showToast(message){
 
 
     clearTimeout(
-        window.riderXToastTimer
+        toastTimer
     );
 
 
-    window.riderXToastTimer =
+    toastTimer =
         setTimeout(
-            () => {
+            function(){
 
                 toast.classList.remove(
                     "show"
@@ -976,6 +986,10 @@ function showError(message){
         "none";
 
 
+    empty.style.display =
+        "none";
+
+
     errorText.textContent =
         message ||
         "Unable to load notifications.";
@@ -984,6 +998,14 @@ function showError(message){
     errorBox.classList.add(
         "show"
     );
+
+
+    markAllReadButton.disabled =
+        true;
+
+
+    deleteAllButton.disabled =
+        true;
 
 }
 
@@ -998,88 +1020,175 @@ function hideError(){
 
 
 /* =========================================================
+   LOADING UI
+========================================================= */
+
+function showLoading(){
+
+    loading.style.display =
+        "block";
+
+
+    empty.style.display =
+        "none";
+
+
+    hideError();
+
+}
+
+
+/* =========================================================
    BACK
 ========================================================= */
 
 document
-.getElementById("backButton")
-.addEventListener(
-    "click",
-    () => {
+    .getElementById("backButton")
+    .addEventListener(
+        "click",
+        function(){
 
-        if(
-            history.length > 1
-        ){
+            const fallback =
+                "home.html";
 
-            history.back();
 
-        }else{
+            if(
+                document.referrer &&
+                document.referrer.startsWith(
+                    window.location.origin
+                )
+            ){
+
+                history.back();
+
+                return;
+
+            }
+
 
             location.replace(
-                "home.html"
+                fallback
             );
 
         }
-
-    }
-);
+    );
 
 
 /* =========================================================
-   TIME FORMAT
+   TIME VALUE
 ========================================================= */
 
-function formatTime(timestamp){
+function getTimestampValue(
+    timestamp
+){
 
     if(!timestamp){
 
-        return "Just now";
+        return 0;
 
     }
 
 
-    let date;
-
-
     try{
+
+        if(
+            typeof timestamp.toMillis ===
+            "function"
+        ){
+
+            return timestamp.toMillis();
+
+        }
+
 
         if(
             typeof timestamp.toDate ===
             "function"
         ){
 
-            date =
-                timestamp.toDate();
-
-        }else if(
-            typeof timestamp.toMillis ===
-            "function"
-        ){
-
-            date =
-                new Date(
-                    timestamp.toMillis()
-                );
-
-        }else{
-
-            date =
-                new Date(timestamp);
+            return timestamp
+                .toDate()
+                .getTime();
 
         }
 
+
+        if(
+            typeof timestamp ===
+            "number"
+        ){
+
+            return Number.isFinite(
+                timestamp
+            )
+                ? timestamp
+                : 0;
+
+        }
+
+
+        if(
+            typeof timestamp ===
+            "object" &&
+            typeof timestamp.seconds ===
+            "number"
+        ){
+
+            return (
+                timestamp.seconds *
+                1000
+            ) +
+            Math.floor(
+                Number(
+                    timestamp.nanoseconds ||
+                    0
+                ) /
+                1000000
+            );
+
+        }
+
+
+        const date =
+            new Date(
+                timestamp
+            );
+
+
+        const time =
+            date.getTime();
+
+
+        return Number.isFinite(
+            time
+        )
+            ? time
+            : 0;
+
     }catch{
 
-        return "Just now";
+        return 0;
 
     }
 
+}
 
-    if(
-        Number.isNaN(
-            date.getTime()
-        )
-    ){
+
+/* =========================================================
+   TIME FORMAT
+========================================================= */
+
+function formatTime(
+    timestamp
+){
+
+    const time =
+        getTimestampValue(
+            timestamp
+        );
+
+
+    if(!time){
 
         return "Just now";
 
@@ -1088,57 +1197,86 @@ function formatTime(timestamp){
 
     const diff =
         Date.now() -
-        date.getTime();
+        time;
 
 
-    if(diff < 0){
-
-        return "Just now";
-
-    }
-
-
-    if(diff < 60000){
+    if(
+        diff <= 0 ||
+        diff < 60000
+    ){
 
         return "Just now";
 
     }
 
 
-    if(diff < 3600000){
+    if(
+        diff < 3600000
+    ){
 
         const minutes =
             Math.floor(
-                diff / 60000
+                diff /
+                60000
             );
 
-        return `${minutes} min ago`;
+
+        return (
+            minutes +
+            " min ago"
+        );
 
     }
 
 
-    if(diff < 86400000){
+    if(
+        diff < 86400000
+    ){
 
         const hours =
             Math.floor(
-                diff / 3600000
+                diff /
+                3600000
             );
 
-        return `${hours} hr ago`;
+
+        return (
+            hours +
+            " hr ago"
+        );
 
     }
 
 
-    if(diff < 604800000){
+    if(
+        diff < 604800000
+    ){
 
         const days =
             Math.floor(
-                diff / 86400000
+                diff /
+                86400000
             );
 
-        return `${days} day${days === 1 ? "" : "s"} ago`;
+
+        return (
+            days +
+            " day" +
+            (
+                days === 1
+                    ? ""
+                    : "s"
+            ) +
+            " ago"
+        );
 
     }
+
+
+    const date =
+        new Date(
+            time
+        );
 
 
     return date.toLocaleDateString(
@@ -1157,7 +1295,9 @@ function formatTime(timestamp){
    ICON
 ========================================================= */
 
-function getNotificationIcon(data){
+function getNotificationIcon(
+    data
+){
 
     const type =
         String(
@@ -1165,7 +1305,8 @@ function getNotificationIcon(data){
             data.category ||
             data.notificationType ||
             ""
-        ).toLowerCase();
+        )
+        .toLowerCase();
 
 
     const title =
@@ -1173,11 +1314,14 @@ function getNotificationIcon(data){
             data.title ||
             data.heading ||
             ""
-        ).toLowerCase();
+        )
+        .toLowerCase();
 
 
     const text =
-        `${type} ${title}`;
+        type +
+        " " +
+        title;
 
 
     if(
@@ -1282,67 +1426,14 @@ function escapeHTML(value){
    READ STATE
 ========================================================= */
 
-function isUnread(data){
+function isUnread(
+    data
+){
 
     return (
         data.read !== true &&
         data.isRead !== true
     );
-
-}
-
-
-/* =========================================================
-   SORT
-========================================================= */
-
-function getTimestampValue(timestamp){
-
-    if(!timestamp){
-
-        return 0;
-
-    }
-
-
-    try{
-
-        if(
-            typeof timestamp.toMillis ===
-            "function"
-        ){
-
-            return timestamp.toMillis();
-
-        }
-
-
-        if(
-            typeof timestamp.toDate ===
-            "function"
-        ){
-
-            return timestamp
-                .toDate()
-                .getTime();
-
-        }
-
-
-        const value =
-            new Date(timestamp)
-            .getTime();
-
-
-        return Number.isFinite(value)
-            ? value
-            : 0;
-
-    }catch{
-
-        return 0;
-
-    }
 
 }
 
@@ -1365,8 +1456,11 @@ function renderNotifications(){
             ".notification"
         )
         .forEach(
-            element =>
-                element.remove()
+            function(element){
+
+                element.remove();
+
+            }
         );
 
 
@@ -1413,22 +1507,29 @@ function renderNotifications(){
 
     const unread =
         notificationData.filter(
-            item =>
-                isUnread(
+            function(item){
+
+                return isUnread(
                     item.data
-                )
+                );
+
+            }
         ).length;
 
 
     countText.textContent =
-        `${notificationData.length} notification${
+        notificationData.length +
+        " notification" +
+        (
             notificationData.length === 1
                 ? ""
                 : "s"
-        }`;
+        );
 
 
-    if(unread > 0){
+    if(
+        unread > 0
+    ){
 
         badge.textContent =
             unread > 99
@@ -1448,7 +1549,7 @@ function renderNotifications(){
 
 
     notificationData.forEach(
-        item => {
+        function(item){
 
             const data =
                 item.data || {};
@@ -1526,7 +1627,8 @@ function renderNotifications(){
                         ${escapeHTML(
                             formatTime(
                                 data.createdAt ||
-                                data.timestamp
+                                data.timestamp ||
+                                data.sentAt
                             )
                         )}
                     </div>
@@ -1545,12 +1647,12 @@ function renderNotifications(){
 
 
             /* =========================================
-               OPEN NOTIFICATION
+               OPEN
             ========================================= */
 
             element.addEventListener(
                 "click",
-                async event => {
+                async function(event){
 
                     if(
                         event.target.closest(
@@ -1586,19 +1688,23 @@ function renderNotifications(){
                 );
 
 
-            deleteButton.addEventListener(
-                "click",
-                async event => {
+            if(deleteButton){
 
-                    event.stopPropagation();
+                deleteButton.addEventListener(
+                    "click",
+                    async function(event){
+
+                        event.stopPropagation();
 
 
-                    await deleteNotification(
-                        item.id
-                    );
+                        await deleteNotification(
+                            item.id
+                        );
 
-                }
-            );
+                    }
+                );
+
+            }
 
 
             notificationContainer
@@ -1616,7 +1722,9 @@ function renderNotifications(){
    OPEN NOTIFICATION
 ========================================================= */
 
-function openNotification(data){
+function openNotification(
+    data
+){
 
     const rideId =
         data.rideId ||
@@ -1633,22 +1741,25 @@ function openNotification(data){
                 String(rideId)
             );
 
+
             sessionStorage.setItem(
                 "riderx_active_ride_id",
                 String(rideId)
             );
 
-        }catch{}
+        }catch{
 
-        /*
-         * Open live ride screen when
-         * notification belongs to a ride.
-         */
+            /* Ignore sessionStorage errors. */
+
+        }
+
 
         location.href =
-            `live.html?rideId=${encodeURIComponent(
+            "live.html?rideId=" +
+            encodeURIComponent(
                 String(rideId)
-            )}`;
+            );
+
 
         return;
 
@@ -1661,25 +1772,46 @@ function openNotification(data){
 
 
     if(
-        actionUrl &&
-        typeof actionUrl === "string"
+        typeof actionUrl ===
+        "string"
     ){
 
-        /*
-         * Only allow same-origin
-         * relative navigation.
-         */
+        const value =
+            actionUrl.trim();
+
 
         if(
-            actionUrl.startsWith("/") ||
-            actionUrl.startsWith("./") ||
-            actionUrl.startsWith("../")
+            value.startsWith("/") ||
+            value.startsWith("./") ||
+            value.startsWith("../")
         ){
 
-            location.href =
-                actionUrl;
+            try{
 
-            return;
+                const target =
+                    new URL(
+                        value,
+                        window.location.href
+                    );
+
+
+                if(
+                    target.origin ===
+                    window.location.origin
+                ){
+
+                    location.href =
+                        target.href;
+
+                    return;
+
+                }
+
+            }catch{
+
+                /* Ignore invalid URL. */
+
+            }
 
         }
 
@@ -1694,26 +1826,22 @@ function openNotification(data){
 
 onAuthStateChanged(
     auth,
-    user => {
+    function(user){
+
+        currentUser =
+            user || null;
+
 
         if(!user){
 
-            currentUser =
-                null;
-
-
-            if(unsubscribe){
-
-                unsubscribe();
-
-                unsubscribe =
-                    null;
-
-            }
+            stopNotificationListener();
 
 
             notificationData =
                 [];
+
+
+            renderNotifications();
 
 
             location.replace(
@@ -1726,10 +1854,6 @@ onAuthStateChanged(
         }
 
 
-        currentUser =
-            user;
-
-
         listenNotifications(
             user.uid
         );
@@ -1739,10 +1863,48 @@ onAuthStateChanged(
 
 
 /* =========================================================
+   STOP LISTENER
+========================================================= */
+
+function stopNotificationListener(){
+
+    listenerGeneration++;
+
+
+    if(
+        typeof unsubscribe ===
+        "function"
+    ){
+
+        try{
+
+            unsubscribe();
+
+        }catch(error){
+
+            console.warn(
+                "Unable to unsubscribe notifications:",
+                error
+            );
+
+        }
+
+    }
+
+
+    unsubscribe =
+        null;
+
+}
+
+
+/* =========================================================
    LISTEN NOTIFICATIONS
 ========================================================= */
 
-function listenNotifications(uid){
+function listenNotifications(
+    uid
+){
 
     if(!uid){
 
@@ -1751,29 +1913,14 @@ function listenNotifications(uid){
     }
 
 
-    if(unsubscribe){
-
-        unsubscribe();
-
-        unsubscribe =
-            null;
-
-    }
+    stopNotificationListener();
 
 
-    listenerStarted =
-        true;
+    const generation =
+        listenerGeneration;
 
 
-    loading.style.display =
-        "block";
-
-
-    empty.style.display =
-        "none";
-
-
-    hideError();
+    showLoading();
 
 
     const notificationsRef =
@@ -1781,17 +1928,6 @@ function listenNotifications(uid){
             db,
             "notifications"
         );
-
-
-    /*
-     * IMPORTANT:
-     *
-     * First try the normal indexed query.
-     * If the Firestore index is missing,
-     * automatically fall back to userId-only
-     * query so the notification screen still
-     * works.
-     */
 
 
     const primaryQuery =
@@ -1813,7 +1949,17 @@ function listenNotifications(uid){
         onSnapshot(
             primaryQuery,
 
-            snapshot => {
+            function(snapshot){
+
+                if(
+                    generation !==
+                    listenerGeneration
+                ){
+
+                    return;
+
+                }
+
 
                 processSnapshot(
                     snapshot
@@ -1821,7 +1967,17 @@ function listenNotifications(uid){
 
             },
 
-            error => {
+            function(error){
+
+                if(
+                    generation !==
+                    listenerGeneration
+                ){
+
+                    return;
+
+                }
+
 
                 console.warn(
                     "Primary notification query failed:",
@@ -1830,12 +1986,13 @@ function listenNotifications(uid){
 
 
                 /*
-                 * Missing-index / query failure
-                 * fallback.
+                 * Re-create using a simple
+                 * userId-only query.
                  */
 
                 listenNotificationsFallback(
-                    uid
+                    uid,
+                    generation
                 );
 
             }
@@ -1848,16 +2005,41 @@ function listenNotifications(uid){
    FALLBACK LISTENER
 ========================================================= */
 
-function listenNotificationsFallback(uid){
+function listenNotificationsFallback(
+    uid,
+    parentGeneration
+){
 
-    if(unsubscribe){
+    if(
+        parentGeneration !==
+        listenerGeneration
+    ){
 
-        unsubscribe();
-
-        unsubscribe =
-            null;
+        return;
 
     }
+
+
+    if(
+        typeof unsubscribe ===
+        "function"
+    ){
+
+        try{
+
+            unsubscribe();
+
+        }catch{
+
+            /* Ignore unsubscribe error. */
+
+        }
+
+    }
+
+
+    unsubscribe =
+        null;
 
 
     const notificationsRef =
@@ -1882,7 +2064,17 @@ function listenNotificationsFallback(uid){
         onSnapshot(
             fallbackQuery,
 
-            snapshot => {
+            function(snapshot){
+
+                if(
+                    parentGeneration !==
+                    listenerGeneration
+                ){
+
+                    return;
+
+                }
+
 
                 processSnapshot(
                     snapshot
@@ -1890,7 +2082,17 @@ function listenNotificationsFallback(uid){
 
             },
 
-            error => {
+            function(error){
+
+                if(
+                    parentGeneration !==
+                    listenerGeneration
+                ){
+
+                    return;
+
+                }
+
 
                 console.error(
                     "Notification fallback error:",
@@ -1898,9 +2100,14 @@ function listenNotificationsFallback(uid){
                 );
 
 
+                notificationData =
+                    [];
+
+
                 showError(
-                    error.message ||
-                    "Unable to load notifications."
+                    getFirebaseErrorMessage(
+                        error
+                    )
                 );
 
             }
@@ -1910,39 +2117,118 @@ function listenNotificationsFallback(uid){
 
 
 /* =========================================================
+   FIREBASE ERROR MESSAGE
+========================================================= */
+
+function getFirebaseErrorMessage(
+    error
+){
+
+    const code =
+        String(
+            error?.code ||
+            ""
+        );
+
+
+    if(
+        code ===
+        "permission-denied"
+    ){
+
+        return (
+            "You do not have permission to read notifications."
+        );
+
+    }
+
+
+    if(
+        code ===
+        "unauthenticated"
+    ){
+
+        return (
+            "Your login session has expired. Please login again."
+        );
+
+    }
+
+
+    if(
+        code ===
+        "failed-precondition"
+    ){
+
+        return (
+            "Notification query needs a Firestore index or configuration."
+        );
+
+    }
+
+
+    if(
+        code ===
+        "unavailable"
+    ){
+
+        return (
+            "Firebase is temporarily unavailable. Please try again."
+        );
+
+    }
+
+
+    return (
+        error?.message ||
+        "Unable to load notifications."
+    );
+
+}
+
+
+/* =========================================================
    PROCESS SNAPSHOT
 ========================================================= */
 
-function processSnapshot(snapshot){
+function processSnapshot(
+    snapshot
+){
 
     notificationData =
         snapshot.docs.map(
-            item => ({
+            function(item){
 
-                id:
-                    item.id,
+                return {
 
-                data:
-                    item.data() || {}
+                    id:
+                        item.id,
 
-            })
+                    data:
+                        item.data() || {}
+
+                };
+
+            }
         );
 
 
     notificationData.sort(
-        (a,b) => {
+        function(a,b){
 
             const aTime =
                 getTimestampValue(
                     a.data.createdAt ||
-                    a.data.timestamp
+                    a.data.timestamp ||
+                    a.data.sentAt
                 );
 
 
             const bTime =
                 getTimestampValue(
                     b.data.createdAt ||
-                    b.data.timestamp
+                    b.data.timestamp ||
+                    b.data.sentAt
                 );
 
 
@@ -1961,7 +2247,9 @@ function processSnapshot(snapshot){
    MARK ONE READ
 ========================================================= */
 
-async function markAsRead(id){
+async function markAsRead(
+    id
+){
 
     if(
         !currentUser ||
@@ -1975,8 +2263,14 @@ async function markAsRead(id){
 
     const item =
         notificationData.find(
-            notification =>
-                notification.id === id
+            function(notification){
+
+                return (
+                    notification.id ===
+                    id
+                );
+
+            }
         );
 
 
@@ -1988,6 +2282,22 @@ async function markAsRead(id){
         return;
 
     }
+
+
+    /*
+     * Optimistically update local state.
+     * The realtime listener will confirm the
+     * Firestore result afterwards.
+     */
+
+    item.data.read =
+        true;
+
+    item.data.isRead =
+        true;
+
+
+    renderNotifications();
 
 
     try{
@@ -2013,6 +2323,21 @@ async function markAsRead(id){
             error
         );
 
+
+        /*
+         * Revert optimistic state if
+         * Firestore update failed.
+         */
+
+        item.data.read =
+            false;
+
+        item.data.isRead =
+            false;
+
+
+        renderNotifications();
+
     }
 
 }
@@ -2024,7 +2349,7 @@ async function markAsRead(id){
 
 markAllReadButton.addEventListener(
     "click",
-    async () => {
+    async function(){
 
         if(!currentUser){
 
@@ -2039,14 +2364,19 @@ markAllReadButton.addEventListener(
 
         const unread =
             notificationData.filter(
-                item =>
-                    isUnread(
+                function(item){
+
+                    return isUnread(
                         item.data
-                    )
+                    );
+
+                }
             );
 
 
-        if(!unread.length){
+        if(
+            !unread.length
+        ){
 
             showToast(
                 "All notifications are already read"
@@ -2063,34 +2393,70 @@ markAllReadButton.addEventListener(
 
         try{
 
-            const batch =
-                writeBatch(
-                    db
+            for(
+                let start = 0;
+                start < unread.length;
+                start += BATCH_SIZE
+            ){
+
+                const chunk =
+                    unread.slice(
+                        start,
+                        start +
+                        BATCH_SIZE
+                    );
+
+
+                const batch =
+                    writeBatch(
+                        db
+                    );
+
+
+                let operations =
+                    0;
+
+
+                chunk.forEach(
+                    function(item){
+
+                        if(!item.id){
+
+                            return;
+
+                        }
+
+
+                        batch.update(
+                            doc(
+                                db,
+                                "notifications",
+                                item.id
+                            ),
+                            {
+                                read:true,
+                                isRead:true,
+                                readAt:
+                                    serverTimestamp()
+                            }
+                        );
+
+
+                        operations++;
+
+                    }
                 );
 
 
-            unread.forEach(
-                item => {
+                if(
+                    operations > 0
+                ){
 
-                    batch.update(
-                        doc(
-                            db,
-                            "notifications",
-                            item.id
-                        ),
-                        {
-                            read:true,
-                            isRead:true,
-                            readAt:
-                                serverTimestamp()
-                        }
-                    );
+                    await batch.commit();
 
                 }
-            );
 
-
-            await batch.commit();
+            }
 
 
             showToast(
@@ -2106,7 +2472,9 @@ markAllReadButton.addEventListener(
 
 
             showToast(
-                "Unable to update notifications"
+                getFirebaseErrorMessage(
+                    error
+                )
             );
 
         }finally{
@@ -2124,9 +2492,14 @@ markAllReadButton.addEventListener(
    DELETE ONE
 ========================================================= */
 
-async function deleteNotification(id){
+async function deleteNotification(
+    id
+){
 
-    if(!id){
+    if(
+        !currentUser ||
+        !id
+    ){
 
         return;
 
@@ -2157,7 +2530,9 @@ async function deleteNotification(id){
 
 
         showToast(
-            "Unable to delete notification"
+            getFirebaseErrorMessage(
+                error
+            )
         );
 
     }
@@ -2171,7 +2546,7 @@ async function deleteNotification(id){
 
 deleteAllButton.addEventListener(
     "click",
-    async () => {
+    async function(){
 
         if(!currentUser){
 
@@ -2198,7 +2573,7 @@ deleteAllButton.addEventListener(
 
 
         const confirmed =
-            confirm(
+            window.confirm(
                 "Clear all notifications?"
             );
 
@@ -2216,29 +2591,17 @@ deleteAllButton.addEventListener(
 
         try{
 
-            /*
-             * Firestore batch supports a maximum
-             * of 500 operations.
-             *
-             * Process notifications in chunks
-             * so the button also works when the
-             * user has many notifications.
-             */
-
-            const chunkSize =
-                450;
-
-
             for(
-                let i = 0;
-                i < notificationData.length;
-                i += chunkSize
+                let start = 0;
+                start < notificationData.length;
+                start += BATCH_SIZE
             ){
 
                 const chunk =
                     notificationData.slice(
-                        i,
-                        i + chunkSize
+                        start,
+                        start +
+                        BATCH_SIZE
                     );
 
 
@@ -2248,8 +2611,19 @@ deleteAllButton.addEventListener(
                     );
 
 
+                let operations =
+                    0;
+
+
                 chunk.forEach(
-                    item => {
+                    function(item){
+
+                        if(!item.id){
+
+                            return;
+
+                        }
+
 
                         batch.delete(
                             doc(
@@ -2259,11 +2633,20 @@ deleteAllButton.addEventListener(
                             )
                         );
 
+
+                        operations++;
+
                     }
                 );
 
 
-                await batch.commit();
+                if(
+                    operations > 0
+                ){
+
+                    await batch.commit();
+
+                }
 
             }
 
@@ -2281,7 +2664,9 @@ deleteAllButton.addEventListener(
 
 
             showToast(
-                "Unable to clear notifications"
+                getFirebaseErrorMessage(
+                    error
+                )
             );
 
         }finally{
@@ -2301,11 +2686,9 @@ deleteAllButton.addEventListener(
 
 refreshButton.addEventListener(
     "click",
-    () => {
+    function(){
 
-        if(
-            !currentUser
-        ){
+        if(!currentUser){
 
             showToast(
                 "Please login first"
@@ -2322,19 +2705,18 @@ refreshButton.addEventListener(
             );
 
 
-        icon.classList.add(
-            "fa-spin"
-        );
+        if(icon){
+
+            icon.classList.add(
+                "fa-spin"
+            );
+
+        }
 
 
         refreshButton.disabled =
             true;
 
-
-        /*
-         * Re-create listener so that refresh
-         * also recovers from a stale listener.
-         */
 
         listenNotifications(
             currentUser.uid
@@ -2342,11 +2724,15 @@ refreshButton.addEventListener(
 
 
         setTimeout(
-            () => {
+            function(){
 
-                icon.classList.remove(
-                    "fa-spin"
-                );
+                if(icon){
+
+                    icon.classList.remove(
+                        "fa-spin"
+                    );
+
+                }
 
 
                 refreshButton.disabled =
@@ -2371,11 +2757,9 @@ refreshButton.addEventListener(
 
 retryButton.addEventListener(
     "click",
-    () => {
+    function(){
 
-        if(
-            !currentUser
-        ){
+        if(!currentUser){
 
             location.replace(
                 "../auth/login.html?role=rider"
@@ -2400,16 +2784,9 @@ retryButton.addEventListener(
 
 window.addEventListener(
     "pagehide",
-    () => {
+    function(){
 
-        if(unsubscribe){
-
-            unsubscribe();
-
-            unsubscribe =
-                null;
-
-        }
+        stopNotificationListener();
 
     }
 );
@@ -2421,6 +2798,7 @@ window.addEventListener(
 
 markAllReadButton.disabled =
     true;
+
 
 deleteAllButton.disabled =
     true;
