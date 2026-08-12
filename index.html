@@ -1,342 +1,471 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8"><meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
->
 
-<meta name="theme-color" content="#f5c400">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="RiderX">
+    <meta charset="UTF-8">
 
-<meta
-    name="description"
-    content="RiderX - Bike, Taxi, Cab, Parcel and Delivery"
->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
 
-<link rel="manifest" href="./manifest.json">
-<link rel="icon" href="./assets/logo.png">
+    <meta
+        name="theme-color"
+        content="#f5c400"
+    >
 
-<title>RiderX</title>
+    <meta
+        name="mobile-web-app-capable"
+        content="yes"
+    >
 
-<style>
-    :root {
-        --rx-yellow: #f5c400;
-        --rx-black: #050505;
-        --rx-text: #ffffff;
-        --rx-muted: #8d8d8d;
-    }
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    >
 
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+    >
 
-    html,
-    body {
-        width: 100%;
-        min-width: 100%;
-        min-height: 100%;
-        background: var(--rx-black);
-    }
+    <meta
+        name="apple-mobile-web-app-title"
+        content="RiderX"
+    >
 
-    body {
-        min-height: 100vh;
-        min-height: 100dvh;
-        overflow: hidden;
+    <meta
+        name="description"
+        content="RiderX - Bike, Taxi, Cab, Parcel and Delivery"
+    >
 
-        background:
-            radial-gradient(
-                circle at 50% 30%,
-                rgba(245, 196, 0, 0.12),
-                transparent 38%
-            ),
-            var(--rx-black);
+    <link
+        rel="manifest"
+        href="./manifest.json"
+    >
 
-        color: var(--rx-text);
+    <link
+        rel="icon"
+        href="./assets/logo.png"
+    >
 
-        font-family:
-            Inter,
-            system-ui,
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            sans-serif;
+    <title>RiderX</title>
 
-        -webkit-font-smoothing: antialiased;
-        text-rendering: optimizeLegibility;
-    }
 
-    button {
-        font: inherit;
-        -webkit-tap-highlight-color: transparent;
-    }
+    <style>
 
-    #riderx-loader {
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        background:
-            radial-gradient(
-                circle at center,
-                rgba(245, 196, 0, 0.10),
-                transparent 42%
-            ),
-            #050505;
-
-        transition:
-            opacity 0.35s ease,
-            visibility 0.35s ease;
-    }
-
-    #riderx-loader.hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-    }
-
-    .loader-content {
-        width: min(90vw, 360px);
-        text-align: center;
-    }
-
-    .logo-wrap {
-        width: 92px;
-        height: 92px;
-
-        margin: 0 auto 22px;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        border: 2px solid rgba(245, 196, 0, 0.35);
-        border-radius: 28px;
-
-        background:
-            linear-gradient(
-                145deg,
-                #171717,
-                #090909
-            );
-
-        box-shadow:
-            0 0 0 8px rgba(245, 196, 0, 0.03),
-            0 20px 60px rgba(0, 0, 0, 0.55);
-    }
-
-    .logo-wrap img {
-        width: 68px;
-        height: 68px;
-        object-fit: contain;
-        border-radius: 18px;
-    }
-
-    .brand {
-        font-size: 34px;
-        line-height: 1;
-
-        font-weight: 900;
-        letter-spacing: -1.5px;
-    }
-
-    .brand span {
-        color: var(--rx-yellow);
-    }
-
-    .tagline {
-        margin-top: 10px;
-
-        color: var(--rx-muted);
-
-        font-size: 13px;
-        letter-spacing: 0.3px;
-    }
-
-    .progress {
-        width: 150px;
-        height: 4px;
-
-        margin: 28px auto 0;
-
-        overflow: hidden;
-        border-radius: 99px;
-
-        background: rgba(255, 255, 255, 0.08);
-    }
-
-    .progress::after {
-        content: "";
-
-        display: block;
-
-        width: 45%;
-        height: 100%;
-
-        border-radius: inherit;
-        background: var(--rx-yellow);
-
-        animation:
-            rx-progress 1.15s ease-in-out infinite;
-    }
-
-    .status {
-        min-height: 18px;
-
-        margin-top: 14px;
-
-        color: #858585;
-
-        font-size: 11px;
-        line-height: 1.45;
-    }
-
-    .fallback {
-        display: none;
-        margin-top: 24px;
-    }
-
-    .fallback.visible {
-        display: block;
-    }
-
-    .fallback button {
-        border: 0;
-        border-radius: 12px;
-
-        padding: 12px 20px;
-
-        background: var(--rx-yellow);
-        color: #080808;
-
-        font-size: 14px;
-        font-weight: 800;
-
-        cursor: pointer;
-    }
-
-    .fallback button:active {
-        transform: scale(0.97);
-    }
-
-    @keyframes rx-progress {
-        0% {
-            transform: translateX(-180%);
+        :root {
+            --rx-yellow: #f5c400;
+            --rx-black: #050505;
+            --rx-text: #ffffff;
+            --rx-muted: #8d8d8d;
         }
 
-        50% {
-            transform: translateX(100%);
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        100% {
-            transform: translateX(350%);
-        }
-    }
 
-    @media (prefers-reduced-motion: reduce) {
-        .progress::after {
-            animation: none;
+        html,
+        body {
+            width: 100%;
+            min-width: 100%;
+            min-height: 100%;
+            background: var(--rx-black);
         }
+
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            overflow: hidden;
+
+            background:
+                radial-gradient(
+                    circle at 50% 30%,
+                    rgba(245, 196, 0, 0.12),
+                    transparent 38%
+                ),
+                var(--rx-black);
+
+            color: var(--rx-text);
+
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            -webkit-font-smoothing: antialiased;
+
+            text-rendering: optimizeLegibility;
+        }
+
+
+        button {
+            font: inherit;
+
+            -webkit-tap-highlight-color:
+                transparent;
+        }
+
 
         #riderx-loader {
-            transition: none;
-        }
-    }
-</style>
+            position: fixed;
 
-</head><body><main
+            inset: 0;
+
+            z-index: 99999;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(245, 196, 0, 0.10),
+                    transparent 42%
+                ),
+                #050505;
+
+            transition:
+                opacity 0.35s ease,
+                visibility 0.35s ease;
+        }
+
+
+        #riderx-loader.hidden {
+            opacity: 0;
+
+            visibility: hidden;
+
+            pointer-events: none;
+        }
+
+
+        .loader-content {
+            width: min(90vw, 360px);
+
+            text-align: center;
+        }
+
+
+        .logo-wrap {
+            width: 92px;
+
+            height: 92px;
+
+            margin: 0 auto 22px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border:
+                2px solid
+                rgba(245, 196, 0, 0.35);
+
+            border-radius: 28px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #171717,
+                    #090909
+                );
+
+            box-shadow:
+                0 0 0 8px
+                rgba(245, 196, 0, 0.03),
+
+                0 20px 60px
+                rgba(0, 0, 0, 0.55);
+        }
+
+
+        .logo-wrap img {
+            width: 68px;
+
+            height: 68px;
+
+            object-fit: contain;
+
+            border-radius: 18px;
+        }
+
+
+        .brand {
+            font-size: 34px;
+
+            line-height: 1;
+
+            font-weight: 900;
+
+            letter-spacing: -1.5px;
+        }
+
+
+        .brand span {
+            color: var(--rx-yellow);
+        }
+
+
+        .tagline {
+            margin-top: 10px;
+
+            color: var(--rx-muted);
+
+            font-size: 13px;
+
+            letter-spacing: 0.3px;
+        }
+
+
+        .progress {
+            width: 150px;
+
+            height: 4px;
+
+            margin: 28px auto 0;
+
+            overflow: hidden;
+
+            border-radius: 99px;
+
+            background:
+                rgba(255, 255, 255, 0.08);
+        }
+
+
+        .progress::after {
+            content: "";
+
+            display: block;
+
+            width: 45%;
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                var(--rx-yellow);
+
+            animation:
+                rx-progress 1.15s
+                ease-in-out infinite;
+        }
+
+
+        .status {
+            min-height: 18px;
+
+            margin-top: 14px;
+
+            color: #858585;
+
+            font-size: 11px;
+
+            line-height: 1.45;
+        }
+
+
+        .fallback {
+            display: none;
+
+            margin-top: 24px;
+        }
+
+
+        .fallback.visible {
+            display: block;
+        }
+
+
+        .fallback button {
+            border: 0;
+
+            border-radius: 12px;
+
+            padding: 12px 20px;
+
+            background:
+                var(--rx-yellow);
+
+            color: #080808;
+
+            font-size: 14px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+        }
+
+
+        .fallback button:active {
+            transform:
+                scale(0.97);
+        }
+
+
+        @keyframes rx-progress {
+
+            0% {
+                transform:
+                    translateX(-180%);
+            }
+
+            50% {
+                transform:
+                    translateX(100%);
+            }
+
+            100% {
+                transform:
+                    translateX(350%);
+            }
+
+        }
+
+
+        @media (
+            prefers-reduced-motion: reduce
+        ) {
+
+            .progress::after {
+                animation: none;
+            }
+
+
+            #riderx-loader {
+                transition: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<main
     id="riderx-loader"
     aria-label="RiderX loading"
 >
-    <div class="loader-content">    <div class="logo-wrap">
-        <img
-            src="./assets/logo.png"
-            alt="RiderX"
-            onerror="this.style.display='none';"
+
+
+    <div class="loader-content">
+
+
+        <div class="logo-wrap">
+
+            <img
+                src="./assets/logo.png"
+                alt="RiderX"
+                onerror="
+                    this.style.display='none';
+                "
+            >
+
+        </div>
+
+
+        <div class="brand">
+
+            Rider<span>X</span>
+
+        </div>
+
+
+        <div class="tagline">
+
+            Ride. Deliver. Move.
+
+        </div>
+
+
+        <div
+            id="riderx-status"
+            class="status"
+            aria-live="polite"
+            aria-atomic="true"
         >
-    </div>
+            Starting RiderX...
+        </div>
 
-    <div class="brand">
-        Rider<span>X</span>
-    </div>
 
-    <div class="tagline">
-        Ride. Deliver. Move.
-    </div>
+        <div
+            class="progress"
+            aria-hidden="true"
+        ></div>
 
-    <div
-        id="riderx-status"
-        class="status"
-        aria-live="polite"
-        aria-atomic="true"
-    >
-        Starting RiderX...
-    </div>
 
-    <div
-        class="progress"
-        aria-hidden="true"
-    ></div>
-
-    <div
-        id="riderx-fallback"
-        class="fallback"
-    >
-        <button
-            id="riderx-retry"
-            type="button"
+        <div
+            id="riderx-fallback"
+            class="fallback"
         >
-            Retry Connection
-        </button>
+
+            <button
+                id="riderx-retry"
+                type="button"
+            >
+                Retry Connection
+            </button>
+
+        </div>
+
+
     </div>
 
-</div>
 
-</main><script type="module">
+</main>
+
+
+<script>
 
 "use strict";
+
 
 /* ============================================================
    RIDERX 2.0
    ROOT ENTRY / SPLASH ROUTER
    File: index.html
 
-   RESPONSIBILITIES:
-   - Firebase Auth state detection
-   - Existing user role resolution
-   - Customer routing
-   - Rider routing
-   - Rider approval verification
-   - Admin routing
-   - Safe logged-out routing
-   - Session cache
-   - Service worker registration
-
    IMPORTANT:
-   Firebase is initialized ONLY by:
-   ./firebase/firebase-config.js
+   Firebase is loaded dynamically so module/CDN/configuration
+   failures can be handled instead of silently leaving the
+   splash screen stuck forever.
 ============================================================ */
 
 
 /* ============================================================
-   FIREBASE IMPORTS
+   FIREBASE REFERENCES
 ============================================================ */
 
-import {
-    auth,
-    db,
-    onAuthStateChanged,
-    doc,
-    getDoc
-} from "./firebase/firebase-config.js";
+let auth = null;
+
+let db = null;
+
+let onAuthStateChanged = null;
+
+let doc = null;
+
+let getDoc = null;
 
 
 /* ============================================================
@@ -344,16 +473,27 @@ import {
 ============================================================ */
 
 const loader =
-    document.getElementById("riderx-loader");
+    document.getElementById(
+        "riderx-loader"
+    );
+
 
 const statusElement =
-    document.getElementById("riderx-status");
+    document.getElementById(
+        "riderx-status"
+    );
+
 
 const fallback =
-    document.getElementById("riderx-fallback");
+    document.getElementById(
+        "riderx-fallback"
+    );
+
 
 const retryButton =
-    document.getElementById("riderx-retry");
+    document.getElementById(
+        "riderx-retry"
+    );
 
 
 /* ============================================================
@@ -361,10 +501,19 @@ const retryButton =
 ============================================================ */
 
 const ROUTES = Object.freeze({
-    role: "./auth/role.html",
-    customer: "./customer/home.html",
-    rider: "./rider/home.html",
-    admin: "./admin/dashboard.html"
+
+    role:
+        "./auth/role.html",
+
+    customer:
+        "./customer/home.html",
+
+    rider:
+        "./rider/home.html",
+
+    admin:
+        "./admin/dashboard.html"
+
 });
 
 
@@ -373,9 +522,16 @@ const ROUTES = Object.freeze({
 ============================================================ */
 
 const CONFIG = Object.freeze({
-    AUTH_TIMEOUT: 15000,
-    FIRESTORE_TIMEOUT: 10000,
-    REDIRECT_DELAY: 120
+
+    AUTH_TIMEOUT:
+        15000,
+
+    FIRESTORE_TIMEOUT:
+        10000,
+
+    REDIRECT_DELAY:
+        120
+
 });
 
 
@@ -384,9 +540,16 @@ const CONFIG = Object.freeze({
 ============================================================ */
 
 const ROLES = Object.freeze({
-    ADMIN: "admin",
-    RIDER: "rider",
-    CUSTOMER: "customer"
+
+    ADMIN:
+        "admin",
+
+    RIDER:
+        "rider",
+
+    CUSTOMER:
+        "customer"
+
 });
 
 
@@ -394,11 +557,24 @@ const ROLES = Object.freeze({
    STATE
 ============================================================ */
 
-let authResolved = false;
-let routingStarted = false;
-let redirectStarted = false;
-let fallbackShown = false;
-let authUnsubscribe = null;
+let authResolved =
+    false;
+
+
+let routingStarted =
+    false;
+
+
+let redirectStarted =
+    false;
+
+
+let fallbackShown =
+    false;
+
+
+let authUnsubscribe =
+    null;
 
 
 /* ============================================================
@@ -406,11 +582,15 @@ let authUnsubscribe = null;
 ============================================================ */
 
 function setStatus(text) {
+
     if (!statusElement) {
         return;
     }
 
-    statusElement.textContent = String(text || "");
+
+    statusElement.textContent =
+        String(text || "");
+
 }
 
 
@@ -419,24 +599,38 @@ function setStatus(text) {
 ============================================================ */
 
 function hideLoader() {
+
     if (!loader) {
         return;
     }
 
-    loader.classList.add("hidden");
+
+    loader.classList.add(
+        "hidden"
+    );
+
 }
 
 
 function showFallback() {
+
     if (fallbackShown) {
         return;
     }
 
-    fallbackShown = true;
+
+    fallbackShown =
+        true;
+
 
     if (fallback) {
-        fallback.classList.add("visible");
+
+        fallback.classList.add(
+            "visible"
+        );
+
     }
+
 }
 
 
@@ -445,40 +639,77 @@ function showFallback() {
 ============================================================ */
 
 function redirectTo(route) {
-    if (!route || redirectStarted) {
+
+    if (
+        !route ||
+        redirectStarted
+    ) {
         return;
     }
 
-    redirectStarted = true;
+
+    redirectStarted =
+        true;
+
 
     hideLoader();
 
+
     try {
-        window.location.replace(route);
+
+        window.location.replace(
+            route
+        );
+
     } catch (error) {
+
         console.error(
             "RiderX: redirect failed:",
             error
         );
 
-        redirectStarted = false;
+
+        redirectStarted =
+            false;
+
+
         showFallback();
+
     }
+
 }
 
 
-function delayedRedirect(route, statusText) {
+function delayedRedirect(
+    route,
+    statusText
+) {
+
     if (redirectStarted) {
         return;
     }
 
+
     if (statusText) {
-        setStatus(statusText);
+
+        setStatus(
+            statusText
+        );
+
     }
 
-    window.setTimeout(function () {
-        redirectTo(route);
-    }, CONFIG.REDIRECT_DELAY);
+
+    window.setTimeout(
+        function () {
+
+            redirectTo(
+                route
+            );
+
+        },
+        CONFIG.REDIRECT_DELAY
+    );
+
 }
 
 
@@ -487,17 +718,26 @@ function delayedRedirect(route, statusText) {
 ============================================================ */
 
 function normalizeRole(value) {
+
     if (
         typeof value !== "string" &&
         typeof value !== "number"
     ) {
+
         return "";
+
     }
 
-    const role = String(value)
-        .trim()
-        .toLowerCase()
-        .replace(/[\s-]+/g, "_");
+
+    const role =
+        String(value)
+            .trim()
+            .toLowerCase()
+            .replace(
+                /[\s-]+/g,
+                "_"
+            );
+
 
     if (
         [
@@ -507,8 +747,11 @@ function normalizeRole(value) {
             "super_admin"
         ].includes(role)
     ) {
+
         return ROLES.ADMIN;
+
     }
+
 
     if (
         [
@@ -523,8 +766,11 @@ function normalizeRole(value) {
             "driverpartner"
         ].includes(role)
     ) {
+
         return ROLES.RIDER;
+
     }
+
 
     if (
         [
@@ -536,10 +782,14 @@ function normalizeRole(value) {
             "client"
         ].includes(role)
     ) {
+
         return ROLES.CUSTOMER;
+
     }
 
+
     return "";
+
 }
 
 
@@ -548,17 +798,28 @@ function normalizeRole(value) {
 ============================================================ */
 
 function isTruthyApprovalValue(value) {
+
     if (value === true) {
         return true;
     }
 
-    if (typeof value === "number") {
+
+    if (
+        typeof value === "number"
+    ) {
+
         return value === 1;
+
     }
 
-    const normalized = String(value ?? "")
+
+    const normalized =
+        String(
+            value ?? ""
+        )
         .trim()
         .toLowerCase();
+
 
     return [
         "true",
@@ -567,22 +828,36 @@ function isTruthyApprovalValue(value) {
         "approved",
         "active",
         "verified"
-    ].includes(normalized);
+    ].includes(
+        normalized
+    );
+
 }
 
 
 function isFalseApprovalValue(value) {
+
     if (value === false) {
         return true;
     }
 
-    if (typeof value === "number") {
+
+    if (
+        typeof value === "number"
+    ) {
+
         return value === 0;
+
     }
 
-    const normalized = String(value ?? "")
+
+    const normalized =
+        String(
+            value ?? ""
+        )
         .trim()
         .toLowerCase();
+
 
     return [
         "false",
@@ -592,7 +867,10 @@ function isFalseApprovalValue(value) {
         "blocked",
         "disabled",
         "suspended"
-    ].includes(normalized);
+    ].includes(
+        normalized
+    );
+
 }
 
 
@@ -600,29 +878,72 @@ function isFalseApprovalValue(value) {
    TIMEOUT HELPER
 ============================================================ */
 
-function withTimeout(promise, timeout, label) {
+function withTimeout(
+    promise,
+    timeout,
+    label
+) {
+
     let timer = null;
 
-    const timeoutPromise = new Promise(function (_, reject) {
-        timer = window.setTimeout(function () {
-            const error = new Error(
-                label || "Operation timed out."
-            );
 
-            error.code = "riderx/timeout";
+    const timeoutPromise =
+        new Promise(
+            function (_, reject) {
 
-            reject(error);
-        }, timeout);
-    });
+                timer =
+                    window.setTimeout(
+                        function () {
+
+                            const error =
+                                new Error(
+                                    label ||
+                                    "Operation timed out."
+                                );
+
+
+                            error.code =
+                                "riderx/timeout";
+
+
+                            reject(
+                                error
+                            );
+
+                        },
+                        timeout
+                    );
+
+            }
+        );
+
 
     return Promise.race([
-        Promise.resolve(promise),
+
+        Promise.resolve(
+            promise
+        ),
+
         timeoutPromise
-    ]).finally(function () {
-        if (timer !== null) {
-            window.clearTimeout(timer);
+
+    ]).finally(
+
+        function () {
+
+            if (
+                timer !== null
+            ) {
+
+                window.clearTimeout(
+                    timer
+                );
+
+            }
+
         }
-    });
+
+    );
+
 }
 
 
@@ -631,35 +952,68 @@ function withTimeout(promise, timeout, label) {
 ============================================================ */
 
 function safeGetStorage(key) {
+
     try {
-        return localStorage.getItem(key);
+
+        return localStorage.getItem(
+            key
+        );
+
     } catch (error) {
+
         return null;
+
     }
+
 }
 
 
-function safeSetStorage(key, value) {
+function safeSetStorage(
+    key,
+    value
+) {
+
     try {
-        localStorage.setItem(key, String(value));
+
+        localStorage.setItem(
+            key,
+            String(value)
+        );
+
         return true;
+
     } catch (error) {
+
         console.warn(
             "RiderX: localStorage write failed:",
             error
         );
 
+
         return false;
+
     }
+
 }
 
 
 function safeRemoveStorage(key) {
+
     try {
-        localStorage.removeItem(key);
+
+        localStorage.removeItem(
+            key
+        );
+
     } catch (error) {
-        // Ignore restricted/private browser storage.
+
+        /*
+         * Ignore restricted/private
+         * browser storage.
+         */
+
     }
+
 }
 
 
@@ -667,128 +1021,239 @@ function safeRemoveStorage(key) {
    SESSION CACHE
 ============================================================ */
 
-function saveSessionCache(user, role) {
+function saveSessionCache(
+    user,
+    role
+) {
+
     if (
         !user ||
         !user.uid ||
         !role
     ) {
+
         return;
+
     }
 
+
     const normalizedRole =
-        normalizeRole(role);
+        normalizeRole(
+            role
+        );
+
 
     if (!normalizedRole) {
         return;
     }
 
+
     const session = {
-        uid: user.uid,
-        role: normalizedRole,
-        email: user.email || "",
-        displayName: user.displayName || "",
-        photoURL: user.photoURL || "",
-        updatedAt: Date.now()
+
+        uid:
+            user.uid,
+
+        role:
+            normalizedRole,
+
+        email:
+            user.email || "",
+
+        displayName:
+            user.displayName || "",
+
+        photoURL:
+            user.photoURL || "",
+
+        updatedAt:
+            Date.now()
+
     };
 
+
     try {
+
         localStorage.setItem(
             "riderx_session",
-            JSON.stringify(session)
+            JSON.stringify(
+                session
+            )
         );
+
     } catch (error) {
+
         console.warn(
             "RiderX: session cache unavailable:",
             error
         );
+
     }
+
 
     safeSetStorage(
         "riderx_uid",
         user.uid
     );
 
+
     safeSetStorage(
         "riderx_role",
         normalizedRole
     );
+
 
     safeSetStorage(
         "riderx_selected_role",
         normalizedRole
     );
 
-    if (normalizedRole === ROLES.CUSTOMER) {
+
+    if (
+        normalizedRole ===
+        ROLES.CUSTOMER
+    ) {
+
         safeSetStorage(
             "riderx_customer_id",
             user.uid
         );
 
-        safeRemoveStorage("riderx_rider_id");
+
+        safeRemoveStorage(
+            "riderx_rider_id"
+        );
+
     }
 
-    if (normalizedRole === ROLES.RIDER) {
+
+    if (
+        normalizedRole ===
+        ROLES.RIDER
+    ) {
+
         safeSetStorage(
             "riderx_rider_id",
             user.uid
         );
 
-        safeRemoveStorage("riderx_customer_id");
+
+        safeRemoveStorage(
+            "riderx_customer_id"
+        );
+
     }
+
 }
 
 
 /* ============================================================
-   CLEAR AUTH-DEPENDENT CACHE
+   CLEAR AUTH CACHE
 ============================================================ */
 
 function clearAuthCache() {
+
     const keys = [
+
         "riderx_user",
+
         "riderx_customer",
+
         "riderx_rider",
+
         "riderx_role",
+
         "riderx_selected_role",
+
         "riderx_customer_id",
+
         "riderx_rider_id",
+
         "riderx_uid",
+
         "riderx_session"
+
     ];
 
-    for (const key of keys) {
-        safeRemoveStorage(key);
+
+    for (
+        const key of keys
+    ) {
+
+        safeRemoveStorage(
+            key
+        );
+
     }
+
 }
 
 
 /* ============================================================
-   GET FIRESTORE USER PROFILE
+   GET USER PROFILE
 ============================================================ */
 
-async function getUserProfile(user) {
+async function getUserProfile(
+    user
+) {
+
     if (
         !user ||
         !user.uid
     ) {
+
         return null;
+
     }
 
+
+    if (
+        typeof doc !== "function" ||
+        typeof getDoc !== "function"
+    ) {
+
+        throw new Error(
+            "Firestore functions are unavailable."
+        );
+
+    }
+
+
     const userRef =
-        doc(db, "users", user.uid);
+        doc(
+            db,
+            "users",
+            user.uid
+        );
+
 
     const snapshot =
         await withTimeout(
-            getDoc(userRef),
+
+            getDoc(
+                userRef
+            ),
+
             CONFIG.FIRESTORE_TIMEOUT,
+
             "User profile lookup timed out."
+
         );
 
-    if (!snapshot.exists()) {
+
+    if (
+        !snapshot.exists()
+    ) {
+
         return null;
+
     }
 
-    return snapshot.data() || {};
+
+    return (
+        snapshot.data() ||
+        {}
+    );
+
 }
 
 
@@ -796,32 +1261,64 @@ async function getUserProfile(user) {
    ROLE FROM PROFILE
 ============================================================ */
 
-function getRoleFromProfile(data) {
-    if (!data || typeof data !== "object") {
+function getRoleFromProfile(
+    data
+) {
+
+    if (
+        !data ||
+        typeof data !== "object"
+    ) {
+
         return "";
+
     }
+
 
     const possibleRoles = [
+
         data.role,
+
         data.userRole,
+
         data.accountType,
+
         data.account_type,
+
         data.userType,
+
         data.user_type,
+
         data.type,
+
         data.accountRole,
+
         data.account_role
+
     ];
 
-    for (const value of possibleRoles) {
-        const role = normalizeRole(value);
+
+    for (
+        const value of possibleRoles
+    ) {
+
+        const role =
+            normalizeRole(
+                value
+            );
+
 
         if (role) {
+
             return role;
+
         }
+
     }
 
+
     return "";
+
 }
 
 
@@ -829,66 +1326,96 @@ function getRoleFromProfile(data) {
    GET USER ROLE
 ============================================================ */
 
-async function getUserRole(user) {
+async function getUserRole(
+    user
+) {
+
     if (
         !user ||
         !user.uid
     ) {
+
         return "";
+
     }
 
+
     try {
+
         const profile =
-            await getUserProfile(user);
+            await getUserProfile(
+                user
+            );
+
 
         const profileRole =
-            getRoleFromProfile(profile);
+            getRoleFromProfile(
+                profile
+            );
+
 
         if (profileRole) {
+
             return profileRole;
+
         }
 
-        /*
-         * Firebase custom claims fallback.
-         * This does not replace Firestore role resolution;
-         * it only helps when the backend has already assigned
-         * a valid role claim.
-         */
+
         try {
+
             const tokenResult =
                 await withTimeout(
+
                     user.getIdTokenResult(),
+
                     CONFIG.FIRESTORE_TIMEOUT,
+
                     "Authentication token lookup timed out."
+
                 );
 
+
             const claims =
-                tokenResult?.claims || {};
+                tokenResult?.claims ||
+                {};
+
 
             const claimRole =
-                getRoleFromProfile(claims);
+                getRoleFromProfile(
+                    claims
+                );
+
 
             if (claimRole) {
+
                 return claimRole;
+
             }
 
         } catch (claimError) {
+
             console.warn(
                 "RiderX: custom claim lookup failed:",
                 claimError
             );
+
         }
+
 
         return "";
 
     } catch (error) {
+
         console.error(
             "RiderX: Firestore role lookup failed:",
             error
         );
 
+
         throw error;
+
     }
+
 }
 
 
@@ -896,133 +1423,221 @@ async function getUserRole(user) {
    RIDER APPROVAL CHECK
 ============================================================ */
 
-async function checkRiderAccess(user) {
+async function checkRiderAccess(
+    user
+) {
+
     if (
         !user ||
         !user.uid
     ) {
+
         return false;
+
     }
 
+
+    if (
+        typeof doc !== "function" ||
+        typeof getDoc !== "function"
+    ) {
+
+        throw new Error(
+            "Firestore functions are unavailable."
+        );
+
+    }
+
+
     const riderRef =
-        doc(db, "riders", user.uid);
+        doc(
+            db,
+            "riders",
+            user.uid
+        );
+
 
     const snapshot =
         await withTimeout(
-            getDoc(riderRef),
+
+            getDoc(
+                riderRef
+            ),
+
             CONFIG.FIRESTORE_TIMEOUT,
+
             "Rider approval lookup timed out."
+
         );
 
-    if (!snapshot.exists()) {
-        return false;
-    }
-
-    const data =
-        snapshot.data() || {};
-
-
-    /*
-     * Hard deny always wins.
-     */
 
     if (
-        isTruthyApprovalValue(data.disabled) ||
-        isTruthyApprovalValue(data.blocked) ||
-        isTruthyApprovalValue(data.suspended)
+        !snapshot.exists()
     ) {
+
         return false;
+
     }
 
 
-    /*
-     * Explicit rejection always wins.
-     */
+    const data =
+        snapshot.data() ||
+        {};
+
+
+    if (
+        isTruthyApprovalValue(
+            data.disabled
+        ) ||
+        isTruthyApprovalValue(
+            data.blocked
+        ) ||
+        isTruthyApprovalValue(
+            data.suspended
+        )
+    ) {
+
+        return false;
+
+    }
+
 
     const approvalStatus =
-        String(data.approvalStatus ?? "")
-            .trim()
-            .toLowerCase();
+        String(
+            data.approvalStatus ??
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
 
     const status =
-        String(data.status ?? "")
-            .trim()
-            .toLowerCase();
+        String(
+            data.status ??
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
 
     const riderStatus =
-        String(data.riderStatus ?? "")
-            .trim()
-            .toLowerCase();
+        String(
+            data.riderStatus ??
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
 
     const verificationStatus =
-        String(data.verificationStatus ?? "")
-            .trim()
-            .toLowerCase();
+        String(
+            data.verificationStatus ??
+            ""
+        )
+        .trim()
+        .toLowerCase();
 
 
     const rejectedStates = [
+
         "rejected",
+
         "declined",
+
         "blocked",
+
         "disabled",
+
         "suspended",
+
         "banned"
+
     ];
 
+
     if (
-        rejectedStates.includes(approvalStatus) ||
-        rejectedStates.includes(status) ||
-        rejectedStates.includes(riderStatus) ||
-        rejectedStates.includes(verificationStatus)
+        rejectedStates.includes(
+            approvalStatus
+        ) ||
+        rejectedStates.includes(
+            status
+        ) ||
+        rejectedStates.includes(
+            riderStatus
+        ) ||
+        rejectedStates.includes(
+            verificationStatus
+        )
     ) {
+
         return false;
+
     }
 
-
-    /*
-     * Explicit approval fields.
-     */
 
     if (
-        isTruthyApprovalValue(data.approved) ||
-        isTruthyApprovalValue(data.isApproved) ||
-        isTruthyApprovalValue(data.adminApproved) ||
-        isTruthyApprovalValue(data.admin_approved) ||
-        isTruthyApprovalValue(data.verified) ||
-        isTruthyApprovalValue(data.isVerified)
+        isTruthyApprovalValue(
+            data.approved
+        ) ||
+        isTruthyApprovalValue(
+            data.isApproved
+        ) ||
+        isTruthyApprovalValue(
+            data.adminApproved
+        ) ||
+        isTruthyApprovalValue(
+            data.admin_approved
+        ) ||
+        isTruthyApprovalValue(
+            data.verified
+        ) ||
+        isTruthyApprovalValue(
+            data.isVerified
+        )
     ) {
+
         return true;
+
     }
 
-
-    /*
-     * Status-based approval.
-     */
 
     const approvedStates = [
+
         "approved",
+
         "active",
+
         "verified",
+
         "accepted",
+
         "enabled"
+
     ];
 
+
     if (
-        approvedStates.includes(approvalStatus) ||
-        approvedStates.includes(status) ||
-        approvedStates.includes(riderStatus) ||
-        approvedStates.includes(verificationStatus)
+        approvedStates.includes(
+            approvalStatus
+        ) ||
+        approvedStates.includes(
+            status
+        ) ||
+        approvedStates.includes(
+            riderStatus
+        ) ||
+        approvedStates.includes(
+            verificationStatus
+        )
     ) {
+
         return true;
+
     }
 
 
-    /*
-     * Do not guess approval from arbitrary rider data.
-     * Missing approval remains pending.
-     */
-
     return false;
+
 }
 
 
@@ -1031,20 +1646,34 @@ async function checkRiderAccess(user) {
 ============================================================ */
 
 async function registerServiceWorker() {
+
     if (
-        !("serviceWorker" in navigator)
+        !(
+            "serviceWorker" in
+            navigator
+        )
     ) {
+
         return;
+
     }
 
+
     try {
+
         await navigator.serviceWorker.register(
+
             "./sw.js",
+
             {
-                scope: "./"
+                scope:
+                    "./"
             }
+
         );
+
     } catch (error) {
+
         /*
          * Service worker failure must NEVER prevent
          * Firebase authentication or routing.
@@ -1054,7 +1683,9 @@ async function registerServiceWorker() {
             "RiderX: service worker registration failed:",
             error
         );
+
     }
+
 }
 
 
@@ -1063,12 +1694,18 @@ async function registerServiceWorker() {
 ============================================================ */
 
 function routeLoggedOut() {
+
     clearAuthCache();
 
+
     delayedRedirect(
+
         ROUTES.role,
+
         "Welcome to RiderX..."
+
     );
+
 }
 
 
@@ -1076,14 +1713,21 @@ function routeLoggedOut() {
    LOGGED-IN ROUTER
 ============================================================ */
 
-async function routeLoggedIn(user) {
+async function routeLoggedIn(
+    user
+) {
+
     if (
         !user ||
         !user.uid
     ) {
+
         routeLoggedOut();
+
         return;
+
     }
+
 
     setStatus(
         "Checking your RiderX account..."
@@ -1092,9 +1736,14 @@ async function routeLoggedIn(user) {
 
     let role = "";
 
+
     try {
+
         role =
-            await getUserRole(user);
+            await getUserRole(
+                user
+            );
+
     } catch (error) {
 
         console.error(
@@ -1102,76 +1751,95 @@ async function routeLoggedIn(user) {
             error
         );
 
-        /*
-         * Keep Firebase session intact.
-         * Do NOT erase role/session cache just because
-         * Firestore is temporarily unavailable.
-         */
 
         setStatus(
             "Network error while checking your profile."
         );
 
+
         showFallback();
 
-        routingStarted = false;
+
+        routingStarted =
+            false;
+
 
         return;
+
     }
 
-
-    /*
-     * Auth user exists but no profile/role exists.
-     */
 
     if (!role) {
-        safeRemoveStorage("riderx_role");
-        safeRemoveStorage("riderx_selected_role");
 
-        delayedRedirect(
-            ROUTES.role,
-            "Please select your account type..."
+        safeRemoveStorage(
+            "riderx_role"
         );
 
+
+        safeRemoveStorage(
+            "riderx_selected_role"
+        );
+
+
+        delayedRedirect(
+
+            ROUTES.role,
+
+            "Please select your account type..."
+
+        );
+
+
         return;
+
     }
 
 
-    /* ========================================================
-       ADMIN
-    ======================================================== */
-
-    if (role === ROLES.ADMIN) {
+    if (
+        role ===
+        ROLES.ADMIN
+    ) {
 
         saveSessionCache(
             user,
             ROLES.ADMIN
         );
 
+
         delayedRedirect(
+
             ROUTES.admin,
+
             "Opening admin dashboard..."
+
         );
 
+
         return;
+
     }
 
 
-    /* ========================================================
-       RIDER
-    ======================================================== */
-
-    if (role === ROLES.RIDER) {
+    if (
+        role ===
+        ROLES.RIDER
+    ) {
 
         setStatus(
             "Checking rider approval..."
         );
 
-        let approved = false;
+
+        let approved =
+            false;
+
 
         try {
+
             approved =
-                await checkRiderAccess(user);
+                await checkRiderAccess(
+                    user
+                );
 
         } catch (error) {
 
@@ -1180,40 +1848,56 @@ async function routeLoggedIn(user) {
                 error
             );
 
+
             setStatus(
                 "Network error while checking rider approval."
             );
 
+
             showFallback();
 
-            routingStarted = false;
+
+            routingStarted =
+                false;
+
 
             return;
+
         }
 
 
         if (!approved) {
 
-            /*
-             * Keep the account logged in.
-             * Only remove routing cache so the pending rider
-             * does not accidentally enter the rider dashboard.
-             */
+            safeRemoveStorage(
+                "riderx_rider_id"
+            );
 
-            safeRemoveStorage("riderx_rider_id");
-            safeRemoveStorage("riderx_role");
+
+            safeRemoveStorage(
+                "riderx_role"
+            );
+
 
             safeSetStorage(
+
                 "riderx_selected_role",
+
                 ROLES.RIDER
+
             );
+
 
             delayedRedirect(
+
                 ROUTES.role,
+
                 "Your rider account is pending approval."
+
             );
 
+
             return;
+
         }
 
 
@@ -1222,45 +1906,57 @@ async function routeLoggedIn(user) {
             ROLES.RIDER
         );
 
+
         delayedRedirect(
+
             ROUTES.rider,
+
             "Opening rider dashboard..."
+
         );
 
+
         return;
+
     }
 
 
-    /* ========================================================
-       CUSTOMER
-    ======================================================== */
-
-    if (role === ROLES.CUSTOMER) {
+    if (
+        role ===
+        ROLES.CUSTOMER
+    ) {
 
         saveSessionCache(
             user,
             ROLES.CUSTOMER
         );
 
+
         delayedRedirect(
+
             ROUTES.customer,
+
             "Opening customer dashboard..."
+
         );
 
+
         return;
+
     }
 
 
-    /* ========================================================
-       UNKNOWN ROLE
-    ======================================================== */
-
     clearAuthCache();
 
+
     delayedRedirect(
+
         ROUTES.role,
+
         "Please select your account type..."
+
     );
+
 }
 
 
@@ -1268,26 +1964,40 @@ async function routeLoggedIn(user) {
    AUTH STATE HANDLER
 ============================================================ */
 
-async function handleAuthState(user) {
+async function handleAuthState(
+    user
+) {
 
-    /*
-     * Firebase may invoke the listener more than once.
-     * Only the first routing decision is allowed to run.
-     */
+    if (
+        routingStarted ||
+        redirectStarted
+    ) {
 
-    if (routingStarted || redirectStarted) {
         return;
+
     }
 
-    routingStarted = true;
-    authResolved = true;
+
+    routingStarted =
+        true;
+
+
+    authResolved =
+        true;
+
 
     try {
 
         if (user) {
-            await routeLoggedIn(user);
+
+            await routeLoggedIn(
+                user
+            );
+
         } else {
+
             routeLoggedOut();
+
         }
 
     } catch (error) {
@@ -1297,14 +2007,20 @@ async function handleAuthState(user) {
             error
         );
 
-        routingStarted = false;
+
+        routingStarted =
+            false;
+
 
         setStatus(
             "Unable to load RiderX."
         );
 
+
         showFallback();
+
     }
+
 }
 
 
@@ -1315,31 +2031,45 @@ async function handleAuthState(user) {
 if (retryButton) {
 
     retryButton.addEventListener(
+
         "click",
+
         function () {
 
-            if (redirectStarted) {
+            if (
+                redirectStarted
+            ) {
+
                 return;
+
             }
 
-            /*
-             * Reset UI before reload.
-             */
 
-            retryButton.disabled = true;
+            retryButton.disabled =
+                true;
+
 
             setStatus(
                 "Restarting RiderX..."
             );
 
+
             window.setTimeout(
+
                 function () {
+
                     window.location.reload();
+
                 },
+
                 150
+
             );
+
         }
+
     );
+
 }
 
 
@@ -1363,22 +2093,98 @@ if (retryButton) {
 
 
     /*
-     * Validate Firebase objects before subscribing.
+     * Dynamically load Firebase so module/CDN/configuration
+     * failures can be displayed instead of leaving the
+     * splash screen permanently stuck.
      */
 
-    if (!auth) {
+    setStatus(
+        "Loading RiderX services..."
+    );
+
+
+    let firebaseModule;
+
+
+    try {
+
+        firebaseModule =
+            await import(
+                "./firebase/firebase-config.js"
+            );
+
+
+        auth =
+            firebaseModule.auth;
+
+
+        db =
+            firebaseModule.db;
+
+
+        onAuthStateChanged =
+            firebaseModule.onAuthStateChanged;
+
+
+        doc =
+            firebaseModule.doc;
+
+
+        getDoc =
+            firebaseModule.getDoc;
+
+
+    } catch (error) {
 
         console.error(
-            "RiderX: Firebase Auth instance is unavailable."
+            "RiderX: Firebase module failed to load:",
+            error
         );
 
+
         setStatus(
-            "Authentication service unavailable."
+            "Unable to load RiderX services."
         );
+
 
         showFallback();
 
+
         return;
+
+    }
+
+
+    /*
+     * Validate Firebase objects before subscribing.
+     */
+
+    if (
+        !auth ||
+        !db ||
+        typeof onAuthStateChanged !==
+            "function" ||
+        typeof doc !==
+            "function" ||
+        typeof getDoc !==
+            "function"
+    ) {
+
+        console.error(
+            "RiderX: Firebase module loaded but required exports are missing."
+        );
+
+
+        setStatus(
+            "RiderX services are incomplete."
+        );
+
+
+        showFallback();
+
+
+        return;
+
     }
 
 
@@ -1386,8 +2192,11 @@ if (retryButton) {
 
         authUnsubscribe =
             onAuthStateChanged(
+
                 auth,
+
                 handleAuthState,
+
                 function (error) {
 
                     console.error(
@@ -1395,21 +2204,30 @@ if (retryButton) {
                         error
                     );
 
+
                     if (
                         routingStarted ||
                         redirectStarted
                     ) {
+
                         return;
+
                     }
+
 
                     setStatus(
                         "Authentication service unavailable."
                     );
 
+
                     showFallback();
 
-                    routingStarted = false;
+
+                    routingStarted =
+                        false;
+
                 }
+
             );
 
     } catch (error) {
@@ -1419,25 +2237,30 @@ if (retryButton) {
             error
         );
 
+
         setStatus(
             "Authentication service unavailable."
         );
 
+
         showFallback();
 
+
         return;
+
     }
 
 
     /*
      * Safety timeout.
      *
-     * This does NOT force a logout.
-     * It only tells the user that Firebase is taking
-     * longer than expected and exposes Retry.
+     * This does NOT force logout.
+     * It only exposes Retry when Firebase Auth takes
+     * longer than expected.
      */
 
     window.setTimeout(
+
         function () {
 
             if (
@@ -1450,11 +2273,15 @@ if (retryButton) {
                     "Authentication is taking longer than expected."
                 );
 
+
                 showFallback();
+
             }
 
         },
+
         CONFIG.AUTH_TIMEOUT
+
     );
 
 })();
@@ -1464,23 +2291,25 @@ if (retryButton) {
    DEBUG / COMPATIBILITY API
 ============================================================ */
 
-window.RiderXEntry = Object.freeze({
+window.RiderXEntry =
+    Object.freeze({
 
-    routes: ROUTES,
+        routes:
+            ROUTES,
 
-    normalizeRole,
+        normalizeRole,
 
-    getUserRole,
+        getUserRole,
 
-    checkRiderAccess,
+        checkRiderAccess,
 
-    saveSessionCache,
+        saveSessionCache,
 
-    clearAuthCache,
+        clearAuthCache,
 
-    registerServiceWorker
+        registerServiceWorker
 
-});
+    });
 
 
 /* ============================================================
@@ -1488,31 +2317,46 @@ window.RiderXEntry = Object.freeze({
 ============================================================ */
 
 window.addEventListener(
+
     "pagehide",
+
     function () {
 
         if (
-            typeof authUnsubscribe === "function"
+            typeof authUnsubscribe ===
+            "function"
         ) {
 
             try {
+
                 authUnsubscribe();
+
             } catch (error) {
 
                 console.warn(
                     "RiderX: auth listener cleanup failed:",
                     error
                 );
+
             }
 
-            authUnsubscribe = null;
+
+            authUnsubscribe =
+                null;
+
         }
 
     },
+
     {
         once: true
     }
+
 );
 
-</script></body>
-</html>
+</script>
+
+
+</body>
+
+    </html>
