@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -31,6 +32,7 @@
     margin:0;
     padding:0;
     font-family:Inter,Arial,Helvetica,sans-serif;
+    -webkit-tap-highlight-color:transparent;
 }
 
 html,
@@ -44,7 +46,15 @@ body{
     padding-bottom:30px;
 }
 
-/* HEADER */
+button{
+    font:inherit;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+}
+
+/* ================================
+   HEADER
+================================ */
 
 .header{
     position:sticky;
@@ -81,10 +91,17 @@ body{
     display:flex;
     align-items:center;
     justify-content:center;
+
+    flex:none;
+}
+
+.back:active{
+    transform:scale(.94);
 }
 
 .header-title{
     flex:1;
+    min-width:0;
 }
 
 .header-title h1{
@@ -110,9 +127,17 @@ body{
     color:#fff;
 
     font-size:17px;
+
+    flex:none;
 }
 
-/* PAGE */
+.header-icon:active{
+    transform:scale(.94);
+}
+
+/* ================================
+   PAGE
+================================ */
 
 .container{
     width:100%;
@@ -121,7 +146,9 @@ body{
     padding:14px;
 }
 
-/* SECTION */
+/* ================================
+   SECTION
+================================ */
 
 .section-title{
     margin:19px 3px 9px;
@@ -136,7 +163,9 @@ body{
     letter-spacing:.8px;
 }
 
-/* CARD */
+/* ================================
+   CARD
+================================ */
 
 .settings-card{
     overflow:hidden;
@@ -148,7 +177,9 @@ body{
     border:1px solid var(--border);
 }
 
-/* ROW */
+/* ================================
+   ROW
+================================ */
 
 .setting-row{
     width:100%;
@@ -167,10 +198,16 @@ body{
     color:#fff;
 
     text-align:left;
+
+    appearance:none;
 }
 
 .setting-row:last-child{
     border-bottom:0;
+}
+
+.setting-row:active{
+    background:#171717;
 }
 
 .setting-icon{
@@ -213,14 +250,18 @@ body{
 .setting-value{
     color:#777;
     font-size:10px;
+    white-space:nowrap;
 }
 
 .arrow{
     color:#666;
     font-size:16px;
+    flex:none;
 }
 
-/* SWITCH */
+/* ================================
+   SWITCH
+================================ */
 
 .switch{
     width:48px;
@@ -234,6 +275,8 @@ body{
     background:#333;
 
     flex:none;
+
+    appearance:none;
 }
 
 .switch span{
@@ -258,11 +301,18 @@ body{
     background:#000;
 }
 
-/* LANGUAGE */
+.switch:active{
+    transform:scale(.96);
+}
+
+/* ================================
+   LANGUAGE
+================================ */
 
 .language-options{
     display:flex;
     gap:6px;
+    flex:none;
 }
 
 .language{
@@ -280,13 +330,19 @@ body{
     font-weight:900;
 }
 
+.language:active{
+    transform:scale(.95);
+}
+
 .language.active{
     background:var(--yellow);
     color:#000;
     border-color:var(--yellow);
 }
 
-/* DANGER */
+/* ================================
+   DANGER
+================================ */
 
 .danger{
     color:#ff7777;
@@ -297,7 +353,9 @@ body{
     color:#ff7777;
 }
 
-/* APP INFO */
+/* ================================
+   APP INFO
+================================ */
 
 .app-card{
     padding:17px;
@@ -359,7 +417,9 @@ body{
     line-height:1.6;
 }
 
-/* TOAST */
+/* ================================
+   TOAST
+================================ */
 
 .toast{
     position:fixed;
@@ -397,10 +457,28 @@ body{
     transform:translate(-50%,0);
 }
 
+/* ================================
+   MOBILE
+================================ */
+
 @media(max-width:370px){
 
     .container{
         padding:10px;
+    }
+
+    .setting-row{
+        padding-left:12px;
+        padding-right:12px;
+        gap:9px;
+    }
+
+    .setting-description{
+        font-size:8.5px;
+    }
+
+    .language{
+        padding:6px 8px;
     }
 
 }
@@ -408,6 +486,7 @@ body{
 </style>
 
 </head>
+
 
 <body>
 
@@ -418,6 +497,7 @@ body{
         class="back"
         id="backBtn"
         type="button"
+        aria-label="Go back"
     >
         ‹
     </button>
@@ -440,6 +520,7 @@ body{
         class="header-icon"
         id="refreshBtn"
         type="button"
+        aria-label="Refresh settings"
     >
         ↻
     </button>
@@ -450,7 +531,9 @@ body{
 <main class="container">
 
 
-    <!-- APP -->
+    <!-- =========================================
+         APP PREFERENCES
+    ========================================== -->
 
     <div class="section-title">
         App Preferences
@@ -460,11 +543,9 @@ body{
     <section class="settings-card">
 
 
-        <button
-            class="setting-row"
-            id="notificationSetting"
-            type="button"
-        >
+        <!-- NOTIFICATIONS -->
+
+        <div class="setting-row">
 
             <div class="setting-icon">
                 🔔
@@ -486,13 +567,16 @@ body{
                 class="switch active"
                 id="notificationSwitch"
                 type="button"
-                aria-label="Ride notifications"
+                aria-label="Toggle ride notifications"
+                aria-pressed="true"
             >
                 <span></span>
             </button>
 
-        </button>
+        </div>
 
+
+        <!-- SOUND -->
 
         <div class="setting-row">
 
@@ -516,13 +600,16 @@ body{
                 class="switch active"
                 id="soundSwitch"
                 type="button"
-                aria-label="Ride request sound"
+                aria-label="Toggle ride request sound"
+                aria-pressed="true"
             >
                 <span></span>
             </button>
 
         </div>
 
+
+        <!-- VIBRATION -->
 
         <div class="setting-row">
 
@@ -546,13 +633,16 @@ body{
                 class="switch active"
                 id="vibrationSwitch"
                 type="button"
-                aria-label="Vibration"
+                aria-label="Toggle vibration"
+                aria-pressed="true"
             >
                 <span></span>
             </button>
 
         </div>
 
+
+        <!-- DARK MODE -->
 
         <div class="setting-row">
 
@@ -576,13 +666,16 @@ body{
                 class="switch active"
                 id="darkSwitch"
                 type="button"
-                aria-label="Dark mode"
+                aria-label="Toggle dark mode"
+                aria-pressed="true"
             >
                 <span></span>
             </button>
 
         </div>
 
+
+        <!-- LANGUAGE -->
 
         <div class="setting-row">
 
@@ -602,7 +695,11 @@ body{
 
             </div>
 
-            <div class="language-options">
+            <div
+                class="language-options"
+                role="group"
+                aria-label="Language"
+            >
 
                 <button
                     class="language active"
@@ -624,10 +721,13 @@ body{
 
         </div>
 
+
     </section>
 
 
-    <!-- RIDE -->
+    <!-- =========================================
+         RIDE PREFERENCES
+    ========================================== -->
 
     <div class="section-title">
         Ride Preferences
@@ -636,6 +736,8 @@ body{
 
     <section class="settings-card">
 
+
+        <!-- LOCATION -->
 
         <div class="setting-row">
 
@@ -665,6 +767,8 @@ body{
         </div>
 
 
+        <!-- ONLINE -->
+
         <button
             class="setting-row"
             id="onlinePageBtn"
@@ -693,6 +797,8 @@ body{
 
         </button>
 
+
+        <!-- MAP -->
 
         <button
             class="setting-row"
@@ -726,7 +832,9 @@ body{
     </section>
 
 
-    <!-- ACCOUNT -->
+    <!-- =========================================
+         ACCOUNT & SUPPORT
+    ========================================== -->
 
     <div class="section-title">
         Account & Support
@@ -735,6 +843,8 @@ body{
 
     <section class="settings-card">
 
+
+        <!-- PROFILE -->
 
         <button
             class="setting-row"
@@ -765,6 +875,8 @@ body{
         </button>
 
 
+        <!-- DOCUMENTS -->
+
         <button
             class="setting-row"
             id="documentsBtn"
@@ -794,6 +906,8 @@ body{
         </button>
 
 
+        <!-- SUPPORT -->
+
         <button
             class="setting-row"
             id="supportBtn"
@@ -822,6 +936,8 @@ body{
 
         </button>
 
+
+        <!-- TERMS -->
 
         <button
             class="setting-row"
@@ -855,7 +971,9 @@ body{
     </section>
 
 
-    <!-- DANGER -->
+    <!-- =========================================
+         ACCOUNT ACTIONS
+    ========================================== -->
 
     <div class="section-title">
         Account Actions
@@ -897,7 +1015,9 @@ body{
     </section>
 
 
-    <!-- APP INFO -->
+    <!-- =========================================
+         APP INFO
+    ========================================== -->
 
     <div class="section-title">
         About RiderX
@@ -931,30 +1051,48 @@ body{
 <div
     class="toast"
     id="toast"
+    role="status"
+    aria-live="polite"
 ></div>
 
 
 <script type="module">
 
+/* ============================================================
+   RIDERX
+   SETTINGS
+============================================================ */
+
+
+/* ============================================================
+   FIREBASE
+============================================================ */
+
 import {
     auth,
-    db,
-    doc,
-    getDoc,
-    updateDoc,
     signOut,
     onAuthStateChanged
 } from "../firebase/firebase-config.js";
 
 
+/* ============================================================
+   DOM
+============================================================ */
+
 const backBtn =
-    document.getElementById("backBtn");
+    document.getElementById(
+        "backBtn"
+    );
 
 const refreshBtn =
-    document.getElementById("refreshBtn");
+    document.getElementById(
+        "refreshBtn"
+    );
 
 const toast =
-    document.getElementById("toast");
+    document.getElementById(
+        "toast"
+    );
 
 const locationStatus =
     document.getElementById(
@@ -962,39 +1100,58 @@ const locationStatus =
     );
 
 
+/* ============================================================
+   STATE
+============================================================ */
+
 let currentUser = null;
 
+let toastTimer = null;
 
-/* --------------------------------
+
+/* ============================================================
    TOAST
--------------------------------- */
+============================================================ */
 
 function showToast(message){
 
+    if(!toast){
+        return;
+    }
+
+
     toast.textContent =
-        message;
+        String(message || "");
 
-    toast.classList.add("show");
 
-    clearTimeout(
-        window.__toastTimer
+    toast.classList.add(
+        "show"
     );
 
-    window.__toastTimer =
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
         setTimeout(
-            () =>
+            () => {
+
                 toast.classList.remove(
                     "show"
-                ),
+                );
+
+            },
             2200
         );
 
 }
 
 
-/* --------------------------------
+/* ============================================================
    LOCAL SETTINGS
--------------------------------- */
+============================================================ */
 
 const defaultSettings = {
 
@@ -1020,15 +1177,47 @@ function getSettings(){
                 "riderXSettings"
             );
 
+
+        if(!saved){
+
+            return {
+                ...defaultSettings
+            };
+
+        }
+
+
+        const parsed =
+            JSON.parse(
+                saved
+            );
+
+
+        if(
+            !parsed ||
+            typeof parsed !== "object"
+        ){
+
+            return {
+                ...defaultSettings
+            };
+
+        }
+
+
         return {
             ...defaultSettings,
-            ...(saved
-                ? JSON.parse(saved)
-                : {})
+            ...parsed
         };
 
     }
     catch(error){
+
+        console.error(
+            "Settings read error:",
+            error
+        );
+
 
         return {
             ...defaultSettings
@@ -1039,19 +1228,43 @@ function getSettings(){
 }
 
 
-function saveSettings(settings){
+function saveSettings(
+    settings
+){
 
-    localStorage.setItem(
-        "riderXSettings",
-        JSON.stringify(settings)
-    );
+    try{
+
+        localStorage.setItem(
+            "riderXSettings",
+            JSON.stringify(
+                settings
+            )
+        );
+
+        return true;
+
+    }
+    catch(error){
+
+        console.error(
+            "Settings save error:",
+            error
+        );
+
+        showToast(
+            "Unable to save setting."
+        );
+
+        return false;
+
+    }
 
 }
 
 
-/* --------------------------------
+/* ============================================================
    SWITCH
--------------------------------- */
+============================================================ */
 
 function setupSwitch(
     id,
@@ -1059,7 +1272,10 @@ function setupSwitch(
 ){
 
     const button =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
+
 
     if(!button){
         return;
@@ -1072,13 +1288,17 @@ function setupSwitch(
 
     setSwitch(
         button,
-        Boolean(settings[key])
+        Boolean(
+            settings[key]
+        )
     );
 
 
     button.addEventListener(
         "click",
         event => {
+
+            event.preventDefault();
 
             event.stopPropagation();
 
@@ -1087,28 +1307,35 @@ function setupSwitch(
                 getSettings();
 
 
-            latest[key] =
+            const newValue =
                 !Boolean(
                     latest[key]
                 );
 
 
-            saveSettings(
-                latest
-            );
+            latest[key] =
+                newValue;
 
 
-            setSwitch(
-                button,
-                latest[key]
-            );
+            if(
+                saveSettings(
+                    latest
+                )
+            ){
+
+                setSwitch(
+                    button,
+                    newValue
+                );
 
 
-            showToast(
-                latest[key]
-                    ? "Enabled"
-                    : "Disabled"
-            );
+                showToast(
+                    newValue
+                        ? "Enabled"
+                        : "Disabled"
+                );
+
+            }
 
         }
     );
@@ -1121,17 +1348,27 @@ function setSwitch(
     active
 ){
 
+    const enabled =
+        Boolean(active);
+
+
     button.classList.toggle(
         "active",
-        Boolean(active)
+        enabled
+    );
+
+
+    button.setAttribute(
+        "aria-pressed",
+        String(enabled)
     );
 
 }
 
 
-/* --------------------------------
+/* ============================================================
    LANGUAGE
--------------------------------- */
+============================================================ */
 
 function setupLanguage(){
 
@@ -1139,80 +1376,108 @@ function setupLanguage(){
         getSettings();
 
 
-    document
-        .querySelectorAll(
+    const buttons =
+        document.querySelectorAll(
             ".language"
-        )
-        .forEach(
-            button => {
-
-                button.classList.toggle(
-                    "active",
-                    button.dataset.language ===
-                    settings.language
-                );
+        );
 
 
-                button.addEventListener(
-                    "click",
-                    () => {
+    buttons.forEach(
+        button => {
 
-                        const latest =
-                            getSettings();
-
-
-                        latest.language =
-                            button.dataset.language;
+            const language =
+                button.dataset.language;
 
 
-                        saveSettings(
+            button.classList.toggle(
+                "active",
+                language ===
+                settings.language
+            );
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const latest =
+                        getSettings();
+
+
+                    latest.language =
+                        language;
+
+
+                    if(
+                        !saveSettings(
                             latest
-                        );
+                        )
+                    ){
 
-
-                        document
-                            .querySelectorAll(
-                                ".language"
-                            )
-                            .forEach(
-                                item =>
-                                    item.classList.toggle(
-                                        "active",
-                                        item.dataset.language ===
-                                        latest.language
-                                    )
-                            );
-
-
-                        showToast(
-                            latest.language === "hi"
-                                ? "Hindi selected"
-                                : "English selected"
-                        );
+                        return;
 
                     }
-                );
 
-            }
-        );
+
+                    buttons.forEach(
+                        item => {
+
+                            item.classList.toggle(
+                                "active",
+                                item.dataset.language ===
+                                language
+                            );
+
+                        }
+                    );
+
+
+                    showToast(
+                        language === "hi"
+                            ? "Hindi selected"
+                            : "English selected"
+                    );
+
+                }
+            );
+
+        }
+    );
 
 }
 
 
-/* --------------------------------
+/* ============================================================
    LOCATION
--------------------------------- */
+============================================================ */
 
 function checkLocation(){
 
-    if(!navigator.geolocation){
+    if(!locationStatus){
+        return;
+    }
+
+
+    if(
+        !navigator.geolocation
+    ){
 
         locationStatus.textContent =
             "Unavailable";
 
+        locationStatus.style.color =
+            "var(--red)";
+
         return;
 
     }
+
+
+    locationStatus.textContent =
+        "Checking...";
+
+    locationStatus.style.color =
+        "var(--muted)";
 
 
     navigator.geolocation.getCurrentPosition(
@@ -1228,6 +1493,12 @@ function checkLocation(){
         },
 
         error => {
+
+            console.warn(
+                "Location check:",
+                error
+            );
+
 
             locationStatus.textContent =
                 "Permission needed";
@@ -1248,97 +1519,147 @@ function checkLocation(){
 }
 
 
-/* --------------------------------
+/* ============================================================
+   NAVIGATION HELPER
+============================================================ */
+
+function goTo(
+    path
+){
+
+    if(!path){
+        return;
+    }
+
+
+    window.location.href =
+        path;
+
+}
+
+
+/* ============================================================
    NAVIGATION
--------------------------------- */
+============================================================ */
 
 document
-    .getElementById("profileBtn")
-    .addEventListener(
+    .getElementById(
+        "profileBtn"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
-            window.location.href =
-                "profile.html";
+            goTo(
+                "profile.html"
+            );
 
         }
     );
 
 
 document
-    .getElementById("documentsBtn")
-    .addEventListener(
+    .getElementById(
+        "documentsBtn"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
-            window.location.href =
-                "documents.html";
+            goTo(
+                "documents.html"
+            );
 
         }
     );
 
 
 document
-    .getElementById("onlinePageBtn")
-    .addEventListener(
+    .getElementById(
+        "onlinePageBtn"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
-            window.location.href =
-                "online.html";
+            goTo(
+                "online.html"
+            );
 
         }
     );
 
 
 document
-    .getElementById("mapSettingBtn")
-    .addEventListener(
+    .getElementById(
+        "mapSettingBtn"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
-            window.location.href =
-                "map.html";
+            goTo(
+                "map.html"
+            );
 
         }
     );
 
 
 document
-    .getElementById("supportBtn")
-    .addEventListener(
+    .getElementById(
+        "supportBtn"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
-            window.location.href =
-                "support.html";
+            goTo(
+                "support.html"
+            );
 
         }
     );
 
 
 document
-    .getElementById("termsBtn")
-    .addEventListener(
+    .getElementById(
+        "termsBtn"
+    )
+    ?.addEventListener(
         "click",
         () => {
 
-            window.location.href =
-                "../terms.html";
+            goTo(
+                "../terms.html"
+            );
 
         }
     );
 
 
-/* --------------------------------
+/* ============================================================
    LOGOUT
--------------------------------- */
+============================================================ */
 
 document
-    .getElementById("logoutBtn")
-    .addEventListener(
+    .getElementById(
+        "logoutBtn"
+    )
+    ?.addEventListener(
         "click",
         async () => {
+
+            if(!currentUser){
+
+                showToast(
+                    "No active account."
+                );
+
+                return;
+
+            }
+
 
             const confirmed =
                 window.confirm(
@@ -1366,8 +1687,10 @@ document
             catch(error){
 
                 console.error(
+                    "Logout error:",
                     error
                 );
+
 
                 showToast(
                     "Logout failed. Please try again."
@@ -1379,23 +1702,26 @@ document
     );
 
 
-/* --------------------------------
+/* ============================================================
    BACK
--------------------------------- */
+============================================================ */
 
-backBtn.addEventListener(
+backBtn?.addEventListener(
     "click",
     () => {
 
-        if(history.length > 1){
+        if(
+            window.history.length > 1
+        ){
 
-            history.back();
+            window.history.back();
 
         }
         else{
 
-            window.location.href =
-                "profile.html";
+            goTo(
+                "profile.html"
+            );
 
         }
 
@@ -1403,11 +1729,11 @@ backBtn.addEventListener(
 );
 
 
-/* --------------------------------
+/* ============================================================
    REFRESH
--------------------------------- */
+============================================================ */
 
-refreshBtn.addEventListener(
+refreshBtn?.addEventListener(
     "click",
     () => {
 
@@ -1421,13 +1747,13 @@ refreshBtn.addEventListener(
 );
 
 
-/* --------------------------------
+/* ============================================================
    AUTH
--------------------------------- */
+============================================================ */
 
 onAuthStateChanged(
     auth,
-    async user => {
+    user => {
 
         if(!user){
 
@@ -1450,33 +1776,38 @@ onAuthStateChanged(
 );
 
 
-/* --------------------------------
+/* ============================================================
    INIT
--------------------------------- */
+============================================================ */
 
 setupSwitch(
     "notificationSwitch",
     "notifications"
 );
 
+
 setupSwitch(
     "soundSwitch",
     "sound"
 );
+
 
 setupSwitch(
     "vibrationSwitch",
     "vibration"
 );
 
+
 setupSwitch(
     "darkSwitch",
     "dark"
 );
+
 
 setupLanguage();
 
 </script>
 
 </body>
-    </html>
+
+</html>
