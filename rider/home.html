@@ -1134,6 +1134,16 @@ let audio=null;
 
 let realtimeDb=null;
 
+/*
+  GPS can fire every few seconds. Throttle database location
+  writes and keep the frequent location channel in RTDB.
+ */
+let lastLocationWriteAt=0;
+let locationWritePromise=null;
+const LOCATION_WRITE_INTERVAL=10000;
+
+let navigationToken=0;
+
 let booted=false;
 
 
@@ -1239,7 +1249,13 @@ function go(path){
 
 function locationData(value){
 
- if(!value){
+ /*
+   Normalize all location shapes used by RiderX:
+   nested coordinates, pickup/destination coordinate
+   fields, and plain address objects.
+ */
+
+ if(value===null || value===undefined){
 
   return {
    text:"Location unavailable",
@@ -1248,7 +1264,6 @@ function locationData(value){
   };
 
  }
-
 
  if(typeof value==="string"){
 
@@ -1260,22 +1275,58 @@ function locationData(value){
 
  }
 
+ if(typeof value!=="object"){
 
- const lat=
-  value.lat ??
-  value.latitude ??
-  value.coordinates?.lat ??
-  value.location?.lat ??
-  null;
+  return {
+   text:String(value),
+   lat:null,
+   lng:null
+  };
 
+ }
 
- const lng=
-  value.lng ??
-  value.longitude ??
-  value.coordinates?.lng ??
-  value.location?.lng ??
-  null;
+ const latValue=[
+  value.lat,
+  value.latitude,
+  value.coordinates?.lat,
+  value.coordinates?.latitude,
+  value.location?.lat,
+  value.location?.latitude,
+  value.pickupLat,
+  value.pickupLatitude,
+  value.destinationLat,
+  value.destinationLatitude,
+  value.dropoffLat,
+  value.dropoffLatitude
+ ].find(
+  candidate=>
+   candidate!==null &&
+   candidate!==undefined &&
+   candidate!==""
+ );
 
+ const lngValue=[
+  value.lng,
+  value.longitude,
+  value.coordinates?.lng,
+  value.coordinates?.longitude,
+  value.location?.lng,
+  value.location?.longitude,
+  value.pickupLng,
+  value.pickupLongitude,
+  value.destinationLng,
+  value.destinationLongitude,
+  value.dropoffLng,
+  value.dropoffLongitude
+ ].find(
+  candidate=>
+   candidate!==null &&
+   candidate!==undefined &&
+   candidate!==""
+ );
+
+ const lat=Number(latValue);
+ const lng=Number(lngValue);
 
  return {
 
@@ -1285,16 +1336,19 @@ function locationData(value){
    value.text ||
    value.label ||
    value.formattedAddress ||
+   value.pickupAddress ||
+   value.destinationAddress ||
+   value.dropoffAddress ||
    "Location",
 
   lat:
-   lat!==null
-    ?Number(lat)
+   Number.isFinite(lat)
+    ?lat
     :null,
 
   lng:
-   lng!==null
-    ?Number(lng)
+   Number.isFinite(lng)
+    ?lng
     :null
 
  };
@@ -1830,81 +1884,142 @@ function stopGPS(){
 
 async function saveLocation(
  lat,
- lng
+ lng,
+ force=false
 ){
 
- if(!user)return;
+ if(!user)return false;
 
- const location={
-  lat:Number(lat),
-  lng:Number(lng)
- };
+ const latitude=Number(lat);
+ const longitude=Number(lng);
 
-
- /*
-   Firestore rider location.
-
-   The existing project may use both
-   users/{uid} and riders/{uid}.
- */
-
- try{
-
-  await setDoc(
-   doc(
-    db,
-    "users",
-    user.uid
-   ),
-   {
-    location,
-    lat:location.lat,
-    lng:location.lng,
-    isOnline:true,
-    updatedAt:serverTimestamp()
-   },
-   {
-    merge:true
-   }
-  );
-
- }catch(error){
-
-  console.warn(
-   "users location update:",
-   error
-  );
-
+ if(
+  !Number.isFinite(latitude) ||
+  !Number.isFinite(longitude) ||
+  latitude < -90 ||
+  latitude > 90 ||
+  longitude < -180 ||
+  longitude > 180
+ ){
+  return false;
  }
 
+ const now=Date.now();
+
+ if(
+  !force &&
+  now-lastLocationWriteAt<LOCATION_WRITE_INTERVAL
+ ){
+  return true;
+ }
+
+ if(locationWritePromise){
+  return locationWritePromise;
+ }
+
+ const location={
+  lat:latitude,
+  lng:longitude
+ };
+
+ locationWritePromise=(async()=>{
+
+  let firestoreSuccess=false;
+
+  try{
+
+   await setDoc(
+    doc(db,"users",user.uid),
+    {
+     location,
+     lat:location.lat,
+     lng:location.lng,
+     isOnline:true,
+     updatedAt:serverTimestamp()
+    },
+    {merge:true}
+   );
+
+   firestoreSuccess=true;
+
+  }catch(error){
+
+   console.warn(
+    "users location update:",
+    error
+   );
+
+  }
+
+  try{
+
+   await setDoc(
+    doc(db,"riders",user.uid),
+    {
+     uid:user.uid,
+     location,
+     lat:location.lat,
+     lng:location.lng,
+     isOnline:true,
+     updatedAt:serverTimestamp()
+    },
+    {merge:true}
+   );
+
+  }catch(error){
+
+   console.warn(
+    "riders location update:",
+    error
+   );
+
+  }
+
+  const realtime=initRealtimeDatabase();
+
+  if(realtime){
+
+   try{
+
+    await rtdbUpdate(
+     rtdbRef(
+      realtime,
+      `riders/${user.uid}`
+     ),
+     {
+      riderId:user.uid,
+      riderUid:user.uid,
+      lat:location.lat,
+      lng:location.lng,
+      isOnline:Boolean(isOnline),
+      updatedAt:Date.now()
+     }
+    );
+
+   }catch(error){
+
+    console.warn(
+     "RTDB rider location update:",
+     error
+    );
+
+   }
+
+  }
+
+  lastLocationWriteAt=Date.now();
+
+  return firestoreSuccess;
+
+ })();
 
  try{
 
-  await setDoc(
-   doc(
-    db,
-    "riders",
-    user.uid
-   ),
-   {
-    uid:user.uid,
-    location,
-    lat:location.lat,
-    lng:location.lng,
-    isOnline:true,
-    updatedAt:serverTimestamp()
-   },
-   {
-    merge:true
-   }
-  );
+  return await locationWritePromise;
 
- }catch(error){
+ }finally{
 
-  console.warn(
-   "riders location update:",
-   error
-  );
+  locationWritePromise=null;
 
  }
 
@@ -4323,6 +4438,9 @@ async function startNavigation(
   type
  };
 
+ const currentNavigationToken=
+  ++navigationToken;
+
 
  $("navigationTitle").textContent=
   type==="pickup"
@@ -4437,9 +4555,18 @@ async function startNavigation(
 
 async function drawRoute(){
 
+ const currentNavigationToken=
+  navigationToken;
+
+ const routeTarget=
+  target;
+
+ const routeOrigin=
+  riderLocation;
+
  if(
-  !target||
-  !riderLocation
+  !routeTarget||
+  !routeOrigin
  ){
 
   return;
@@ -4467,8 +4594,8 @@ async function drawRoute(){
 
   const url=
    `https://router.project-osrm.org/route/v1/driving/`+
-   `${riderLocation.lng},${riderLocation.lat};`+
-   `${target.lng},${target.lat}`+
+   `${routeOrigin.lng},${routeOrigin.lat};`+
+   `${routeTarget.lng},${routeTarget.lat}`+
    `?overview=full&geometries=geojson`;
 
 
@@ -4493,6 +4620,13 @@ async function drawRoute(){
   const data=
    await response.json();
 
+
+  if(
+   currentNavigationToken!==navigationToken ||
+   target!==routeTarget
+  ){
+   return;
+  }
 
   const route=
    data.routes?.[0];
@@ -4548,6 +4682,13 @@ async function drawRoute(){
 
  }catch(error){
 
+  if(
+   currentNavigationToken!==navigationToken ||
+   target!==routeTarget
+  ){
+   return;
+  }
+
   console.warn(
    "OSRM route unavailable:",
    error
@@ -4562,12 +4703,12 @@ async function drawRoute(){
    L.polyline(
     [
      [
-      riderLocation.lat,
-      riderLocation.lng
+      routeOrigin.lat,
+      routeOrigin.lng
      ],
      [
-      target.lat,
-      target.lng
+      routeTarget.lat,
+      routeTarget.lng
      ]
     ],
     {
@@ -4631,6 +4772,8 @@ function updateNavigationDistance(){
    ============================================================ */
 
 function stopNavigation(){
+
+ navigationToken++;
 
  target=null;
 
@@ -4954,11 +5097,13 @@ function restoreActive(){
       }
 
 
-      const seconds=
-       ride.acceptedAt?.seconds||
-       ride.startedAt?.seconds||
-       ride.createdAt?.seconds||
-       0;
+      const seconds=Math.max(
+       ride.acceptedAt?.seconds||0,
+       ride.startedAt?.seconds||0,
+       ride.completedAt?.seconds||0,
+       ride.updatedAt?.seconds||0,
+       ride.createdAt?.seconds||0
+      );
 
 
       if(seconds>=best){
@@ -5240,6 +5385,27 @@ onAuthStateChanged(
 
 
    onlineUI();
+
+   /*
+     Re-establish backend presence after a reload if the
+     rider was previously online.
+   */
+   if(isOnline){
+
+    try{
+
+     await setOnline(true);
+
+    }catch(error){
+
+     console.warn(
+      "Rider online-state restore:",
+      error
+     );
+
+    }
+
+   }
 
 
    /*
