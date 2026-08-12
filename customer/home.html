@@ -1538,36 +1538,46 @@ button:active{
 ></div>
 
 
+<!-- =======================================================
+     CANONICAL RIDERX AUTH
+======================================================= -->
+
+<script type="module">
+
+import "../js/auth.js";
+
+</script>
+
+
+<!-- =======================================================
+     CUSTOMER HOME JAVASCRIPT
+======================================================= -->
+
 <script>
 "use strict";
-
-/* ==========================================================
-   RIDERX CUSTOMER HOME
-   FULL FIXED / HARDENED VERSION
-========================================================== */
-
 
 /* ==========================================================
    CONSTANTS
 ========================================================== */
 
-const ROLE_KEY = "riderx_selected_role";
 const CUSTOMER_ROLE = "customer";
 const LOGIN_PATH = "../auth/role.html";
+const ROLE_KEY = "riderx_selected_role";
 
 let currentUser = null;
+let currentProfile = null;
 
-let toastTimer = null;
+let authReady = false;
+
 let activeRideTimer = null;
 let recentRideTimer = null;
+let toastTimer = null;
 
-let firebaseAuthListenerStarted = false;
-let pageInitialized = false;
-let authGateInitialized = false;
+let authUnsubscribe = null;
 
 
 /* ==========================================================
-   DOM HELPER
+   DOM
 ========================================================== */
 
 function $(id){
@@ -1576,27 +1586,20 @@ function $(id){
 
 
 /* ==========================================================
-   SAFE STORAGE
+   STORAGE
 ========================================================== */
 
-function getStorage(key){
+function storageGet(key){
 
     try{
         return localStorage.getItem(key);
     }catch(error){
-
-        console.warn(
-            "RiderX localStorage read failed:",
-            key,
-            error
-        );
-
         return null;
     }
 }
 
 
-function setStorage(key,value){
+function storageSet(key,value){
 
     try{
 
@@ -1609,39 +1612,23 @@ function setStorage(key,value){
 
     }catch(error){
 
-        console.warn(
-            "RiderX localStorage write failed:",
-            key,
-            error
-        );
-
         return false;
     }
 }
 
 
-function removeStorage(key){
+function storageRemove(key){
 
     try{
         localStorage.removeItem(key);
-    }catch(error){
-        console.warn(
-            "RiderX localStorage remove failed:",
-            key,
-            error
-        );
-    }
+    }catch(error){}
 }
 
-
-/* ==========================================================
-   SAFE JSON
-========================================================== */
 
 function readJSON(key){
 
     const raw =
-        getStorage(key);
+        storageGet(key);
 
     if(!raw){
         return null;
@@ -1649,31 +1636,25 @@ function readJSON(key){
 
     try{
 
-        const parsed =
+        const value =
             JSON.parse(raw);
 
-        if(
-            parsed &&
-            typeof parsed === "object"
-        ){
-            return parsed;
-        }
+        return (
+            value &&
+            typeof value === "object"
+        )
+            ? value
+            : null;
 
     }catch(error){
 
-        console.warn(
-            "RiderX JSON parse failed:",
-            key,
-            error
-        );
+        return null;
     }
-
-    return null;
 }
 
 
 /* ==========================================================
-   ROLE NORMALIZATION
+   ROLE
 ========================================================== */
 
 function normalizeRole(role){
@@ -1687,6 +1668,7 @@ function normalizeRole(role){
                 "_"
             );
 
+
     if(
         [
             "customer",
@@ -1696,6 +1678,7 @@ function normalizeRole(role){
     ){
         return CUSTOMER_ROLE;
     }
+
 
     if(
         [
@@ -1709,6 +1692,7 @@ function normalizeRole(role){
         return "rider";
     }
 
+
     if(
         [
             "admin",
@@ -1720,122 +1704,8 @@ function normalizeRole(role){
         return "admin";
     }
 
+
     return "";
-}
-
-
-/* ==========================================================
-   LOCAL AUTH USER
-========================================================== */
-
-function getLocalAuthenticatedUser(){
-
-    const user =
-        readJSON("riderx_user");
-
-    if(!user){
-        return null;
-    }
-
-
-    const authenticated =
-        user.loggedIn === true ||
-        user.authenticated === true ||
-        user.isAuthenticated === true ||
-        user.sessionActive === true;
-
-
-    if(!authenticated){
-        return null;
-    }
-
-
-    const role =
-        normalizeRole(user.role);
-
-
-    if(!role){
-        return null;
-    }
-
-
-    const status =
-        String(
-            user.status || "active"
-        )
-        .trim()
-        .toLowerCase();
-
-
-    if(
-        [
-            "blocked",
-            "suspended",
-            "disabled",
-            "banned"
-        ].includes(status)
-    ){
-        return null;
-    }
-
-
-    const hasIdentity =
-        Boolean(
-            user.uid ||
-            user.userId ||
-            user.id ||
-            user.email ||
-            user.phone ||
-            user.mobile ||
-            user.phoneNumber
-        );
-
-
-    if(!hasIdentity){
-        return null;
-    }
-
-
-    return {
-        ...user,
-        role
-    };
-}
-
-
-/* ==========================================================
-   ROLE REDIRECT
-========================================================== */
-
-function redirectByRole(user){
-
-    const role =
-        normalizeRole(user?.role);
-
-
-    if(role === "rider"){
-
-        window.location.replace(
-            "../rider/home.html"
-        );
-
-        return;
-    }
-
-
-    if(role === "admin"){
-
-        window.location.replace(
-            "../admin/dashboard.html"
-        );
-
-        return;
-    }
-
-
-    window.location.replace(
-        LOGIN_PATH
-    );
 }
 
 
@@ -1881,62 +1751,152 @@ function redirectToLogin(){
 }
 
 
-function initAuthGate(){
+function redirectByRole(role){
 
-    if(authGateInitialized){
+    const normalized =
+        normalizeRole(role);
+
+
+    if(normalized === "rider"){
+
+        window.location.replace(
+            "../rider/home.html"
+        );
+
         return;
     }
 
-    authGateInitialized = true;
 
-    const button =
-        $("authGateBtn");
+    if(normalized === "admin"){
 
-    if(button){
-
-        button.addEventListener(
-            "click",
-            redirectToLogin
+        window.location.replace(
+            "../admin/dashboard.html"
         );
+
+        return;
     }
+
+
+    redirectToLogin();
 }
 
 
 /* ==========================================================
-   CUSTOMER GUARD
+   SESSION
 ========================================================== */
 
-function guardCustomerPage(){
+function setCustomerSession(state){
+
+    currentUser =
+        state?.user ||
+        null;
+
+
+    currentProfile =
+        state?.profile ||
+        null;
+
+
+    storageSet(
+        ROLE_KEY,
+        CUSTOMER_ROLE
+    );
+
+
+    /*
+     * Keep a compatibility cache.
+     * This cache is NOT the authentication authority.
+     */
+
+    storageSet(
+        "riderx_user",
+        JSON.stringify({
+
+            ...(currentUser || {}),
+
+            ...(currentProfile || {}),
+
+            uid:
+                currentUser?.uid ||
+                currentProfile?.uid ||
+                "",
+
+            email:
+                currentUser?.email ||
+                currentProfile?.email ||
+                "",
+
+            displayName:
+                currentProfile?.displayName ||
+                currentProfile?.name ||
+                currentUser?.displayName ||
+                "",
+
+            role:
+                CUSTOMER_ROLE,
+
+            loggedIn:
+                true,
+
+            authenticated:
+                true,
+
+            sessionActive:
+                true
+        })
+    );
+
+
+    updateUserName(
+        currentProfile?.displayName ||
+        currentProfile?.name ||
+        currentProfile?.fullName ||
+        currentUser?.displayName ||
+        currentUser?.email?.split("@")[0] ||
+        "RiderX Customer"
+    );
+}
+
+
+/* ==========================================================
+   LOCAL COMPATIBILITY FALLBACK
+========================================================== */
+
+function getLocalCustomerFallback(){
 
     const user =
-        getLocalAuthenticatedUser();
+        readJSON(
+            "riderx_user"
+        );
 
 
     if(!user){
-
-        showAuthGate();
-
-        return false;
+        return null;
     }
+
+
+    const role =
+        normalizeRole(
+            user.role
+        );
+
+
+    const authenticated =
+        user.loggedIn === true ||
+        user.authenticated === true ||
+        user.isAuthenticated === true ||
+        user.sessionActive === true;
 
 
     if(
-        user.role !== CUSTOMER_ROLE
+        !authenticated ||
+        role !== CUSTOMER_ROLE
     ){
-
-        redirectByRole(
-            user
-        );
-
-        return false;
+        return null;
     }
 
 
-    currentUser =
-        user;
-
-
-    return true;
+    return user;
 }
 
 
@@ -1949,12 +1909,13 @@ function updateUserName(name){
     const element =
         $("userName");
 
+
     if(!element){
         return;
     }
 
 
-    const clean =
+    const value =
         String(
             name ||
             "RiderX Customer"
@@ -1962,276 +1923,201 @@ function updateUserName(name){
 
 
     element.textContent =
-        clean ||
+        value ||
         "RiderX Customer";
 }
 
 
 /* ==========================================================
-   SAVED CUSTOMER
+   CANONICAL AUTH INITIALIZATION
 ========================================================== */
 
-function loadSavedCustomer(){
+async function initCustomerAuth(){
 
-    const savedName =
-        getStorage(
-            "riderxCustomerName"
+    const AUTH =
+        window.RiderXAuth?.AUTH ||
+        window.RiderX?.AUTH ||
+        window.AUTH;
+
+
+    if(!AUTH){
+
+        console.error(
+            "RiderX AUTH is unavailable."
         );
 
-
-    if(savedName){
-
-        updateUserName(
-            savedName
-        );
+        showAuthGate();
 
         return;
     }
 
-
-    const customer =
-        readJSON(
-            "riderx_customer"
-        );
-
-
-    if(customer){
-
-        updateUserName(
-            customer.name ||
-            customer.displayName ||
-            customer.email?.split("@")[0] ||
-            currentUser?.name ||
-            "RiderX Customer"
-        );
-
-        return;
-    }
-
-
-    updateUserName(
-        currentUser?.name ||
-        currentUser?.displayName ||
-        currentUser?.email?.split("@")[0] ||
-        "RiderX Customer"
-    );
-}
-
-
-/* ==========================================================
-   FIREBASE AUTH
-========================================================== */
-
-function getFirebaseAuth(){
 
     try{
-
-        if(
-            window.firebase &&
-            typeof window.firebase.auth === "function"
-        ){
-
-            return window.firebase.auth();
-        }
-
-    }catch(error){
-
-        console.warn(
-            "Firebase auth unavailable:",
-            error
-        );
-    }
-
-    return null;
-}
-
-
-/* ==========================================================
-   FIREBASE USER MERGE
-========================================================== */
-
-function mergeFirebaseUser(firebaseUser){
-
-    if(!firebaseUser){
-        return;
-    }
-
-
-    const localUser =
-        getLocalAuthenticatedUser();
-
-
-    currentUser = {
-        ...(localUser || {}),
-        uid:
-            firebaseUser.uid ||
-            localUser?.uid ||
-            "",
-        email:
-            firebaseUser.email ||
-            localUser?.email ||
-            "",
-        displayName:
-            firebaseUser.displayName ||
-            localUser?.displayName ||
-            "",
-        phoneNumber:
-            firebaseUser.phoneNumber ||
-            localUser?.phoneNumber ||
-            "",
-        role:
-            CUSTOMER_ROLE,
-        loggedIn:true,
-        authenticated:true,
-        sessionActive:true
-    };
-
-
-    setStorage(
-        "riderx_user",
-        JSON.stringify(currentUser)
-    );
-}
-
-
-/* ==========================================================
-   AUTH INITIALIZATION
-========================================================== */
-
-function initAuth(){
-
-    if(firebaseAuthListenerStarted){
-        return;
-    }
-
-
-    firebaseAuthListenerStarted = true;
-
-
-    const auth =
-        getFirebaseAuth();
-
-
-    if(!auth){
 
         /*
-         * Firebase is optional here.
-         * Local RiderX authentication remains valid.
+         * IMPORTANT:
+         *
+         * RiderX auth.js already owns Firebase's real
+         * onAuthStateChanged listener.
+         *
+         * This listener receives the FINAL RiderX state,
+         * including Firestore role/profile resolution.
          */
 
-        loadSavedCustomer();
-        loadActiveRide();
-        loadRecentRides();
+        authUnsubscribe =
+            AUTH.onAuthStateChanged(
+                async function(state){
 
-        return;
-    }
+                    if(
+                        state?.authenticated === true &&
+                        normalizeRole(
+                            state.role
+                        ) === CUSTOMER_ROLE
+                    ){
 
-
-    try{
-
-        auth.onAuthStateChanged(
-            async function(firebaseUser){
-
-                /*
-                 * IMPORTANT:
-                 *
-                 * Firebase null does NOT automatically mean
-                 * RiderX local session is invalid.
-                 */
-
-                if(firebaseUser){
-
-                    mergeFirebaseUser(
-                        firebaseUser
-                    );
+                        setCustomerSession(
+                            state
+                        );
 
 
-                    updateUserName(
-                        firebaseUser.displayName ||
-                        firebaseUser.email?.split("@")[0] ||
-                        currentUser?.name ||
-                        "RiderX Customer"
-                    );
+                        hideAuthGate();
 
 
-                    hideAuthGate();
+                        authReady =
+                            true;
 
 
-                    await loadCustomer();
-
-                    return;
-                }
+                        await loadCustomer();
 
 
-                /*
-                 * Firebase signed out.
-                 * Fall back to the project's local session.
-                 */
-
-                const saved =
-                    getLocalAuthenticatedUser();
+                        startCustomerRuntime();
 
 
-                if(
-                    saved &&
-                    saved.role === CUSTOMER_ROLE
-                ){
+                        return;
+                    }
+
+
+                    /*
+                     * Authenticated but another role.
+                     */
+
+                    if(
+                        state?.authenticated === true &&
+                        state?.role
+                    ){
+
+                        authReady =
+                            false;
+
+
+                        redirectByRole(
+                            state.role
+                        );
+
+
+                        return;
+                    }
+
+
+                    /*
+                     * Firebase/Auth.js has resolved as signed out.
+                     */
+
+                    authReady =
+                        false;
+
 
                     currentUser =
-                        saved;
+                        null;
 
-                    loadSavedCustomer();
 
-                    hideAuthGate();
+                    currentProfile =
+                        null;
 
-                    await loadActiveRide();
 
-                    await loadRecentRides();
-
-                    return;
+                    showAuthGate();
                 }
+            );
 
 
-                currentUser = null;
+        /*
+         * Wait for the canonical auth engine to resolve.
+         */
 
-                showAuthGate();
-            }
-        );
+        await AUTH.init();
 
     }catch(error){
 
         console.error(
-            "RiderX Firebase auth listener failed:",
+            "RiderX Customer Home auth error:",
             error
         );
 
+
         /*
-         * Do not break the page if Firebase listener fails.
+         * Compatibility fallback only if the canonical
+         * auth engine itself failed to initialize.
          */
 
-        const saved =
-            getLocalAuthenticatedUser();
+        const fallback =
+            getLocalCustomerFallback();
 
 
-        if(
-            saved &&
-            saved.role === CUSTOMER_ROLE
-        ){
+        if(fallback){
 
             currentUser =
-                saved;
+                fallback;
+
+
+            currentProfile =
+                fallback;
+
+
+            authReady =
+                true;
+
 
             hideAuthGate();
 
-            loadSavedCustomer();
-            loadActiveRide();
-            loadRecentRides();
+
+            updateUserName(
+                fallback.name ||
+                fallback.displayName ||
+                fallback.email?.split("@")[0] ||
+                "RiderX Customer"
+            );
+
+
+            await loadCustomer();
+
+
+            startCustomerRuntime();
 
         }else{
 
             showAuthGate();
         }
     }
+}
+
+
+/* ==========================================================
+   CUSTOMER GUARD
+========================================================== */
+
+function guardCustomerPage(){
+
+    if(
+        authReady &&
+        currentUser
+    ){
+        return true;
+    }
+
+
+    showAuthGate();
+
+    return false;
 }
 
 
@@ -2261,12 +2147,17 @@ async function loadCustomer(){
 
             if(data){
 
+                currentProfile = {
+                    ...(currentProfile || {}),
+                    ...data
+                };
+
+
                 updateUserName(
                     data.name ||
                     data.displayName ||
-                    currentUser?.displayName ||
-                    currentUser?.email?.split("@")[0] ||
-                    currentUser?.name ||
+                    data.fullName ||
+                    data.email?.split("@")[0] ||
                     "RiderX Customer"
                 );
             }
@@ -2274,17 +2165,17 @@ async function loadCustomer(){
 
     }catch(error){
 
-        console.error(
-            "RiderX customer profile error:",
+        console.warn(
+            "Customer profile load failed:",
             error
         );
-
-        loadSavedCustomer();
     }
 
 
-    await loadActiveRide();
-    await loadRecentRides();
+    await Promise.allSettled([
+        loadActiveRide(),
+        loadRecentRides()
+    ]);
 }
 
 
@@ -2292,7 +2183,26 @@ async function loadCustomer(){
    LOCATION
 ========================================================== */
 
-function getLocation(showMessage = false){
+function setLocationText(text){
+
+    const element =
+        $("locationText");
+
+
+    if(element){
+
+        element.textContent =
+            String(
+                text ||
+                "Current location"
+            );
+    }
+}
+
+
+function getLocation(
+    showMessage = false
+){
 
     if(
         !navigator.geolocation
@@ -2350,18 +2260,28 @@ function getLocation(showMessage = false){
 
 
             const location = {
+
                 lat,
-                lng
+
+                lng,
+
+                accuracy:
+                    Number(
+                        position.coords.accuracy
+                    ) || null,
+
+                timestamp:
+                    Date.now()
             };
 
 
-            setStorage(
+            storageSet(
                 "riderxCurrentLocation",
                 JSON.stringify(location)
             );
 
 
-            setStorage(
+            storageSet(
                 "riderx_customer_location",
                 JSON.stringify(location)
             );
@@ -2394,12 +2314,6 @@ function getLocation(showMessage = false){
 
 
         function(error){
-
-            console.warn(
-                "RiderX GPS error:",
-                error
-            );
-
 
             setLocationText(
                 "Location unavailable"
@@ -2450,40 +2364,10 @@ function getLocation(showMessage = false){
 }
 
 
-/* ==========================================================
-   LOCATION TEXT
-========================================================== */
-
-function setLocationText(text){
-
-    const element =
-        $("locationText");
-
-
-    if(element){
-
-        element.textContent =
-            String(
-                text ||
-                "Current location"
-            );
-    }
-}
-
-
-/* ==========================================================
-   REVERSE GEOCODE
-========================================================== */
-
-async function reverseGeocode(lat,lng){
-
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
-    ){
-        return;
-    }
-
+async function reverseGeocode(
+    lat,
+    lng
+){
 
     const controller =
         new AbortController();
@@ -2500,26 +2384,35 @@ async function reverseGeocode(lat,lng){
 
     try{
 
-        const params =
+        const url =
+            "https://nominatim.openstreetmap.org/reverse?" +
             new URLSearchParams({
+
                 lat:String(lat),
+
                 lon:String(lng),
+
                 format:"json",
+
                 zoom:"18",
+
                 addressdetails:"1"
             });
 
 
         const response =
             await fetch(
-                "https://nominatim.openstreetmap.org/reverse?" +
-                params.toString(),
+                url,
                 {
                     method:"GET",
+
                     headers:{
-                        Accept:"application/json"
+                        Accept:
+                            "application/json"
                     },
-                    signal:controller.signal
+
+                    signal:
+                        controller.signal
                 }
             );
 
@@ -2527,7 +2420,7 @@ async function reverseGeocode(lat,lng){
         if(!response.ok){
 
             throw new Error(
-                "Reverse geocoding HTTP " +
+                "HTTP " +
                 response.status
             );
         }
@@ -2537,28 +2430,15 @@ async function reverseGeocode(lat,lng){
             await response.json();
 
 
-        const address =
-            String(
-                data?.display_name || ""
-            ).trim();
-
-
         setLocationText(
-            address ||
-            "Current location"
+            data?.display_name ||
+            `${lat.toFixed(5)}, ${lng.toFixed(5)}`
         );
-
 
     }catch(error){
 
-        console.warn(
-            "RiderX reverse geocoding failed:",
-            error
-        );
-
-
         setLocationText(
-            "Current location"
+            `${lat.toFixed(5)}, ${lng.toFixed(5)}`
         );
 
     }finally{
@@ -2590,13 +2470,17 @@ function selectService(service){
 
 
     if(
-        !allowed.includes(service)
+        !allowed.includes(
+            service
+        )
     ){
-        service = "bike";
+
+        service =
+            "bike";
     }
 
 
-    setStorage(
+    storageSet(
         "riderxSelectedService",
         service
     );
@@ -2604,7 +2488,9 @@ function selectService(service){
 
     window.location.href =
         "booking.html?service=" +
-        encodeURIComponent(service);
+        encodeURIComponent(
+            service
+        );
 }
 
 
@@ -2615,32 +2501,118 @@ function bookRide(){
     }
 
 
-    const selected =
-        getStorage(
+    const service =
+        storageGet(
             "riderxSelectedService"
         );
 
 
-    if(
-        selected &&
-        [
-            "bike",
-            "cab",
-            "parcel",
-            "food"
-        ].includes(selected)
-    ){
+    if(service){
 
         window.location.href =
             "booking.html?service=" +
-            encodeURIComponent(selected);
+            encodeURIComponent(
+                service
+            );
 
-        return;
+    }else{
+
+        window.location.href =
+            "booking.html";
+    }
+}
+
+
+/* ==========================================================
+   RIDE HELPERS
+========================================================== */
+
+function getRideId(ride){
+
+    if(!ride){
+        return "";
     }
 
 
-    window.location.href =
-        "booking.html";
+    return String(
+
+        ride.id ||
+
+        ride.rideId ||
+
+        ride.bookingId ||
+
+        ride.bookingID ||
+
+        ""
+
+    ).trim();
+}
+
+
+function getAddress(
+    value,
+    direct,
+    fallback
+){
+
+    if(
+        value &&
+        typeof value === "object"
+    ){
+
+        return String(
+
+            value.address ||
+
+            value.formattedAddress ||
+
+            value.name ||
+
+            ""
+
+        );
+    }
+
+
+    return String(
+        direct ||
+        fallback ||
+        ""
+    );
+}
+
+
+function isRideFinished(status){
+
+    const value =
+        String(
+            status || ""
+        )
+        .toLowerCase()
+        .replace(
+            /[-_\s]/g,
+            ""
+        );
+
+
+    return [
+
+        "completed",
+
+        "complete",
+
+        "cancelled",
+
+        "canceled",
+
+        "rejected",
+
+        "expired",
+
+        "failed"
+
+    ].includes(value);
 }
 
 
@@ -2650,23 +2622,8 @@ function bookRide(){
 
 async function loadActiveRide(){
 
-    const user =
-        getLocalAuthenticatedUser();
-
-
-    if(
-        !user ||
-        user.role !== CUSTOMER_ROLE
-    ){
-
-        hideActiveRide();
-
+    if(!guardCustomerPage()){
         return;
-    }
-
-
-    if(!currentUser){
-        currentUser = user;
     }
 
 
@@ -2688,46 +2645,46 @@ async function loadActiveRide(){
 
     }catch(error){
 
-        console.error(
-            "RiderX active ride error:",
+        console.warn(
+            "Active ride load failed:",
             error
         );
     }
 
 
-    /*
-     * Firebase/backend function may not exist.
-     * Local active ride is used as fallback.
-     */
-
     if(!ride){
 
         ride =
-            getSavedActiveRide();
-    }
-
-
-    if(!ride){
-
-        hideActiveRide();
-
-        return;
+            readJSON(
+                "riderxActiveRide"
+            );
     }
 
 
     if(
+        !ride ||
         isRideFinished(
             ride.status
         )
     ){
 
-        removeStorage(
-            "riderxActiveRide"
-        );
+        if(
+            ride &&
+            isRideFinished(
+                ride.status
+            )
+        ){
 
-        removeStorage(
-            "riderxCurrentRideId"
-        );
+            storageRemove(
+                "riderxActiveRide"
+            );
+
+
+            storageRemove(
+                "riderxCurrentRideId"
+            );
+        }
+
 
         hideActiveRide();
 
@@ -2740,77 +2697,27 @@ async function loadActiveRide(){
     );
 
 
-    setStorage(
+    storageSet(
         "riderxActiveRide",
         JSON.stringify(ride)
     );
 
 
     const rideId =
-        getRideId(ride);
+        getRideId(
+            ride
+        );
 
 
     if(rideId){
 
-        setStorage(
+        storageSet(
             "riderxCurrentRideId",
             rideId
         );
     }
 }
 
-
-/* ==========================================================
-   SAVED ACTIVE RIDE
-========================================================== */
-
-function getSavedActiveRide(){
-
-    const raw =
-        getStorage(
-            "riderxActiveRide"
-        );
-
-
-    if(!raw){
-        return null;
-    }
-
-
-    try{
-
-        const ride =
-            JSON.parse(raw);
-
-
-        if(
-            ride &&
-            typeof ride === "object"
-        ){
-
-            return ride;
-        }
-
-    }catch(error){
-
-        console.warn(
-            "RiderX active ride JSON invalid:",
-            error
-        );
-
-        removeStorage(
-            "riderxActiveRide"
-        );
-    }
-
-
-    return null;
-}
-
-
-/* ==========================================================
-   ACTIVE RIDE RENDER
-========================================================== */
 
 function renderActiveRide(ride){
 
@@ -2846,8 +2753,11 @@ function renderActiveRide(ride){
         ).toLowerCase();
 
 
-    let title = "Bike Taxi";
-    let icon = "🏍️";
+    let icon =
+        "🏍️";
+
+    let title =
+        "Bike Taxi";
 
 
     if(
@@ -2855,83 +2765,65 @@ function renderActiveRide(ride){
         service.includes("car")
     ){
 
-        title = "Cab Ride";
-        icon = "🚕";
+        icon =
+            "🚕";
+
+        title =
+            "Cab Ride";
 
     }else if(
         service.includes("parcel")
     ){
 
-        title = "Parcel Delivery";
-        icon = "📦";
+        icon =
+            "📦";
+
+        title =
+            "Parcel Delivery";
 
     }else if(
         service.includes("food")
     ){
 
-        title = "Food Delivery";
-        icon = "🍔";
+        icon =
+            "🍔";
+
+        title =
+            "Food Delivery";
     }
 
 
-    const activeIcon =
-        $("activeIcon");
-
-    const activeTitle =
-        $("activeTitle");
-
-    const activeStatus =
-        $("activeStatus");
-
-    const pickupText =
-        $("pickupText");
-
-    const dropText =
-        $("dropText");
+    $("activeIcon").textContent =
+        icon;
 
 
-    if(activeIcon){
-        activeIcon.textContent = icon;
-    }
+    $("activeTitle").textContent =
+        title;
 
 
-    if(activeTitle){
-        activeTitle.textContent = title;
-    }
+    $("activeStatus").textContent =
+        formatStatus(
+            ride.status ||
+            "searching"
+        );
 
 
-    if(activeStatus){
-
-        activeStatus.textContent =
-            formatStatus(
-                ride.status ||
-                "searching"
-            );
-    }
-
-
-    if(pickupText){
-
-        pickupText.textContent =
-            getAddress(
-                ride.pickup,
-                ride.pickupAddress,
-                ride.fromAddress
-            ) ||
-            "Pickup location";
-    }
+    $("pickupText").textContent =
+        getAddress(
+            ride.pickup,
+            ride.pickupAddress,
+            ride.fromAddress
+        ) ||
+        "Pickup location";
 
 
-    if(dropText){
-
-        dropText.textContent =
-            getAddress(
-                ride.drop,
-                ride.dropAddress,
-                ride.destinationAddress
-            ) ||
-            "Destination";
-    }
+    $("dropText").textContent =
+        getAddress(
+            ride.drop,
+            ride.dropAddress,
+            ride.destinationAddress
+        ) ||
+        "Destination";
 }
 
 
@@ -2945,102 +2837,20 @@ function hideActiveRide(){
 
 
     if(section){
+
         section.style.display =
             "none";
     }
 
 
     if(card){
+
         card.classList.remove(
             "show"
         );
     }
 }
 
-
-/* ==========================================================
-   RIDE ID
-========================================================== */
-
-function getRideId(ride){
-
-    if(!ride){
-        return "";
-    }
-
-
-    return String(
-        ride.id ||
-        ride.rideId ||
-        ride.bookingId ||
-        ride.bookingID ||
-        ""
-    ).trim();
-}
-
-
-/* ==========================================================
-   ADDRESS
-========================================================== */
-
-function getAddress(
-    object,
-    directAddress,
-    fallbackAddress
-){
-
-    if(
-        object &&
-        typeof object === "object"
-    ){
-
-        return String(
-            object.address ||
-            object.formattedAddress ||
-            object.name ||
-            ""
-        ).trim();
-    }
-
-
-    return String(
-        directAddress ||
-        fallbackAddress ||
-        ""
-    ).trim();
-}
-
-
-/* ==========================================================
-   FINISHED RIDE
-========================================================== */
-
-function isRideFinished(status){
-
-    const value =
-        String(status || "")
-            .toLowerCase()
-            .replace(
-                /[-_\s]/g,
-                ""
-            );
-
-
-    return [
-        "completed",
-        "complete",
-        "cancelled",
-        "canceled",
-        "rejected",
-        "expired",
-        "failed"
-    ].includes(value);
-}
-
-
-/* ==========================================================
-   OPEN ACTIVE RIDE
-========================================================== */
 
 function openActiveRide(){
 
@@ -3049,25 +2859,27 @@ function openActiveRide(){
     }
 
 
-    let rideId =
-        getStorage(
+    let id =
+        storageGet(
             "riderxCurrentRideId"
         );
 
 
-    if(!rideId){
+    if(!id){
 
-        rideId =
+        id =
             getRideId(
-                getSavedActiveRide()
+                readJSON(
+                    "riderxActiveRide"
+                )
             );
     }
 
 
     window.location.href =
-        rideId
+        id
             ? "ride-status.html?rideId=" +
-              encodeURIComponent(rideId)
+              encodeURIComponent(id)
             : "ride-status.html";
 }
 
@@ -3078,22 +2890,8 @@ function openActiveRide(){
 
 async function loadRecentRides(){
 
-    const user =
-        getLocalAuthenticatedUser();
-
-
-    if(
-        !user ||
-        user.role !== CUSTOMER_ROLE
-    ){
-        renderRecent([]);
-
+    if(!guardCustomerPage()){
         return;
-    }
-
-
-    if(!currentUser){
-        currentUser = user;
     }
 
 
@@ -3116,14 +2914,16 @@ async function loadRecentRides(){
 
     }catch(error){
 
-        console.error(
-            "RiderX recent rides error:",
+        console.warn(
+            "Recent rides load failed:",
             error
         );
     }
 
 
-    if(!Array.isArray(rides)){
+    if(
+        !Array.isArray(rides)
+    ){
 
         rides =
             getSavedRideHistory();
@@ -3131,23 +2931,28 @@ async function loadRecentRides(){
 
 
     renderRecent(
+
         Array.isArray(rides)
-            ? rides.slice(0,5)
+
+            ? rides
+                .filter(Boolean)
+                .slice(0,5)
+
             : []
     );
 }
 
 
-/* ==========================================================
-   SAVED HISTORY
-========================================================== */
-
 function getSavedRideHistory(){
 
     const keys = [
+
         "riderxRideHistory",
+
         "riderx_ride_history",
+
         "riderxCustomerRideHistory"
+
     ];
 
 
@@ -3155,15 +2960,17 @@ function getSavedRideHistory(){
         const key of keys
     ){
 
-        const data =
-            readJSON(key);
+        const value =
+            readJSON(
+                key
+            );
 
 
         if(
-            Array.isArray(data)
+            Array.isArray(value)
         ){
 
-            return data;
+            return value;
         }
     }
 
@@ -3171,10 +2978,6 @@ function getSavedRideHistory(){
     return [];
 }
 
-
-/* ==========================================================
-   RENDER RECENT
-========================================================== */
 
 function renderRecent(rides){
 
@@ -3205,8 +3008,7 @@ function renderRecent(rides){
 
 
     if(
-        !Array.isArray(rides) ||
-        rides.length === 0
+        !rides.length
     ){
 
         empty.style.display =
@@ -3222,14 +3024,6 @@ function renderRecent(rides){
 
     rides.forEach(
         function(ride){
-
-            if(
-                !ride ||
-                typeof ride !== "object"
-            ){
-                return;
-            }
-
 
             const item =
                 document.createElement(
@@ -3249,7 +3043,8 @@ function renderRecent(rides){
                 ).toLowerCase();
 
 
-            let icon = "🏍️";
+            let icon =
+                "🏍️";
 
 
             if(
@@ -3257,19 +3052,22 @@ function renderRecent(rides){
                 service.includes("car")
             ){
 
-                icon = "🚕";
+                icon =
+                    "🚕";
 
             }else if(
                 service.includes("parcel")
             ){
 
-                icon = "📦";
+                icon =
+                    "📦";
 
             }else if(
                 service.includes("food")
             ){
 
-                icon = "🍔";
+                icon =
+                    "🍔";
             }
 
 
@@ -3298,28 +3096,7 @@ function renderRecent(rides){
                     ride.amount ??
                     ride.price ??
                     0
-                );
-
-
-            const safeFare =
-                Number.isFinite(fare)
-                    ? fare
-                    : 0;
-
-
-            const status =
-                formatStatus(
-                    ride.status ||
-                    "completed"
-                );
-
-
-            const date =
-                formatDate(
-                    ride.createdAt ||
-                    ride.timestamp ||
-                    ride.date
-                );
+                ) || 0;
 
 
             const iconElement =
@@ -3357,24 +3134,26 @@ function renderRecent(rides){
                 drop;
 
 
-            const dateElement =
+            const date =
                 document.createElement(
                     "div"
                 );
 
-            dateElement.className =
+            date.className =
                 "recent-date";
 
-            dateElement.textContent =
-                date;
+            date.textContent =
+                formatDate(
+                    ride.createdAt ??
+                    ride.timestamp ??
+                    ride.date ??
+                    ride.created_at
+                );
 
 
-            info.appendChild(
-                route
-            );
-
-            info.appendChild(
-                dateElement
+            info.append(
+                route,
+                date
             );
 
 
@@ -3395,41 +3174,40 @@ function renderRecent(rides){
             price.textContent =
                 "₹" +
                 Math.round(
-                    safeFare
+                    fare
                 );
 
 
-            const statusElement =
+            const status =
                 document.createElement(
                     "div"
                 );
 
-            statusElement.className =
+            status.className =
                 "recent-status";
 
-            statusElement.textContent =
-                status;
+            status.textContent =
+                formatStatus(
+                    ride.status ||
+                    "completed"
+                );
 
 
-            right.appendChild(
-                price
+            right.append(
+                price,
+                status
             );
 
-            right.appendChild(
-                statusElement
-            );
 
-
-            item.appendChild(
-                iconElement
-            );
-
-            item.appendChild(
-                info
-            );
-
-            item.appendChild(
+            item.append(
+                iconElement,
+                info,
                 right
+            );
+
+
+            container.appendChild(
+                item
             );
 
 
@@ -3445,25 +3223,19 @@ function renderRecent(rides){
 
 
                     const id =
-                        getRideId(ride);
+                        getRideId(
+                            ride
+                        );
 
 
-                    if(id){
+                    window.location.href =
+                        id
 
-                        window.location.href =
-                            "ride-status.html?rideId=" +
-                            encodeURIComponent(id);
+                            ? "ride-status.html?rideId=" +
+                              encodeURIComponent(id)
 
-                    }else{
-
-                        openHistory();
-                    }
+                            : "history.html";
                 }
-            );
-
-
-            container.appendChild(
-                item
             );
         }
     );
@@ -3476,26 +3248,20 @@ function renderRecent(rides){
 
 function customerNavigate(path){
 
-    if(!guardCustomerPage()){
-        return;
-    }
-
-
-    const safePath =
-        String(path || "").trim();
-
-
-    if(!safePath){
+    if(
+        !guardCustomerPage()
+    ){
         return;
     }
 
 
     window.location.href =
-        safePath;
+        path;
 }
 
 
 function openHome(){
+
     customerNavigate(
         "home.html"
     );
@@ -3503,6 +3269,7 @@ function openHome(){
 
 
 function openHistory(){
+
     customerNavigate(
         "history.html"
     );
@@ -3510,6 +3277,7 @@ function openHistory(){
 
 
 function openWallet(){
+
     customerNavigate(
         "wallet.html"
     );
@@ -3517,6 +3285,7 @@ function openWallet(){
 
 
 function openProfile(){
+
     customerNavigate(
         "profile.html"
     );
@@ -3524,6 +3293,7 @@ function openProfile(){
 
 
 function openMenu(){
+
     customerNavigate(
         "menu.html"
     );
@@ -3531,6 +3301,7 @@ function openMenu(){
 
 
 function openNotifications(){
+
     customerNavigate(
         "notifications.html"
     );
@@ -3538,6 +3309,7 @@ function openNotifications(){
 
 
 function openSupport(){
+
     customerNavigate(
         "chat.html"
     );
@@ -3545,28 +3317,24 @@ function openSupport(){
 
 
 /* ==========================================================
-   STATUS FORMAT
+   FORMATTING
 ========================================================== */
 
-function formatStatus(status){
+function formatStatus(value){
 
-    const value =
-        String(
-            status || ""
-        )
-        .replace(
-            /[-_]+/g,
-            " "
-        )
-        .trim();
-
-
-    if(!value){
-        return "";
-    }
-
-
-    return value.replace(
+    return String(
+        value || ""
+    )
+    .replace(
+        /[-_]+/g,
+        " "
+    )
+    .replace(
+        /\s+/g,
+        " "
+    )
+    .trim()
+    .replace(
         /\b\w/g,
         function(char){
             return char.toUpperCase();
@@ -3575,13 +3343,10 @@ function formatStatus(status){
 }
 
 
-/* ==========================================================
-   DATE FORMAT
-========================================================== */
-
 function formatDate(value){
 
-    let date = null;
+    let date =
+        null;
 
 
     try{
@@ -3597,7 +3362,8 @@ function formatDate(value){
 
         }else if(
             value &&
-            typeof value === "object" &&
+            typeof value ===
+            "object" &&
             typeof value.seconds ===
             "number"
         ){
@@ -3608,7 +3374,8 @@ function formatDate(value){
                 );
 
         }else if(
-            typeof value === "number"
+            typeof value ===
+            "number"
         ){
 
             date =
@@ -3621,12 +3388,15 @@ function formatDate(value){
         }else if(value){
 
             date =
-                new Date(value);
+                new Date(
+                    value
+                );
         }
 
     }catch(error){
 
-        date = null;
+        date =
+            null;
     }
 
 
@@ -3704,7 +3474,7 @@ function showToast(
 
 
 /* ==========================================================
-   NOTIFICATION DOT
+   NOTIFICATIONS
 ========================================================== */
 
 function checkNotificationDot(){
@@ -3718,28 +3488,15 @@ function checkNotificationDot(){
     }
 
 
-    const notifications =
+    const list =
         readJSON(
             "riderxNotifications"
         );
 
 
-    if(
-        !Array.isArray(
-            notifications
-        )
-    ){
-
-        dot.classList.remove(
-            "show"
-        );
-
-        return;
-    }
-
-
-    const hasUnread =
-        notifications.some(
+    const unread =
+        Array.isArray(list) &&
+        list.some(
             function(item){
 
                 return (
@@ -3755,117 +3512,65 @@ function checkNotificationDot(){
 
     dot.classList.toggle(
         "show",
-        hasUnread
+        Boolean(unread)
     );
 }
 
 
 /* ==========================================================
-   ACTIVE RIDE REFRESH
+   RUNTIME
 ========================================================== */
 
-function startActiveRideRefresh(){
+function startCustomerRuntime(){
+
+    if(!authReady){
+        return;
+    }
+
 
     clearInterval(
         activeRideTimer
     );
 
 
-    activeRideTimer =
-        setInterval(
-            async function(){
-
-                if(
-                    document.visibilityState !==
-                    "visible"
-                ){
-                    return;
-                }
-
-
-                const user =
-                    getLocalAuthenticatedUser();
-
-
-                if(
-                    user &&
-                    user.role ===
-                    CUSTOMER_ROLE
-                ){
-
-                    currentUser =
-                        currentUser ||
-                        user;
-
-
-                    try{
-
-                        await loadActiveRide();
-
-                    }catch(error){
-
-                        console.warn(
-                            "Active ride refresh failed:",
-                            error
-                        );
-                    }
-                }
-
-            },
-            10000
-        );
-}
-
-
-/* ==========================================================
-   RECENT RIDE REFRESH
-========================================================== */
-
-function startRecentRideRefresh(){
-
     clearInterval(
         recentRideTimer
     );
 
 
-    recentRideTimer =
+    getLocation(
+        false
+    );
+
+
+    checkNotificationDot();
+
+
+    activeRideTimer =
         setInterval(
-            async function(){
+            function(){
 
                 if(
-                    document.visibilityState !==
-                    "visible"
+                    authReady
                 ){
-                    return;
+
+                    loadActiveRide();
                 }
 
+            },
+            10000
+        );
 
-                const user =
-                    getLocalAuthenticatedUser();
 
+    recentRideTimer =
+        setInterval(
+            function(){
 
                 if(
-                    user &&
-                    user.role ===
-                    CUSTOMER_ROLE
+                    authReady
                 ){
 
-                    currentUser =
-                        currentUser ||
-                        user;
-
-
-                    try{
-
-                        await loadRecentRides();
-
-                    }catch(error){
-
-                        console.warn(
-                            "Recent ride refresh failed:",
-                            error
-                        );
-                    }
+                    loadRecentRides();
                 }
 
             },
@@ -3890,34 +3595,15 @@ document.addEventListener(
         }
 
 
-        const user =
-            getLocalAuthenticatedUser();
-
-
-        if(
-            !user ||
-            user.role !== CUSTOMER_ROLE
-        ){
+        if(!authReady){
             return;
         }
 
 
-        currentUser =
-            user;
-
-
-        try{
-
-            await loadActiveRide();
-            await loadRecentRides();
-
-        }catch(error){
-
-            console.warn(
-                "Visibility refresh failed:",
-                error
-            );
-        }
+        await Promise.allSettled([
+            loadActiveRide(),
+            loadRecentRides()
+        ]);
 
 
         checkNotificationDot();
@@ -3926,117 +3612,36 @@ document.addEventListener(
 
 
 /* ==========================================================
-   PAGE INIT
-========================================================== */
-
-function initializeCustomerHome(){
-
-    if(pageInitialized){
-        return;
-    }
-
-
-    pageInitialized = true;
-
-
-    initAuthGate();
-
-
-    const user =
-        getLocalAuthenticatedUser();
-
-
-    if(!user){
-
-        showAuthGate();
-
-        return;
-    }
-
-
-    if(
-        user.role !==
-        CUSTOMER_ROLE
-    ){
-
-        redirectByRole(
-            user
-        );
-
-        return;
-    }
-
-
-    currentUser =
-        user;
-
-
-    hideAuthGate();
-
-
-    loadSavedCustomer();
-
-
-    initAuth();
-
-
-    checkNotificationDot();
-
-
-    /*
-     * GPS is intentionally non-blocking.
-     * The page remains usable if GPS is denied.
-     */
-
-    getLocation(false);
-
-
-    startActiveRideRefresh();
-
-
-    startRecentRideRefresh();
-
-
-    /*
-     * Initial data load.
-     */
-
-    Promise.allSettled([
-        loadActiveRide(),
-        loadRecentRides()
-    ]).catch(
-        function(error){
-
-            console.warn(
-                "Initial customer data load failed:",
-                error
-            );
-        }
-    );
-}
-
-
-/* ==========================================================
    DOM READY
 ========================================================== */
 
-if(
-    document.readyState ===
-    "loading"
-){
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        initializeCustomerHome,
-        {
-            once:true
+        const button =
+            $("authGateBtn");
+
+
+        if(button){
+
+            button.addEventListener(
+                "click",
+                redirectToLogin
+            );
         }
-    );
 
-}else{
 
-    initializeCustomerHome();
-}
+        /*
+         * DO NOT show the Login Required card here.
+         *
+         * Firebase/Auth.js may still be restoring a valid
+         * session. We wait for the canonical auth state first.
+         */
+
+        initCustomerAuth();
+    }
+);
 
 
 /* ==========================================================
@@ -4051,23 +3656,25 @@ window.addEventListener(
             activeRideTimer
         );
 
+
         clearInterval(
             recentRideTimer
         );
 
 
-        activeRideTimer =
-            null;
+        if(
+            typeof authUnsubscribe ===
+            "function"
+        ){
 
-
-        recentRideTimer =
-            null;
+            authUnsubscribe();
+        }
     }
 );
 
 
 /* ==========================================================
-   PAGE ERROR PROTECTION
+   ERROR PROTECTION
 ========================================================== */
 
 window.addEventListener(
@@ -4075,8 +3682,9 @@ window.addEventListener(
     function(event){
 
         console.error(
-            "RiderX Customer Home runtime error:",
-            event.error || event.message
+            "RiderX Customer Home error:",
+            event.error ||
+            event.message
         );
     }
 );
@@ -4096,4 +3704,4 @@ window.addEventListener(
 </script>
 
 </body>
-</html>
+    </html>
