@@ -1,8 +1,38 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#FFD400"><title>RiderX Admin - Notifications</title><link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
-<link rel="stylesheet" href="../css/responsive.css"><style>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<meta
+    name="theme-color"
+    content="#FFD400"
+>
+
+<title>RiderX Admin - Notifications</title>
+
+<link
+    rel="stylesheet"
+    href="../css/style.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/dashboard.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/responsive.css"
+>
+
+<style>
 
 *{
     box-sizing:border-box;
@@ -16,6 +46,17 @@ body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
+button,
+input,
+textarea,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
 .page{
     min-height:100vh;
     padding-bottom:70px;
@@ -25,11 +66,15 @@ body{
     position:sticky;
     top:0;
     z-index:100;
+
     height:64px;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     padding:0 16px;
+
     background:#111;
     border-bottom:1px solid #292929;
 }
@@ -43,10 +88,13 @@ body{
 .back-btn{
     width:40px;
     height:40px;
+
     border:1px solid #333;
     border-radius:10px;
+
     background:#1b1b1b;
     color:#fff;
+
     cursor:pointer;
     font-size:20px;
 }
@@ -69,6 +117,7 @@ body{
 .content{
     width:100%;
     max-width:1100px;
+
     margin:auto;
     padding:18px;
 }
@@ -76,15 +125,23 @@ body{
 .hero{
     padding:18px;
     margin-bottom:16px;
+
     border:1px solid #292929;
     border-radius:18px;
-    background:linear-gradient(145deg,#181818,#101010);
+
+    background:
+        linear-gradient(
+            145deg,
+            #181818,
+            #101010
+        );
 }
 
 .hero-top{
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     gap:15px;
 }
 
@@ -95,18 +152,25 @@ body{
 
 .hero p{
     margin:7px 0 0;
+
     color:#888;
+
     font-size:12px;
     line-height:1.5;
 }
 
 .unread{
     min-width:45px;
+
     padding:8px 10px;
+
     border-radius:10px;
+
     background:#FFD400;
     color:#111;
+
     text-align:center;
+
     font-size:14px;
     font-weight:1000;
 }
@@ -114,19 +178,27 @@ body{
 .toolbar{
     display:flex;
     align-items:center;
+
     gap:10px;
+
     margin-bottom:15px;
+
     flex-wrap:wrap;
 }
 
 .search{
     flex:1;
     min-width:220px;
+
     height:44px;
+
     padding:0 13px;
+
     border:1px solid #333;
     border-radius:10px;
+
     outline:none;
+
     background:#171717;
     color:#fff;
 }
@@ -137,22 +209,31 @@ body{
 
 .filter{
     height:44px;
+
     padding:0 12px;
+
     border:1px solid #333;
     border-radius:10px;
+
     background:#171717;
     color:#fff;
+
     outline:none;
 }
 
 .btn{
     height:44px;
+
     padding:0 14px;
+
     border:1px solid #333;
     border-radius:10px;
+
     background:#1b1b1b;
     color:#fff;
+
     cursor:pointer;
+
     font-weight:800;
 }
 
@@ -162,20 +243,31 @@ body{
     color:#111;
 }
 
+.btn:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
 .notification-list{
     display:flex;
     flex-direction:column;
+
     gap:10px;
 }
 
 .notification{
     display:flex;
     align-items:flex-start;
+
     gap:13px;
+
     padding:15px;
+
     border:1px solid #292929;
     border-radius:14px;
+
     background:#141414;
+
     transition:.18s;
 }
 
@@ -191,16 +283,22 @@ body{
 .notification-icon{
     width:43px;
     height:43px;
+
     flex-shrink:0;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     border-radius:12px;
+
     background:#242424;
+
     font-size:19px;
 }
 
-.notification.unread-item .notification-icon{
+.notification.unread-item
+.notification-icon{
     background:#FFD400;
     color:#111;
 }
@@ -214,6 +312,7 @@ body{
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     gap:10px;
 }
 
@@ -225,12 +324,15 @@ body{
 .notification-time{
     color:#666;
     font-size:9px;
+
     white-space:nowrap;
 }
 
 .notification-message{
     margin-top:6px;
+
     color:#888;
+
     font-size:11px;
     line-height:1.5;
 }
@@ -238,42 +340,61 @@ body{
 .notification-meta{
     display:flex;
     align-items:center;
+
     gap:7px;
+
     margin-top:9px;
+
     flex-wrap:wrap;
 }
 
 .tag{
     padding:4px 7px;
+
     border-radius:6px;
+
     background:#242424;
     color:#aaa;
+
     font-size:8px;
     font-weight:900;
+
     text-transform:uppercase;
+}
+
+.target-tag{
+    color:#FFD400;
 }
 
 .dot{
     width:7px;
     height:7px;
+
     border-radius:50%;
+
     background:#FFD400;
 }
 
 .notification-actions{
     display:flex;
     gap:6px;
+
     margin-top:9px;
 }
 
 .small-btn{
     height:30px;
+
     padding:0 9px;
+
     border:1px solid #333;
     border-radius:7px;
+
     background:#1c1c1c;
     color:#aaa;
+
     cursor:pointer;
+
     font-size:9px;
     font-weight:800;
 }
@@ -285,10 +406,14 @@ body{
 
 .empty{
     display:none;
+
     padding:45px 20px;
+
     border:1px dashed #333;
     border-radius:15px;
+
     text-align:center;
+
     color:#777;
 }
 
@@ -299,23 +424,31 @@ body{
 
 .empty strong{
     display:block;
+
     color:#aaa;
+
     font-size:14px;
 }
 
 .empty p{
     margin:6px 0 0;
+
     font-size:11px;
 }
 
 .modal{
     position:fixed;
     inset:0;
+
     z-index:999;
+
     display:none;
+
     align-items:center;
     justify-content:center;
+
     padding:18px;
+
     background:rgba(0,0,0,.75);
 }
 
@@ -326,11 +459,16 @@ body{
 .modal-card{
     width:100%;
     max-width:520px;
+
     max-height:90vh;
+
     overflow:auto;
+
     padding:20px;
+
     border:1px solid #333;
     border-radius:18px;
+
     background:#131313;
 }
 
@@ -338,23 +476,30 @@ body{
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     gap:10px;
+
     margin-bottom:17px;
 }
 
 .modal-head h2{
     margin:0;
+
     font-size:18px;
 }
 
 .close{
     width:35px;
     height:35px;
+
     border:1px solid #333;
     border-radius:9px;
+
     background:#1e1e1e;
     color:#fff;
+
     cursor:pointer;
+
     font-size:18px;
 }
 
@@ -364,10 +509,14 @@ body{
 
 .field label{
     display:block;
+
     margin-bottom:6px;
+
     color:#999;
+
     font-size:9px;
     font-weight:900;
+
     text-transform:uppercase;
 }
 
@@ -375,12 +524,17 @@ body{
 .field textarea,
 .field select{
     width:100%;
+
     border:1px solid #333;
     border-radius:9px;
+
     outline:none;
+
     background:#1b1b1b;
     color:#fff;
+
     padding:11px;
+
     font-size:12px;
 }
 
@@ -390,6 +544,7 @@ body{
 
 .field textarea{
     min-height:105px;
+
     resize:vertical;
 }
 
@@ -399,33 +554,85 @@ body{
     border-color:#FFD400;
 }
 
+.target-info{
+    margin-top:6px;
+
+    color:#777;
+
+    font-size:10px;
+    line-height:1.4;
+}
+
+.send-status{
+    display:none;
+
+    margin-top:12px;
+    padding:10px;
+
+    border:1px solid #333;
+    border-radius:9px;
+
+    background:#181818;
+
+    color:#aaa;
+
+    font-size:10px;
+    line-height:1.5;
+}
+
+.send-status.show{
+    display:block;
+}
+
 .modal-actions{
     display:flex;
+
     justify-content:flex-end;
+
     gap:8px;
+
     margin-top:16px;
 }
 
 .toast{
     position:fixed;
+
     left:50%;
     bottom:22px;
+
     z-index:2000;
-    transform:translate(-50%,120px);
-    max-width:calc(100% - 30px);
+
+    transform:
+        translate(-50%,120px);
+
+    max-width:
+        calc(100% - 30px);
+
     padding:12px 17px;
+
     border-radius:10px;
+
     background:#18311f;
     color:#65e58b;
+
     font-size:11px;
     font-weight:800;
+
     opacity:0;
+
     transition:.25s;
 }
 
 .toast.show{
-    transform:translate(-50%,0);
+    transform:
+        translate(-50%,0);
+
     opacity:1;
+}
+
+.toast.error{
+    background:#321818;
+    color:#ff7777;
 }
 
 @media(max-width:650px){
@@ -452,334 +659,386 @@ body{
 
 }
 
-</style></head><body><div class="page"><header class="topbar"><div class="top-left">
+</style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+
+<header class="topbar">
+
+    <div class="top-left">
+
+        <button
+            class="back-btn"
+            type="button"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ←
+        </button>
+
+        <div class="title">
+
+            <span>RiderX</span>
+            Notifications
+
+        </div>
+
+    </div>
+
+    <div class="logo">
+        RX
+    </div>
+
+</header>
+
+
+<main class="content">
+
+
+<section class="hero">
+
+    <div class="hero-top">
+
+        <div>
+
+            <h1>
+                Notifications
+            </h1>
+
+            <p>
+                Send real-time notifications to RiderX
+                customers and riders through Firebase.
+            </p>
+
+        </div>
+
+        <div
+            class="unread"
+            id="unreadCount"
+        >
+            0
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="toolbar">
+
+    <input
+        type="search"
+        id="searchInput"
+        class="search"
+        placeholder="Search notifications..."
+    >
+
+
+    <select
+        id="filterSelect"
+        class="filter"
+    >
+
+        <option value="all">
+            All
+        </option>
+
+        <option value="ride">
+            Rides
+        </option>
+
+        <option value="rider">
+            Riders
+        </option>
+
+        <option value="customer">
+            Customers
+        </option>
+
+        <option value="payment">
+            Payments
+        </option>
+
+        <option value="system">
+            System
+        </option>
+
+    </select>
+
 
     <button
-        class="back-btn"
         type="button"
-        onclick="history.back()"
+        class="btn"
+        id="refreshBtn"
     >
-        ←
+        Refresh
     </button>
 
-    <div class="title">
-        <span>RiderX</span> Notifications
-    </div>
 
-</div>
-
-<div class="logo">
-    RX
-</div>
-
-</header><main class="content"><section class="hero"><div class="hero-top">
-
-    <div>
-
-        <h1>
-            Notifications
-        </h1>
-
-        <p>
-            Manage system alerts, rider updates,
-            customer notifications and admin events.
-        </p>
-
-    </div>
-
-    <div
-        class="unread"
-        id="unreadCount"
+    <button
+        type="button"
+        class="btn primary"
+        id="createBtn"
     >
-        0
-    </div>
+        + New
+    </button>
 
 </div>
 
-</section><div class="toolbar"><input
-    type="search"
-    id="searchInput"
-    class="search"
-    placeholder="Search notifications..."
->
 
-
-<select
-    id="filterSelect"
-    class="filter"
->
-
-    <option value="all">
-        All
-    </option>
-
-    <option value="unread">
-        Unread
-    </option>
-
-    <option value="ride">
-        Rides
-    </option>
-
-    <option value="rider">
-        Riders
-    </option>
-
-    <option value="customer">
-        Customers
-    </option>
-
-    <option value="payment">
-        Payments
-    </option>
-
-    <option value="system">
-        System
-    </option>
-
-</select>
-
-
-<button
-    type="button"
-    class="btn"
-    id="markAllBtn"
->
-    Mark all read
-</button>
-
-
-<button
-    type="button"
-    class="btn primary"
-    id="createBtn"
->
-    + New
-</button>
-
-</div><section
+<section
     class="notification-list"
     id="notificationList"
-></section><div
+></section>
+
+
+<div
     class="empty"
     id="emptyState"
-><div class="empty-icon">
-    🔔
+>
+
+    <div class="empty-icon">
+        🔔
+    </div>
+
+    <strong>
+        No notifications found
+    </strong>
+
+    <p>
+        There are no admin notifications to display.
+    </p>
+
 </div>
 
-<strong>
-    No notifications found
-</strong>
 
-<p>
-    There are no notifications matching your current filter.
-</p>
+</main>
 
-</div></main></div><div
+</div>
+
+
+<div
     class="modal"
     id="createModal"
-><div class="modal-card"><div class="modal-head">
+>
 
-    <h2>
-        Create Notification
-    </h2>
+    <div class="modal-card">
 
-    <button
-        type="button"
-        class="close"
-        id="closeModal"
-    >
-        ×
-    </button>
+
+        <div class="modal-head">
+
+            <h2>
+                Send Notification
+            </h2>
+
+            <button
+                type="button"
+                class="close"
+                id="closeModal"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="notificationForm">
+
+
+            <div class="field">
+
+                <label>
+                    Title
+                </label>
+
+                <input
+                    type="text"
+                    id="newTitle"
+                    maxlength="80"
+                    placeholder="Notification title"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Message
+                </label>
+
+                <textarea
+                    id="newMessage"
+                    maxlength="300"
+                    placeholder="Write notification message..."
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Category
+                </label>
+
+                <select
+                    id="newCategory"
+                >
+
+                    <option value="system">
+                        System
+                    </option>
+
+                    <option value="ride">
+                        Ride
+                    </option>
+
+                    <option value="rider">
+                        Rider
+                    </option>
+
+                    <option value="customer">
+                        Customer
+                    </option>
+
+                    <option value="payment">
+                        Payment
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Target
+                </label>
+
+                <select
+                    id="newTarget"
+                >
+
+                    <option value="all">
+                        All Users
+                    </option>
+
+                    <option value="riders">
+                        All Riders
+                    </option>
+
+                    <option value="customers">
+                        All Customers
+                    </option>
+
+                </select>
+
+
+                <div
+                    class="target-info"
+                    id="targetInfo"
+                >
+                    Notification will be sent to all
+                    RiderX customers and riders.
+                </div>
+
+            </div>
+
+
+            <div
+                class="send-status"
+                id="sendStatus"
+            ></div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="cancelModal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn primary"
+                    id="sendBtn"
+                >
+                    Send Notification
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
 
 </div>
 
 
-<form id="notificationForm">
-
-
-    <div class="field">
-
-        <label>
-            Title
-        </label>
-
-        <input
-            type="text"
-            id="newTitle"
-            maxlength="80"
-            placeholder="Notification title"
-            required
-        >
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            Message
-        </label>
-
-        <textarea
-            id="newMessage"
-            maxlength="300"
-            placeholder="Write notification message..."
-            required
-        ></textarea>
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            Category
-        </label>
-
-        <select id="newCategory">
-
-            <option value="system">
-                System
-            </option>
-
-            <option value="ride">
-                Ride
-            </option>
-
-            <option value="rider">
-                Rider
-            </option>
-
-            <option value="customer">
-                Customer
-            </option>
-
-            <option value="payment">
-                Payment
-            </option>
-
-        </select>
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            Target
-        </label>
-
-        <select id="newTarget">
-
-            <option value="all">
-                All Users
-            </option>
-
-            <option value="riders">
-                Riders
-            </option>
-
-            <option value="customers">
-                Customers
-            </option>
-
-        </select>
-
-    </div>
-
-
-    <div class="modal-actions">
-
-        <button
-            type="button"
-            class="btn"
-            id="cancelModal"
-        >
-            Cancel
-        </button>
-
-        <button
-            type="submit"
-            class="btn primary"
-        >
-            Create Notification
-        </button>
-
-    </div>
-
-
-</form>
-
-</div></div><div
+<div
     class="toast"
     id="toast"
-></div><script>
+    role="status"
+    aria-live="polite"
+></div>
+
+
+<script type="module">
 
 "use strict";
 
 
-const STORAGE_KEY =
+/* =========================================================
+   FIREBASE
+========================================================= */
+
+import {
+    auth,
+    db,
+    onAuthStateChanged,
+    collection,
+    query,
+    where,
+    getDocs,
+    addDoc,
+    doc,
+    updateDoc,
+    deleteDoc,
+    writeBatch,
+    serverTimestamp
+} from "../firebase/firebase-config.js";
+
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const LOCAL_KEY =
     "riderx_admin_notifications";
 
 
-const DEFAULT_NOTIFICATIONS = [
-
-    {
-        id:"ride_001",
-        title:"New ride request",
-        message:"A new ride request has been received and is waiting for rider acceptance.",
-        category:"ride",
-        target:"riders",
-        time:Date.now() - 8 * 60 * 1000,
-        read:false
-    },
-
-    {
-        id:"rider_001",
-        title:"Rider approval pending",
-        message:"A rider application is waiting for admin document verification.",
-        category:"rider",
-        target:"admin",
-        time:Date.now() - 32 * 60 * 1000,
-        read:false
-    },
-
-    {
-        id:"payment_001",
-        title:"Payment received",
-        message:"A successful online payment has been recorded on the platform.",
-        category:"payment",
-        target:"admin",
-        time:Date.now() - 60 * 60 * 1000,
-        read:true
-    },
-
-    {
-        id:"customer_001",
-        title:"New customer registered",
-        message:"A new customer has successfully created a RiderX account.",
-        category:"customer",
-        target:"admin",
-        time:Date.now() - 2 * 60 * 60 * 1000,
-        read:true
-    },
-
-    {
-        id:"system_001",
-        title:"RiderX system ready",
-        message:"Admin notification center is active and ready.",
-        category:"system",
-        target:"admin",
-        time:Date.now() - 4 * 60 * 60 * 1000,
-        read:true
-    }
-
-];
+const MAX_BATCH_OPERATIONS =
+    450;
 
 
-let notifications = [];
-
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
 const list =
     document.getElementById(
@@ -806,9 +1065,9 @@ const filterSelect =
         "filterSelect"
     );
 
-const markAllBtn =
+const refreshBtn =
     document.getElementById(
-        "markAllBtn"
+        "refreshBtn"
     );
 
 const createBtn =
@@ -836,90 +1095,516 @@ const notificationForm =
         "notificationForm"
     );
 
+const sendBtn =
+    document.getElementById(
+        "sendBtn"
+    );
+
+const targetInfo =
+    document.getElementById(
+        "targetInfo"
+    );
+
+const sendStatus =
+    document.getElementById(
+        "sendStatus"
+    );
+
 const toast =
     document.getElementById(
         "toast"
     );
 
 
+/* =========================================================
+   STATE
+========================================================= */
+
+let currentAdmin =
+    null;
+
+let notifications =
+    [];
+
+let firebaseNotifications =
+    [];
+
+let adminReady =
+    false;
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     function(){
 
-        loadNotifications();
+        bindEvents();
+
+        loadLocalHistory();
 
         render();
+
+        watchAdmin();
 
     }
 );
 
 
+/* =========================================================
+   EVENTS
+========================================================= */
 
-function loadNotifications(){
+function bindEvents(){
 
-    try{
-
-        const saved =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
+    searchInput.addEventListener(
+        "input",
+        render
+    );
 
 
-        if(saved){
+    filterSelect.addEventListener(
+        "change",
+        render
+    );
 
-            const parsed =
-                JSON.parse(
-                    saved
-                );
 
+    refreshBtn.addEventListener(
+        "click",
+        loadFirebaseHistory
+    );
+
+
+    createBtn.addEventListener(
+        "click",
+        openModal
+    );
+
+
+    closeModal.addEventListener(
+        "click",
+        closeCreateModal
+    );
+
+
+    cancelModal.addEventListener(
+        "click",
+        closeCreateModal
+    );
+
+
+    createModal.addEventListener(
+        "click",
+        function(event){
 
             if(
-                Array.isArray(
-                    parsed
-                )
+                event.target ===
+                createModal
             ){
 
-                notifications =
-                    parsed;
+                closeCreateModal();
+
+            }
+
+        }
+    );
+
+
+    notificationForm.addEventListener(
+        "submit",
+        sendNotification
+    );
+
+
+    document
+        .getElementById("newTarget")
+        .addEventListener(
+            "change",
+            updateTargetInfo
+        );
+
+}
+
+
+/* =========================================================
+   ADMIN AUTH
+========================================================= */
+
+function watchAdmin(){
+
+    onAuthStateChanged(
+        auth,
+        async function(user){
+
+            currentAdmin =
+                user || null;
+
+
+            if(!user){
+
+                adminReady =
+                    false;
+
+                showToast(
+                    "Admin login required.",
+                    true
+                );
 
                 return;
 
             }
 
+
+            try{
+
+                /*
+                 * Existing RiderX canonical user profile
+                 * is users/{uid}.
+                 */
+
+                const snapshot =
+                    await getDocs(
+                        query(
+                            collection(
+                                db,
+                                "users"
+                            ),
+                            where(
+                                "__name__",
+                                "==",
+                                user.uid
+                            )
+                        )
+                    );
+
+
+                let role = "";
+
+
+                if(
+                    !snapshot.empty
+                ){
+
+                    const data =
+                        snapshot
+                            .docs[0]
+                            .data() || {};
+
+
+                    role =
+                        String(
+                            data.role ||
+                            data.userRole ||
+                            data.accountType ||
+                            ""
+                        )
+                        .trim()
+                        .toLowerCase();
+
+                }
+
+
+                /*
+                 * Admin pages may already be protected
+                 * by the existing application auth system.
+                 *
+                 * If the profile is available and explicitly
+                 * identifies a non-admin user, stop sending.
+                 */
+
+                if(
+                    role &&
+                    role !== "admin" &&
+                    role !== "superadmin"
+                ){
+
+                    adminReady =
+                        false;
+
+                    createBtn.disabled =
+                        true;
+
+                    showToast(
+                        "Admin permission required.",
+                        true
+                    );
+
+                    return;
+
+                }
+
+
+                adminReady =
+                    true;
+
+                createBtn.disabled =
+                    false;
+
+                await loadFirebaseHistory();
+
+            }catch(error){
+
+                console.error(
+                    "Admin authorization check:",
+                    error
+                );
+
+
+                /*
+                 * Do not break existing admin pages if
+                 * the users profile is unavailable.
+                 *
+                 * Firebase Security Rules must still
+                 * enforce real admin permission.
+                 */
+
+                adminReady =
+                    true;
+
+                createBtn.disabled =
+                    false;
+
+                await loadFirebaseHistory();
+
+            }
+
         }
-
-    }catch(error){
-
-        console.error(
-            "Notification load error:",
-            error
-        );
-
-    }
-
-
-    notifications =
-        [...DEFAULT_NOTIFICATIONS];
-
-    saveNotifications();
-
-}
-
-
-
-function saveNotifications(){
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(
-            notifications
-        )
     );
 
 }
 
 
+/* =========================================================
+   LOAD LOCAL HISTORY
+========================================================= */
+
+function loadLocalHistory(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                LOCAL_KEY
+            );
+
+
+        if(!raw){
+
+            notifications =
+                [];
+
+            return;
+
+        }
+
+
+        const parsed =
+            JSON.parse(
+                raw
+            );
+
+
+        notifications =
+            Array.isArray(parsed)
+                ? parsed
+                : [];
+
+    }catch(error){
+
+        console.warn(
+            "Local notification history:",
+            error
+        );
+
+        notifications =
+            [];
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE LOCAL HISTORY
+========================================================= */
+
+function saveLocalHistory(){
+
+    try{
+
+        localStorage.setItem(
+            LOCAL_KEY,
+            JSON.stringify(
+                notifications
+            )
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Unable to save local notification history:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FIREBASE ADMIN HISTORY
+========================================================= */
+
+async function loadFirebaseHistory(){
+
+    if(
+        !currentAdmin ||
+        !currentAdmin.uid
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        /*
+         * Query only notifications created by
+         * the currently logged-in admin.
+         *
+         * No orderBy is used here so this does not
+         * require a composite Firestore index.
+         */
+
+        const snapshot =
+            await getDocs(
+                query(
+                    collection(
+                        db,
+                        "notifications"
+                    ),
+                    where(
+                        "senderId",
+                        "==",
+                        currentAdmin.uid
+                    )
+                )
+            );
+
+
+        firebaseNotifications =
+            snapshot.docs.map(
+                function(item){
+
+                    const data =
+                        item.data() || {};
+
+
+                    return {
+                        id:item.id,
+                        ...data,
+                        source:"firebase"
+                    };
+
+                }
+            );
+
+
+        mergeAndRender();
+
+    }catch(error){
+
+        console.warn(
+            "Firebase notification history:",
+            error
+        );
+
+        mergeAndRender();
+
+    }
+
+}
+
+
+/* =========================================================
+   MERGE HISTORY
+========================================================= */
+
+function mergeAndRender(){
+
+    const map =
+        new Map();
+
+
+    notifications.forEach(
+        function(item){
+
+            if(item?.id){
+
+                map.set(
+                    String(item.id),
+                    item
+                );
+
+            }
+
+        }
+    );
+
+
+    firebaseNotifications.forEach(
+        function(item){
+
+            if(item?.id){
+
+                map.set(
+                    String(item.id),
+                    item
+                );
+
+            }
+
+        }
+    );
+
+
+    notifications =
+        Array.from(
+            map.values()
+        );
+
+
+    notifications.sort(
+        function(a,b){
+
+            return (
+                getTime(
+                    b.createdAt ||
+                    b.time
+                ) -
+                getTime(
+                    a.createdAt ||
+                    a.time
+                )
+            );
+
+        }
+    );
+
+
+    saveLocalHistory();
+
+    render();
+
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
 
 function render(){
 
@@ -934,33 +1619,20 @@ function render(){
 
 
     const filtered =
-        notifications
-        .filter(
+        notifications.filter(
             function(item){
 
                 if(
-                    filter ===
-                    "unread"
-                ){
-
-                    return !item.read;
-
-                }
-
-
-                if(
                     filter !==
-                    "all"
+                    "all" &&
+                    String(
+                        item.category ||
+                        "system"
+                    ).toLowerCase() !==
+                    filter
                 ){
 
-                    if(
-                        item.category !==
-                        filter
-                    ){
-
-                        return false;
-
-                    }
+                    return false;
 
                 }
 
@@ -972,57 +1644,27 @@ function render(){
                 }
 
 
-                return (
+                const text =
+                    [
+                        item.title,
+                        item.message,
+                        item.category,
+                        item.target
+                    ]
+                    .join(" ")
+                    .toLowerCase();
 
-                    String(
-                        item.title
-                    )
-                    .toLowerCase()
-                    .includes(
-                        search
-                    )
 
-                    ||
-
-                    String(
-                        item.message
-                    )
-                    .toLowerCase()
-                    .includes(
-                        search
-                    )
-
-                    ||
-
-                    String(
-                        item.category
-                    )
-                    .toLowerCase()
-                    .includes(
-                        search
-                    )
-
-                );
-
-            }
-        )
-        .sort(
-            function(a,b){
-
-                return (
-                    Number(
-                        b.time
-                    ) -
-                    Number(
-                        a.time
-                    )
+                return text.includes(
+                    search
                 );
 
             }
         );
 
 
-    list.innerHTML = "";
+    list.innerHTML =
+        "";
 
 
     filtered.forEach(
@@ -1044,11 +1686,15 @@ function render(){
             : "block";
 
 
-    updateUnreadCount();
+    unreadCount.textContent =
+        notifications.length;
 
 }
 
 
+/* =========================================================
+   CREATE NOTIFICATION ELEMENT
+========================================================= */
 
 function createNotificationElement(
     item
@@ -1061,12 +1707,7 @@ function createNotificationElement(
 
 
     article.className =
-        "notification" +
-        (
-            item.read
-                ? ""
-                : " unread-item"
-        );
+        "notification";
 
 
     const icon =
@@ -1116,7 +1757,8 @@ function createNotificationElement(
 
 
     title.textContent =
-        item.title;
+        item.title ||
+        "Notification";
 
 
     const time =
@@ -1131,6 +1773,7 @@ function createNotificationElement(
 
     time.textContent =
         formatTime(
+            item.createdAt ||
             item.time
         );
 
@@ -1155,7 +1798,8 @@ function createNotificationElement(
 
 
     message.textContent =
-        item.message;
+        item.message ||
+        "";
 
 
     const meta =
@@ -1168,42 +1812,46 @@ function createNotificationElement(
         "notification-meta";
 
 
-    const tag =
+    const categoryTag =
         document.createElement(
             "span"
         );
 
 
-    tag.className =
+    categoryTag.className =
         "tag";
 
 
-    tag.textContent =
-        item.category;
+    categoryTag.textContent =
+        item.category ||
+        "system";
 
 
     meta.appendChild(
-        tag
+        categoryTag
     );
 
 
-    if(!item.read){
-
-        const dot =
-            document.createElement(
-                "span"
-            );
-
-
-        dot.className =
-            "dot";
-
-
-        meta.appendChild(
-            dot
+    const targetTag =
+        document.createElement(
+            "span"
         );
 
-    }
+
+    targetTag.className =
+        "tag target-tag";
+
+
+    targetTag.textContent =
+        "Sent: " +
+        formatTarget(
+            item.target
+        );
+
+
+    meta.appendChild(
+        targetTag
+    );
 
 
     const actions =
@@ -1216,38 +1864,6 @@ function createNotificationElement(
         "notification-actions";
 
 
-    const readBtn =
-        document.createElement(
-            "button"
-        );
-
-
-    readBtn.type =
-        "button";
-
-
-    readBtn.className =
-        "small-btn";
-
-
-    readBtn.textContent =
-        item.read
-            ? "Mark unread"
-            : "Mark read";
-
-
-    readBtn.addEventListener(
-        "click",
-        function(){
-
-            toggleRead(
-                item.id
-            );
-
-        }
-    );
-
-
     const deleteBtn =
         document.createElement(
             "button"
@@ -1257,10 +1873,8 @@ function createNotificationElement(
     deleteBtn.type =
         "button";
 
-
     deleteBtn.className =
         "small-btn";
-
 
     deleteBtn.textContent =
         "Delete";
@@ -1271,16 +1885,12 @@ function createNotificationElement(
         function(){
 
             deleteNotification(
-                item.id
+                item
             );
 
         }
     );
 
-
-    actions.appendChild(
-        readBtn
-    );
 
     actions.appendChild(
         deleteBtn
@@ -1318,278 +1928,117 @@ function createNotificationElement(
 }
 
 
+/* =========================================================
+   DELETE
+========================================================= */
 
-function toggleRead(
-    id
+async function deleteNotification(
+    item
 ){
 
-    const item =
-        notifications.find(
-            function(notification){
-
-                return notification.id ===
-                    id;
-
-            }
-        );
-
-
-    if(!item){
+    if(
+        !confirm(
+            "Delete this admin notification history?"
+        )
+    ){
 
         return;
 
     }
 
 
-    item.read =
-        !item.read;
+    try{
+
+        if(
+            item.source === "firebase" &&
+            item.id
+        ){
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "notifications",
+                    item.id
+                )
+            );
+
+        }
 
 
-    saveNotifications();
+        notifications =
+            notifications.filter(
+                function(notification){
 
-    render();
-
-}
-
-
-
-function deleteNotification(
-    id
-){
-
-    const confirmed =
-        confirm(
-            "Delete this notification?"
-        );
-
-
-    if(!confirmed){
-
-        return;
-
-    }
-
-
-    notifications =
-        notifications.filter(
-            function(item){
-
-                return item.id !==
-                    id;
-
-            }
-        );
-
-
-    saveNotifications();
-
-    render();
-
-    showToast(
-        "Notification deleted."
-    );
-
-}
-
-
-
-markAllBtn.addEventListener(
-    "click",
-    function(){
-
-        let changed =
-            false;
-
-
-        notifications.forEach(
-            function(item){
-
-                if(!item.read){
-
-                    item.read =
-                        true;
-
-                    changed =
-                        true;
+                    return String(
+                        notification.id
+                    ) !==
+                    String(
+                        item.id
+                    );
 
                 }
-
-            }
-        );
-
-
-        if(changed){
-
-            saveNotifications();
-
-            render();
-
-            showToast(
-                "All notifications marked as read."
             );
 
-        }else{
 
-            showToast(
-                "No unread notifications."
-            );
-
-        }
-
-    }
-);
-
-
-
-searchInput.addEventListener(
-    "input",
-    render
-);
-
-
-filterSelect.addEventListener(
-    "change",
-    render
-);
-
-
-
-createBtn.addEventListener(
-    "click",
-    openModal
-);
-
-
-closeModal.addEventListener(
-    "click",
-    closeCreateModal
-);
-
-
-cancelModal.addEventListener(
-    "click",
-    closeCreateModal
-);
-
-
-createModal.addEventListener(
-    "click",
-    function(event){
-
-        if(
-            event.target ===
-            createModal
-        ){
-
-            closeCreateModal();
-
-        }
-
-    }
-);
-
-
-
-notificationForm.addEventListener(
-    "submit",
-    function(event){
-
-        event.preventDefault();
-
-
-        const title =
-            document.getElementById(
-                "newTitle"
-            )
-            .value
-            .trim();
-
-
-        const message =
-            document.getElementById(
-                "newMessage"
-            )
-            .value
-            .trim();
-
-
-        const category =
-            document.getElementById(
-                "newCategory"
-            )
-            .value;
-
-
-        const target =
-            document.getElementById(
-                "newTarget"
-            )
-            .value;
-
-
-        if(
-            !title ||
-            !message
-        ){
-
-            showToast(
-                "Please fill all required fields."
-            );
-
-            return;
-
-        }
-
-
-        notifications.unshift({
-
-            id:
-                "admin_" +
-                Date.now(),
-
-            title:
-                title,
-
-            message:
-                message,
-
-            category:
-                category,
-
-            target:
-                target,
-
-            time:
-                Date.now(),
-
-            read:
-                false
-
-        });
-
-
-        saveNotifications();
-
-        notificationForm.reset();
-
-        closeCreateModal();
+        saveLocalHistory();
 
         render();
 
         showToast(
-            "Notification created successfully."
+            "Notification deleted."
+        );
+
+    }catch(error){
+
+        console.error(
+            "Delete notification:",
+            error
+        );
+
+        showToast(
+            "Unable to delete notification.",
+            true
         );
 
     }
-);
+
+}
 
 
+/* =========================================================
+   OPEN MODAL
+========================================================= */
 
 function openModal(){
+
+    if(!adminReady){
+
+        showToast(
+            "Admin permission required.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    notificationForm.reset();
+
+    updateTargetInfo();
+
+    sendStatus.classList.remove(
+        "show"
+    );
+
+    sendStatus.textContent =
+        "";
+
 
     createModal.classList.add(
         "show"
     );
+
 
     setTimeout(
         function(){
@@ -1607,6 +2056,9 @@ function openModal(){
 }
 
 
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
 
 function closeCreateModal(){
 
@@ -1617,32 +2069,674 @@ function closeCreateModal(){
 }
 
 
+/* =========================================================
+   TARGET INFO
+========================================================= */
 
-function updateUnreadCount(){
+function updateTargetInfo(){
 
-    const count =
-        notifications.filter(
-            function(item){
-
-                return !item.read;
-
-            }
-        ).length;
+    const target =
+        document.getElementById(
+            "newTarget"
+        ).value;
 
 
-    unreadCount.textContent =
-        count;
+    if(
+        target === "riders"
+    ){
+
+        targetInfo.textContent =
+            "Notification will be sent to all RiderX riders.";
+
+        return;
+
+    }
+
+
+    if(
+        target === "customers"
+    ){
+
+        targetInfo.textContent =
+            "Notification will be sent to all RiderX customers.";
+
+        return;
+
+    }
+
+
+    targetInfo.textContent =
+        "Notification will be sent to all RiderX customers and riders.";
 
 }
 
 
+/* =========================================================
+   SEND NOTIFICATION
+========================================================= */
+
+async function sendNotification(
+    event
+){
+
+    event.preventDefault();
+
+
+    if(!adminReady){
+
+        showToast(
+            "Admin permission required.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    if(
+        !currentAdmin ||
+        !currentAdmin.uid
+    ){
+
+        showToast(
+            "Admin session not available.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    const title =
+        document
+            .getElementById(
+                "newTitle"
+            )
+            .value
+            .trim();
+
+
+    const message =
+        document
+            .getElementById(
+                "newMessage"
+            )
+            .value
+            .trim();
+
+
+    const category =
+        document
+            .getElementById(
+                "newCategory"
+            )
+            .value;
+
+
+    const target =
+        document
+            .getElementById(
+                "newTarget"
+            )
+            .value;
+
+
+    if(
+        !title ||
+        !message
+    ){
+
+        showToast(
+            "Title and message are required.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    sendBtn.disabled =
+        true;
+
+
+    sendStatus.classList.add(
+        "show"
+    );
+
+
+    sendStatus.textContent =
+        "Finding recipients...";
+
+
+    try{
+
+        const users =
+            await findRecipients(
+                target
+            );
+
+
+        if(
+            !users.length
+        ){
+
+            throw new Error(
+                "No matching customers or riders found."
+            );
+
+        }
+
+
+        sendStatus.textContent =
+            "Sending to " +
+            users.length +
+            " user(s)...";
+
+
+        const sent =
+            await createRecipientNotifications(
+                users,
+                {
+                    title,
+                    message,
+                    category,
+                    target
+                }
+            );
+
+
+        /*
+         * Save a small admin history record locally.
+         */
+
+        const historyItem = {
+
+            id:
+                "admin_" +
+                Date.now(),
+
+            title,
+
+            message,
+
+            category,
+
+            target,
+
+            recipientCount:
+                sent,
+
+            time:
+                Date.now(),
+
+            createdAt:
+                Date.now(),
+
+            source:
+                "local"
+
+        };
+
+
+        notifications.unshift(
+            historyItem
+        );
+
+
+        saveLocalHistory();
+
+        render();
+
+
+        notificationForm.reset();
+
+        closeCreateModal();
+
+
+        showToast(
+            "Notification sent to " +
+            sent +
+            " user(s)."
+        );
+
+
+        /*
+         * Refresh Firebase admin history.
+         */
+
+        setTimeout(
+            loadFirebaseHistory,
+            500
+        );
+
+    }catch(error){
+
+        console.error(
+            "Send notification:",
+            error
+        );
+
+
+        sendStatus.textContent =
+            error.message ||
+            "Unable to send notification.";
+
+
+        showToast(
+            error.message ||
+            "Unable to send notification.",
+            true
+        );
+
+    }finally{
+
+        sendBtn.disabled =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   FIND RECIPIENTS
+========================================================= */
+
+async function findRecipients(
+    target
+){
+
+    const roles = [];
+
+
+    if(
+        target === "riders"
+    ){
+
+        roles.push(
+            "rider"
+        );
+
+    }
+    else if(
+        target === "customers"
+    ){
+
+        roles.push(
+            "customer"
+        );
+
+    }
+    else{
+
+        roles.push(
+            "rider",
+            "customer"
+        );
+
+    }
+
+
+    const users =
+        new Map();
+
+
+    /*
+     * RiderX canonical user records are:
+     *
+     * users/{uid}
+     *
+     * with role/userRole/accountType.
+     *
+     * We check all three role fields for compatibility
+     * with older RiderX profiles.
+     */
+
+    for(
+        const role of roles
+    ){
+
+        const fieldNames = [
+            "role",
+            "userRole",
+            "accountType"
+        ];
+
+
+        for(
+            const fieldName of fieldNames
+        ){
+
+            try{
+
+                const snapshot =
+                    await getDocs(
+                        query(
+                            collection(
+                                db,
+                                "users"
+                            ),
+                            where(
+                                fieldName,
+                                "==",
+                                role
+                            )
+                        )
+                    );
+
+
+                snapshot.forEach(
+                    function(userDoc){
+
+                        const data =
+                            userDoc.data() ||
+                            {};
+
+
+                        const uid =
+                            userDoc.id;
+
+
+                        if(!uid){
+
+                            return;
+
+                        }
+
+
+                        users.set(
+                            uid,
+                            {
+                                uid,
+                                ...data
+                            }
+                        );
+
+                    }
+                );
+
+            }catch(error){
+
+                console.warn(
+                    "Recipient role query failed:",
+                    fieldName,
+                    role,
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    return Array.from(
+        users.values()
+    );
+
+}
+
+
+/* =========================================================
+   CREATE FIRESTORE NOTIFICATIONS
+========================================================= */
+
+async function createRecipientNotifications(
+    users,
+    payload
+){
+
+    let sent =
+        0;
+
+
+    /*
+     * Firestore writeBatch maximum is 500 operations.
+     * Keep some safety margin.
+     */
+
+    for(
+        let start = 0;
+        start < users.length;
+        start += MAX_BATCH_OPERATIONS
+    ){
+
+        const chunk =
+            users.slice(
+                start,
+                start +
+                MAX_BATCH_OPERATIONS
+            );
+
+
+        const batch =
+            writeBatch(
+                db
+            );
+
+
+        chunk.forEach(
+            function(user){
+
+                if(
+                    !user.uid
+                ){
+
+                    return;
+
+                }
+
+
+                const notificationRef =
+                    doc(
+                        collection(
+                            db,
+                            "notifications"
+                        )
+                    );
+
+
+                batch.set(
+                    notificationRef,
+                    {
+
+                        /*
+                         * Recipient
+                         */
+
+                        userId:
+                            user.uid,
+
+                        recipientId:
+                            user.uid,
+
+
+                        /*
+                         * Notification content
+                         */
+
+                        title:
+                            payload.title,
+
+                        message:
+                            payload.message,
+
+                        category:
+                            payload.category,
+
+
+                        /*
+                         * Target
+                         */
+
+                        target:
+                            payload.target,
+
+                        targetRole:
+                            normalizeTargetRole(
+                                payload.target,
+                                user
+                            ),
+
+
+                        /*
+                         * Read state
+                         */
+
+                        read:
+                            false,
+
+                        isRead:
+                            false,
+
+
+                        /*
+                         * Sender
+                         */
+
+                        senderId:
+                            currentAdmin.uid,
+
+                        senderRole:
+                            "admin",
+
+                        senderEmail:
+                            currentAdmin.email ||
+                            "",
+
+
+                        /*
+                         * Source
+                         */
+
+                        source:
+                            "admin",
+
+                        type:
+                            "admin",
+
+
+                        /*
+                         * Optional navigation data.
+                         */
+
+                        rideId:
+                            "",
+
+                        action:
+                            "",
+
+
+                        /*
+                         * Timestamps
+                         */
+
+                        createdAt:
+                            serverTimestamp(),
+
+                        sentAt:
+                            serverTimestamp(),
+
+                        readAt:
+                            null
+
+                    }
+                );
+
+
+                sent++;
+
+            }
+        );
+
+
+        await batch.commit();
+
+    }
+
+
+    return sent;
+
+}
+
+
+/* =========================================================
+   NORMALIZE TARGET ROLE
+========================================================= */
+
+function normalizeTargetRole(
+    target,
+    user
+){
+
+    const role =
+        String(
+            user.role ||
+            user.userRole ||
+            user.accountType ||
+            ""
+        )
+        .toLowerCase();
+
+
+    if(
+        role === "rider"
+    ){
+
+        return "rider";
+
+    }
+
+
+    if(
+        role === "customer"
+    ){
+
+        return "customer";
+
+    }
+
+
+    if(
+        target === "riders"
+    ){
+
+        return "rider";
+
+    }
+
+
+    if(
+        target === "customers"
+    ){
+
+        return "customer";
+
+    }
+
+
+    return role;
+
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
 
 function getIcon(
     category
 ){
 
     switch(
-        category
+        String(
+            category ||
+            ""
+        ).toLowerCase()
     ){
 
         case "ride":
@@ -1665,18 +2759,141 @@ function getIcon(
 }
 
 
+/* =========================================================
+   TARGET FORMAT
+========================================================= */
 
-function formatTime(
-    timestamp
+function formatTarget(
+    target
 ){
 
-    const time =
-        Number(
-            timestamp
+    switch(
+        target
+    ){
+
+        case "riders":
+            return "Riders";
+
+        case "customers":
+            return "Customers";
+
+        case "all":
+            return "All Users";
+
+        default:
+            return target ||
+                "Users";
+
+    }
+
+}
+
+
+/* =========================================================
+   TIME
+========================================================= */
+
+function getTime(
+    value
+){
+
+    if(!value){
+
+        return 0;
+
+    }
+
+
+    try{
+
+        if(
+            typeof value.toMillis ===
+            "function"
+        ){
+
+            return value.toMillis();
+
+        }
+
+
+        if(
+            typeof value.toDate ===
+            "function"
+        ){
+
+            return value
+                .toDate()
+                .getTime();
+
+        }
+
+
+        if(
+            typeof value.seconds ===
+            "number"
+        ){
+
+            return (
+                value.seconds *
+                1000
+            );
+
+        }
+
+
+        const number =
+            Number(
+                value
+            );
+
+
+        if(
+            Number.isFinite(
+                number
+            )
+        ){
+
+            return number;
+
+        }
+
+
+        const date =
+            new Date(
+                value
+            );
+
+
+        return Number.isNaN(
+            date.getTime()
+        )
+            ? 0
+            : date.getTime();
+
+    }catch(error){
+
+        return 0;
+
+    }
+
+}
+
+
+/* =========================================================
+   FORMAT TIME
+========================================================= */
+
+function formatTime(
+    value
+){
+
+    const timestamp =
+        getTime(
+            value
         );
 
 
-    if(!Number.isFinite(time)){
+    if(!timestamp){
 
         return "Recently";
 
@@ -1687,18 +2904,23 @@ function formatTime(
         Math.max(
             0,
             Date.now() -
-            time
+            timestamp
         );
 
 
     const minute =
-        60 * 1000;
+        60 *
+        1000;
+
 
     const hour =
-        60 * minute;
+        60 *
+        minute;
+
 
     const day =
-        24 * hour;
+        24 *
+        hour;
 
 
     if(
@@ -1754,13 +2976,32 @@ function formatTime(
 }
 
 
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer =
+    null;
+
 
 function showToast(
-    message
+    message,
+    error = false
 ){
 
     toast.textContent =
-        message;
+        String(
+            message ||
+            ""
+        );
+
+
+    toast.classList.toggle(
+        "error",
+        Boolean(
+            error
+        )
+    );
 
 
     toast.classList.add(
@@ -1769,11 +3010,11 @@ function showToast(
 
 
     clearTimeout(
-        window.riderXToastTimer
+        toastTimer
     );
 
 
-    window.riderXToastTimer =
+    toastTimer =
         setTimeout(
             function(){
 
@@ -1782,9 +3023,58 @@ function showToast(
                 );
 
             },
-            2500
+            3500
         );
 
 }
 
-</script></body></html>
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        history.back();
+
+    }else{
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+
+}
+
+
+/* =========================================================
+   GLOBAL DEBUG API
+========================================================= */
+
+window.RiderX =
+    window.RiderX ||
+    {};
+
+window.RiderX.adminNotifications =
+    {
+
+        send:
+            sendNotification,
+
+        refresh:
+            loadFirebaseHistory
+
+    };
+
+</script>
+
+
+</body>
+    </html>
