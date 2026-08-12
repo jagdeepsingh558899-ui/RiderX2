@@ -865,6 +865,7 @@ body{
         id="errorBox"
         class="error-box"
         role="alert"
+        aria-live="polite"
     ></div>
 
 </div>
@@ -882,6 +883,13 @@ body{
 ======================================================== -->
 
 <script type="module">
+
+"use strict";
+
+
+/* =========================================================
+   FIREBASE IMPORTS
+========================================================= */
 
 import {
     auth,
@@ -904,7 +912,7 @@ import {
    CONSTANTS
 ========================================================= */
 
-const CHANDIGARH = [
+const DEFAULT_LOCATION = [
     30.7333,
     76.7794
 ];
@@ -914,6 +922,12 @@ const DEFAULT_ZOOM = 13;
 const RIDER_ZOOM = 16;
 
 const LOCATION_SAVE_INTERVAL = 4000;
+
+const GPS_TIMEOUT = 15000;
+
+const GPS_MAXIMUM_AGE = 5000;
+
+const WATCH_MAXIMUM_AGE = 3000;
 
 
 /* =========================================================
@@ -981,21 +995,44 @@ let authReady = false;
 
 let toggleInProgress = false;
 
+let pageActive = true;
+
 
 /* =========================================================
-   MAP
+   MAP INITIALIZATION
 ========================================================= */
 
 function initializeMap(){
 
-    map = L.map(
-        "map",
-        {
-            zoomControl:false,
-            attributionControl:true
-        }
-    ).setView(
-        CHANDIGARH,
+    if(
+        typeof L === "undefined"
+    ){
+
+        console.error(
+            "Leaflet failed to load."
+        );
+
+        showError(
+            "Map failed to load. Please check your internet connection."
+        );
+
+        return;
+
+    }
+
+
+    map =
+        L.map(
+            "map",
+            {
+                zoomControl:false,
+                attributionControl:true
+            }
+        );
+
+
+    map.setView(
+        DEFAULT_LOCATION,
         DEFAULT_ZOOM
     );
 
@@ -1008,6 +1045,20 @@ function initializeMap(){
         }
     ).addTo(map);
 
+
+    setTimeout(
+        () => {
+
+            if(map){
+
+                map.invalidateSize();
+
+            }
+
+        },
+        300
+    );
+
 }
 
 
@@ -1015,7 +1066,7 @@ initializeMap();
 
 
 /* =========================================================
-   RIDER ICON
+   RIDER MAP ICON
 ========================================================= */
 
 const riderIcon =
@@ -1045,15 +1096,21 @@ const riderIcon =
 
         `,
 
-        iconSize:[44,44],
+        iconSize:[
+            44,
+            44
+        ],
 
-        iconAnchor:[22,22]
+        iconAnchor:[
+            22,
+            22
+        ]
 
     });
 
 
 /* =========================================================
-   AUTH
+   AUTH STATE
 ========================================================= */
 
 onAuthStateChanged(
@@ -1061,6 +1118,7 @@ onAuthStateChanged(
     async user => {
 
         authReady = true;
+
 
         if(!user){
 
@@ -1070,6 +1128,8 @@ onAuthStateChanged(
 
             stopLocationTracking();
 
+            updateUI();
+
             location.href =
                 "../auth/login.html";
 
@@ -1078,12 +1138,32 @@ onAuthStateChanged(
         }
 
 
-        currentUser = user;
+        currentUser =
+            user;
 
 
-        await loadRiderStatus(
-            user.uid
-        );
+        try{
+
+            await loadRiderStatus(
+                user.uid
+            );
+
+        }catch(error){
+
+            console.error(
+                "Authentication rider load error:",
+                error
+            );
+
+            isOnline = false;
+
+            updateUI();
+
+            showError(
+                "Unable to load rider account."
+            );
+
+        }
 
     }
 );
@@ -1095,51 +1175,72 @@ onAuthStateChanged(
 
 async function loadRiderStatus(uid){
 
-    try{
+    if(!uid){
 
-        const riderSnap =
-            await getDoc(
-                doc(
-                    db,
-                    "riders",
-                    uid
-                )
-            );
-
-
-        if(
-            riderSnap.exists() &&
-            riderSnap.data().online === true
-        ){
-
-            isOnline = true;
-
-            updateUI();
-
-            startLocationTracking();
-
-        }else{
-
-            isOnline = false;
-
-            updateUI();
-
-        }
-
-    }catch(error){
-
-        console.error(
-            "Rider status error:",
-            error
+        throw new Error(
+            "Invalid rider ID."
         );
+
+    }
+
+
+    const riderSnap =
+        await getDoc(
+            doc(
+                db,
+                "riders",
+                uid
+            )
+        );
+
+
+    if(
+        !riderSnap.exists()
+    ){
 
         isOnline = false;
 
         updateUI();
 
-        showError(
-            "Unable to load rider status. Please try again."
-        );
+        return;
+
+    }
+
+
+    const data =
+        riderSnap.data() || {};
+
+
+    /*
+     * Support both fields because
+     * older RiderX records may contain
+     * either one.
+     */
+
+    const onlineValue =
+        data.online === true ||
+        data.isOnline === true;
+
+
+    isOnline =
+        onlineValue;
+
+
+    updateUI();
+
+
+    if(isOnline){
+
+        /*
+         * Existing online rider must
+         * resume GPS tracking.
+         */
+
+        startLocationTracking();
+
+    }else{
+
+        stopLocationTracking();
 
     }
 
@@ -1147,7 +1248,7 @@ async function loadRiderStatus(uid){
 
 
 /* =========================================================
-   UI
+   UI UPDATE
 ========================================================= */
 
 function updateUI(){
@@ -1227,7 +1328,7 @@ function updateUI(){
 
 
 /* =========================================================
-   ONLINE / OFFLINE TOGGLE
+   ONLINE / OFFLINE BUTTON
 ========================================================= */
 
 onlineButton.addEventListener(
@@ -1239,21 +1340,34 @@ onlineButton.addEventListener(
             !authReady ||
             toggleInProgress
         ){
+
             return;
+
         }
 
 
         hideError();
 
 
-        toggleInProgress = true;
+        toggleInProgress =
+            true;
 
-        onlineButton.disabled = true;
 
-        onlineButtonText.textContent =
-            isOnline
-                ? "Going Offline..."
-                : "Getting GPS...";
+        onlineButton.disabled =
+            true;
+
+
+        if(isOnline){
+
+            onlineButtonText.textContent =
+                "Going Offline...";
+
+        }else{
+
+            onlineButtonText.textContent =
+                "Getting GPS...";
+
+        }
 
 
         try{
@@ -1275,18 +1389,19 @@ onlineButton.addEventListener(
                 error
             );
 
+
             showError(
-                error.message ||
+                error?.message ||
                 "Unable to change online status."
             );
 
-            updateUI();
-
         }finally{
 
-            toggleInProgress = false;
+            toggleInProgress =
+                false;
 
-            onlineButton.disabled = false;
+            onlineButton.disabled =
+                false;
 
             updateUI();
 
@@ -1301,6 +1416,15 @@ onlineButton.addEventListener(
 ========================================================= */
 
 async function setRiderOnline(){
+
+    if(!currentUser){
+
+        throw new Error(
+            "Authentication session expired. Please login again."
+        );
+
+    }
+
 
     if(!navigator.geolocation){
 
@@ -1319,28 +1443,44 @@ async function setRiderOnline(){
         await getCurrentPosition();
 
 
-    if(!currentUser){
+    if(!position){
 
         throw new Error(
-            "Authentication session expired. Please login again."
+            "Unable to determine your location."
         );
 
     }
+
+
+    const coordinates =
+        getValidCoordinates(
+            position
+        );
+
+
+    if(!coordinates){
+
+        throw new Error(
+            "Invalid GPS coordinates received."
+        );
+
+    }
+
+
+    const {
+        lat,
+        lng
+    } =
+        coordinates;
 
 
     lastPosition =
         position;
 
 
-    const lat =
-        position.coords.latitude;
-
-    const lng =
-        position.coords.longitude;
-
-
     /*
-     * Save rider's first valid GPS position.
+     * Write rider status and first
+     * valid GPS position.
      */
 
     await setDoc(
@@ -1351,9 +1491,11 @@ async function setRiderOnline(){
         ),
         {
             online:true,
+
             isOnline:true,
 
             lat:lat,
+
             lng:lng,
 
             location:{
@@ -1362,19 +1504,26 @@ async function setRiderOnline(){
             },
 
             accuracy:
-                position.coords.accuracy || null,
+                getAccuracy(
+                    position
+                ),
 
             heading:
-                position.coords.heading || null,
+                getHeading(
+                    position
+                ),
 
             speed:
-                position.coords.speed || null,
+                getSpeed(
+                    position
+                ),
 
             locationUpdatedAt:
                 serverTimestamp(),
 
             updatedAt:
                 serverTimestamp()
+
         },
         {
             merge:true
@@ -1383,43 +1532,97 @@ async function setRiderOnline(){
 
 
     /*
-     * Public/active rider location.
+     * Active rider location.
      */
 
-    await setDoc(
-        doc(
-            db,
-            "riderLocations",
-            currentUser.uid
-        ),
-        {
-            riderId:
-                currentUser.uid,
+    try{
 
-            lat:lat,
-            lng:lng,
+        await setDoc(
+            doc(
+                db,
+                "riderLocations",
+                currentUser.uid
+            ),
+            {
+                riderId:
+                    currentUser.uid,
 
-            accuracy:
-                position.coords.accuracy || null,
+                lat:lat,
 
-            heading:
-                position.coords.heading || null,
+                lng:lng,
 
-            speed:
-                position.coords.speed || null,
+                accuracy:
+                    getAccuracy(
+                        position
+                    ),
 
-            online:true,
+                heading:
+                    getHeading(
+                        position
+                    ),
 
-            updatedAt:
-                serverTimestamp()
-        },
-        {
-            merge:true
+                speed:
+                    getSpeed(
+                        position
+                    ),
+
+                online:true,
+
+                updatedAt:
+                    serverTimestamp()
+
+            },
+            {
+                merge:true
+            }
+        );
+
+    }catch(error){
+
+        /*
+         * Roll back rider status if
+         * active-location creation fails.
+         */
+
+        try{
+
+            await setDoc(
+                doc(
+                    db,
+                    "riders",
+                    currentUser.uid
+                ),
+                {
+                    online:false,
+                    isOnline:false,
+                    updatedAt:
+                        serverTimestamp()
+                },
+                {
+                    merge:true
+                }
+            );
+
+        }catch(rollbackError){
+
+            console.error(
+                "Online rollback error:",
+                rollbackError
+            );
+
         }
-    );
 
 
-    isOnline = true;
+        throw new Error(
+            "Unable to publish your location. Please check your internet connection and try again."
+        );
+
+    }
+
+
+    isOnline =
+        true;
+
 
     lastSavedAt =
         Date.now();
@@ -1450,77 +1653,113 @@ async function setRiderOnline(){
 
 async function setRiderOffline(){
 
-    stopLocationTracking();
-
-
     if(!currentUser){
+
         return;
+
     }
 
 
     /*
-     * Mark rider unavailable.
+     * Stop GPS immediately so new
+     * location updates are not created.
      */
 
-    await setDoc(
-        doc(
-            db,
-            "riders",
-            currentUser.uid
-        ),
-        {
-            online:false,
-            isOnline:false,
+    stopLocationTracking();
 
-            locationUpdatedAt:
-                serverTimestamp(),
 
-            updatedAt:
-                serverTimestamp()
-        },
-        {
-            merge:true
-        }
-    );
+    const uid =
+        currentUser.uid;
 
 
     /*
-     * Keep location document but mark it
-     * unavailable instead of deleting it.
+     * Keep previous state until both
+     * Firestore operations succeed.
      */
 
-    await setDoc(
-        doc(
-            db,
-            "riderLocations",
-            currentUser.uid
-        ),
-        {
-            riderId:
-                currentUser.uid,
+    try{
 
-            online:false,
+        await setDoc(
+            doc(
+                db,
+                "riders",
+                uid
+            ),
+            {
+                online:false,
 
-            updatedAt:
-                serverTimestamp()
-        },
-        {
-            merge:true
-        }
-    );
+                isOnline:false,
 
+                locationUpdatedAt:
+                    serverTimestamp(),
 
-    isOnline = false;
+                updatedAt:
+                    serverTimestamp()
 
-    lastSavedAt = 0;
-
-
-    updateUI();
+            },
+            {
+                merge:true
+            }
+        );
 
 
-    showToast(
-        "You're now offline"
-    );
+        await setDoc(
+            doc(
+                db,
+                "riderLocations",
+                uid
+            ),
+            {
+                riderId:
+                    uid,
+
+                online:false,
+
+                updatedAt:
+                    serverTimestamp()
+
+            },
+            {
+                merge:true
+            }
+        );
+
+
+        isOnline =
+            false;
+
+
+        lastSavedAt =
+            0;
+
+
+        updateUI();
+
+
+        showToast(
+            "You're now offline"
+        );
+
+    }catch(error){
+
+        /*
+         * Firestore failed. Restore GPS
+         * tracking because rider may still
+         * be online in Firestore.
+         */
+
+        isOnline =
+            true;
+
+
+        startLocationTracking();
+
+
+        throw new Error(
+            "Unable to go offline. Please check your internet connection and try again."
+        );
+
+    }
 
 }
 
@@ -1534,8 +1773,49 @@ function getCurrentPosition(){
     return new Promise(
         (resolve,reject) => {
 
+            if(
+                !navigator.geolocation
+            ){
+
+                reject(
+                    new Error(
+                        "GPS is not supported on this device."
+                    )
+                );
+
+                return;
+
+            }
+
+
             navigator.geolocation.getCurrentPosition(
-                resolve,
+
+                position => {
+
+                    if(
+                        !position ||
+                        !getValidCoordinates(
+                            position
+                        )
+                    ){
+
+                        reject(
+                            new Error(
+                                "Invalid GPS location received."
+                            )
+                        );
+
+                        return;
+
+                    }
+
+
+                    resolve(
+                        position
+                    );
+
+                },
+
                 error => {
 
                     let message =
@@ -1543,7 +1823,7 @@ function getCurrentPosition(){
 
 
                     if(
-                        error.code ===
+                        error?.code ===
                         error.PERMISSION_DENIED
                     ){
 
@@ -1551,7 +1831,7 @@ function getCurrentPosition(){
                             "Location permission denied. Please allow location permission for RiderX.";
 
                     }else if(
-                        error.code ===
+                        error?.code ===
                         error.POSITION_UNAVAILABLE
                     ){
 
@@ -1559,7 +1839,7 @@ function getCurrentPosition(){
                             "Location unavailable. Please turn on GPS and try again.";
 
                     }else if(
-                        error.code ===
+                        error?.code ===
                         error.TIMEOUT
                     ){
 
@@ -1570,15 +1850,24 @@ function getCurrentPosition(){
 
 
                     reject(
-                        new Error(message)
+                        new Error(
+                            message
+                        )
                     );
 
                 },
+
                 {
                     enableHighAccuracy:true,
-                    timeout:15000,
-                    maximumAge:5000
+
+                    timeout:
+                        GPS_TIMEOUT,
+
+                    maximumAge:
+                        GPS_MAXIMUM_AGE
+
                 }
+
             );
 
         }
@@ -1588,7 +1877,119 @@ function getCurrentPosition(){
 
 
 /* =========================================================
-   START LIVE LOCATION
+   VALID COORDINATES
+========================================================= */
+
+function getValidCoordinates(
+    position
+){
+
+    if(!position?.coords){
+
+        return null;
+
+    }
+
+
+    const lat =
+        Number(
+            position.coords.latitude
+        );
+
+    const lng =
+        Number(
+            position.coords.longitude
+        );
+
+
+    if(
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng)
+    ){
+
+        return null;
+
+    }
+
+
+    if(
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
+    ){
+
+        return null;
+
+    }
+
+
+    return {
+        lat,
+        lng
+    };
+
+}
+
+
+/* =========================================================
+   POSITION HELPERS
+========================================================= */
+
+function getAccuracy(
+    position
+){
+
+    const value =
+        Number(
+            position?.coords?.accuracy
+        );
+
+
+    return Number.isFinite(value) &&
+        value >= 0
+        ? value
+        : null;
+
+}
+
+
+function getHeading(
+    position
+){
+
+    const value =
+        Number(
+            position?.coords?.heading
+        );
+
+
+    return Number.isFinite(value)
+        ? value
+        : null;
+
+}
+
+
+function getSpeed(
+    position
+){
+
+    const value =
+        Number(
+            position?.coords?.speed
+        );
+
+
+    return Number.isFinite(value)
+        ? value
+        : null;
+
+}
+
+
+/* =========================================================
+   START LIVE LOCATION TRACKING
 ========================================================= */
 
 function startLocationTracking(){
@@ -1598,15 +1999,19 @@ function startLocationTracking(){
         !currentUser ||
         !isOnline
     ){
+
         return;
+
     }
 
 
     /*
-     * Never create two GPS watchers.
+     * Prevent duplicate watchers.
      */
 
-    if(watchId !== null){
+    if(
+        watchId !== null
+    ){
 
         return;
 
@@ -1615,11 +2020,23 @@ function startLocationTracking(){
 
     watchId =
         navigator.geolocation.watchPosition(
+
             position => {
 
                 if(
                     !isOnline ||
                     !currentUser
+                ){
+
+                    return;
+
+                }
+
+
+                if(
+                    !getValidCoordinates(
+                        position
+                    )
                 ){
 
                     return;
@@ -1642,6 +2059,7 @@ function startLocationTracking(){
                 );
 
             },
+
             error => {
 
                 console.warn(
@@ -1651,20 +2069,32 @@ function startLocationTracking(){
 
 
                 if(
-                    error.code ===
+                    error?.code ===
                     error.PERMISSION_DENIED
                 ){
 
                     gpsValue.textContent =
                         "Permission";
 
+                    showError(
+                        "Location permission is required while you are online."
+                    );
+
                 }else if(
-                    error.code ===
+                    error?.code ===
                     error.POSITION_UNAVAILABLE
                 ){
 
                     gpsValue.textContent =
                         "Unavailable";
+
+                }else if(
+                    error?.code ===
+                    error.TIMEOUT
+                ){
+
+                    gpsValue.textContent =
+                        "Timeout";
 
                 }else{
 
@@ -1674,18 +2104,25 @@ function startLocationTracking(){
                 }
 
             },
+
             {
                 enableHighAccuracy:true,
-                timeout:15000,
-                maximumAge:3000
+
+                timeout:
+                    GPS_TIMEOUT,
+
+                maximumAge:
+                    WATCH_MAXIMUM_AGE
+
             }
+
         );
 
 }
 
 
 /* =========================================================
-   STOP LIVE LOCATION
+   STOP LIVE LOCATION TRACKING
 ========================================================= */
 
 function stopLocationTracking(){
@@ -1699,7 +2136,8 @@ function stopLocationTracking(){
             watchId
         );
 
-        watchId = null;
+        watchId =
+            null;
 
     }
 
@@ -1716,37 +2154,38 @@ function updatePosition(
 ){
 
     if(!position){
+
         return;
+
+    }
+
+
+    const coordinates =
+        getValidCoordinates(
+            position
+        );
+
+
+    if(!coordinates){
+
+        return;
+
     }
 
 
     const lat =
-        Number(
-            position.coords.latitude
-        );
+        coordinates.lat;
 
     const lng =
-        Number(
-            position.coords.longitude
-        );
-
-
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
-    ){
-
-        return;
-
-    }
+        coordinates.lng;
 
 
     const accuracy =
         Math.max(
             0,
-            Number(
-                position.coords.accuracy || 0
-            )
+            getAccuracy(
+                position
+            ) || 0
         );
 
 
@@ -1757,12 +2196,13 @@ function updatePosition(
     latValue.textContent =
         lat.toFixed(5);
 
+
     lngValue.textContent =
         lng.toFixed(5);
 
 
     gpsValue.textContent =
-        accuracy
+        accuracy > 0
             ? `${Math.round(accuracy)}m`
             : "Active";
 
@@ -1779,6 +2219,13 @@ function updatePosition(
      */
 
     if(!riderMarker){
+
+        if(!map){
+
+            return;
+
+        }
+
 
         riderMarker =
             L.marker(
@@ -1799,10 +2246,11 @@ function updatePosition(
 
 
     /*
-     * GPS accuracy circle.
+     * Accuracy circle.
      */
 
     if(
+        map &&
         accuracy > 0 &&
         accuracy < 1000
     ){
@@ -1814,9 +2262,13 @@ function updatePosition(
                     latLng,
                     {
                         radius:accuracy,
+
                         color:"#ffe500",
+
                         fillColor:"#ffe500",
+
                         fillOpacity:.08,
+
                         weight:1
                     }
                 ).addTo(map);
@@ -1837,10 +2289,15 @@ function updatePosition(
 
 
     /*
-     * Center only when explicitly requested.
+     * Center map only when explicitly
+     * requested or when first GPS lock
+     * is obtained.
      */
 
-    if(centerMap){
+    if(
+        centerMap &&
+        map
+    ){
 
         map.setView(
             latLng,
@@ -1874,6 +2331,19 @@ async function saveLiveLocation(
     }
 
 
+    const coordinates =
+        getValidCoordinates(
+            position
+        );
+
+
+    if(!coordinates){
+
+        return;
+
+    }
+
+
     const now =
         Date.now();
 
@@ -1892,30 +2362,17 @@ async function saveLiveLocation(
     }
 
 
-    lastSavedAt =
-        now;
-
-
     const lat =
-        Number(
-            position.coords.latitude
-        );
+        coordinates.lat;
 
     const lng =
-        Number(
-            position.coords.longitude
-        );
+        coordinates.lng;
 
 
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
-    ){
-
-        return;
-
-    }
-
+    /*
+     * Only update timestamp after
+     * successful Firestore writes.
+     */
 
     const locationData = {
 
@@ -1927,13 +2384,19 @@ async function saveLiveLocation(
         lng:lng,
 
         accuracy:
-            position.coords.accuracy || null,
+            getAccuracy(
+                position
+            ),
 
         heading:
-            position.coords.heading ?? null,
+            getHeading(
+                position
+            ),
 
         speed:
-            position.coords.speed ?? null,
+            getSpeed(
+                position
+            ),
 
         online:true,
 
@@ -1946,7 +2409,7 @@ async function saveLiveLocation(
     try{
 
         /*
-         * Active location document.
+         * Active rider location.
          */
 
         await setDoc(
@@ -1963,7 +2426,7 @@ async function saveLiveLocation(
 
 
         /*
-         * Rider profile/status document.
+         * Rider profile/status.
          */
 
         await setDoc(
@@ -1974,9 +2437,11 @@ async function saveLiveLocation(
             ),
             {
                 online:true,
+
                 isOnline:true,
 
                 lat:lat,
+
                 lng:lng,
 
                 location:{
@@ -1985,24 +2450,35 @@ async function saveLiveLocation(
                 },
 
                 accuracy:
-                    position.coords.accuracy || null,
+                    getAccuracy(
+                        position
+                    ),
 
                 heading:
-                    position.coords.heading ?? null,
+                    getHeading(
+                        position
+                    ),
 
                 speed:
-                    position.coords.speed ?? null,
+                    getSpeed(
+                        position
+                    ),
 
                 locationUpdatedAt:
                     serverTimestamp(),
 
                 updatedAt:
                     serverTimestamp()
+
             },
             {
                 merge:true
             }
         );
+
+
+        lastSavedAt =
+            now;
 
     }catch(error){
 
@@ -2012,9 +2488,8 @@ async function saveLiveLocation(
         );
 
         /*
-         * Do not automatically mark rider
-         * offline because of a temporary
-         * Firestore/network failure.
+         * Do not mark rider offline on
+         * temporary network failure.
          */
 
     }
@@ -2035,6 +2510,10 @@ locationButton.addEventListener(
             !authReady
         ){
 
+            showError(
+                "Please wait for authentication."
+            );
+
             return;
 
         }
@@ -2045,6 +2524,14 @@ locationButton.addEventListener(
 
         locationButton.disabled =
             true;
+
+
+        const previousText =
+            gpsValue.textContent;
+
+
+        gpsValue.textContent =
+            "Locating...";
 
 
         try{
@@ -2071,11 +2558,14 @@ locationButton.addEventListener(
 
             }
 
-
         }catch(error){
 
+            gpsValue.textContent =
+                previousText;
+
+
             showError(
-                error.message ||
+                error?.message ||
                 "Unable to get your location."
             );
 
@@ -2091,7 +2581,7 @@ locationButton.addEventListener(
 
 
 /* =========================================================
-   BACK
+   BACK BUTTON
 ========================================================= */
 
 document
@@ -2101,10 +2591,10 @@ document
         () => {
 
             if(
-                history.length > 1
+                window.history.length > 1
             ){
 
-                history.back();
+                window.history.back();
 
             }else{
 
@@ -2189,13 +2679,16 @@ document
    ERROR
 ========================================================= */
 
-function showError(message){
+function showError(
+    message
+){
 
     errorBox.textContent =
         String(
             message ||
             "Something went wrong."
         );
+
 
     errorBox.style.display =
         "block";
@@ -2218,7 +2711,9 @@ function hideError(){
    TOAST
 ========================================================= */
 
-function showToast(message){
+function showToast(
+    message
+){
 
     const existing =
         document.getElementById(
@@ -2244,7 +2739,10 @@ function showToast(message){
 
 
     toast.textContent =
-        message;
+        String(
+            message ||
+            ""
+        );
 
 
     toast.style.position =
@@ -2283,6 +2781,9 @@ function showToast(message){
     toast.style.boxShadow =
         "0 8px 30px rgba(0,0,0,.4)";
 
+    toast.style.pointerEvents =
+        "none";
+
 
     document.body.appendChild(
         toast
@@ -2292,7 +2793,9 @@ function showToast(message){
     setTimeout(
         () => {
 
-            if(toast.isConnected){
+            if(
+                toast.isConnected
+            ){
 
                 toast.remove();
 
@@ -2313,10 +2816,12 @@ document.addEventListener(
     "visibilitychange",
     () => {
 
-        if(
+        pageActive =
             document.visibilityState ===
-            "visible"
-        ){
+            "visible";
+
+
+        if(pageActive){
 
             setTimeout(
                 () => {
@@ -2332,8 +2837,14 @@ document.addEventListener(
             );
 
 
+            /*
+             * Resume watcher if browser
+             * stopped it while hidden.
+             */
+
             if(
                 isOnline &&
+                currentUser &&
                 watchId === null
             ){
 
@@ -2406,4 +2917,5 @@ setTimeout(
 </script>
 
 </body>
-    </html>
+
+</html>
