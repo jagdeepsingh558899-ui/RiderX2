@@ -297,8 +297,7 @@ button{
     font-size:19px;
 }
 
-.notification.unread-item
-.notification-icon{
+.notification.unread-item .notification-icon{
     background:#FFD400;
     color:#111;
 }
@@ -676,7 +675,7 @@ button{
         <button
             class="back-btn"
             type="button"
-            onclick="goBack()"
+            id="backBtn"
             aria-label="Back"
         >
             ←
@@ -712,8 +711,8 @@ button{
             </h1>
 
             <p>
-                Send real-time notifications to RiderX
-                customers and riders through Firebase.
+                Send real-time in-app notifications to
+                RiderX customers and riders through Firebase.
             </p>
 
         </div>
@@ -721,6 +720,7 @@ button{
         <div
             class="unread"
             id="unreadCount"
+            aria-label="Notification count"
         >
             0
         </div>
@@ -737,12 +737,14 @@ button{
         id="searchInput"
         class="search"
         placeholder="Search notifications..."
+        autocomplete="off"
     >
 
 
     <select
         id="filterSelect"
         class="filter"
+        aria-label="Filter notifications"
     >
 
         <option value="all">
@@ -795,6 +797,7 @@ button{
 <section
     class="notification-list"
     id="notificationList"
+    aria-live="polite"
 ></section>
 
 
@@ -826,6 +829,7 @@ button{
 <div
     class="modal"
     id="createModal"
+    aria-hidden="true"
 >
 
     <div class="modal-card">
@@ -854,7 +858,7 @@ button{
 
             <div class="field">
 
-                <label>
+                <label for="newTitle">
                     Title
                 </label>
 
@@ -863,6 +867,7 @@ button{
                     id="newTitle"
                     maxlength="80"
                     placeholder="Notification title"
+                    autocomplete="off"
                     required
                 >
 
@@ -871,7 +876,7 @@ button{
 
             <div class="field">
 
-                <label>
+                <label for="newMessage">
                     Message
                 </label>
 
@@ -887,7 +892,7 @@ button{
 
             <div class="field">
 
-                <label>
+                <label for="newCategory">
                     Category
                 </label>
 
@@ -922,7 +927,7 @@ button{
 
             <div class="field">
 
-                <label>
+                <label for="newTarget">
                     Target
                 </label>
 
@@ -959,6 +964,8 @@ button{
             <div
                 class="send-status"
                 id="sendStatus"
+                role="status"
+                aria-live="polite"
             ></div>
 
 
@@ -1015,9 +1022,9 @@ import {
     query,
     where,
     getDocs,
+    getDoc,
     addDoc,
     doc,
-    updateDoc,
     deleteDoc,
     writeBatch,
     serverTimestamp
@@ -1030,7 +1037,6 @@ import {
 
 const LOCAL_KEY =
     "riderx_admin_notifications";
-
 
 const MAX_BATCH_OPERATIONS =
     450;
@@ -1115,6 +1121,11 @@ const toast =
         "toast"
     );
 
+const backBtn =
+    document.getElementById(
+        "backBtn"
+    );
+
 
 /* =========================================================
    STATE
@@ -1126,11 +1137,14 @@ let currentAdmin =
 let notifications =
     [];
 
-let firebaseNotifications =
+let adminHistory =
     [];
 
 let adminReady =
     false;
+
+let toastTimer =
+    null;
 
 
 /* =========================================================
@@ -1173,7 +1187,11 @@ function bindEvents(){
 
     refreshBtn.addEventListener(
         "click",
-        loadFirebaseHistory
+        function(){
+
+            loadFirebaseHistory();
+
+        }
     );
 
 
@@ -1192,6 +1210,12 @@ function bindEvents(){
     cancelModal.addEventListener(
         "click",
         closeCreateModal
+    );
+
+
+    backBtn.addEventListener(
+        "click",
+        goBack
     );
 
 
@@ -1225,11 +1249,28 @@ function bindEvents(){
             updateTargetInfo
         );
 
+
+    document.addEventListener(
+        "keydown",
+        function(event){
+
+            if(
+                event.key === "Escape" &&
+                createModal.classList.contains("show")
+            ){
+
+                closeCreateModal();
+
+            }
+
+        }
+    );
+
 }
 
 
 /* =========================================================
-   ADMIN AUTH
+   ADMIN AUTHORIZATION
 ========================================================= */
 
 function watchAdmin(){
@@ -1247,6 +1288,9 @@ function watchAdmin(){
                 adminReady =
                     false;
 
+                createBtn.disabled =
+                    true;
+
                 showToast(
                     "Admin login required.",
                     true
@@ -1260,37 +1304,39 @@ function watchAdmin(){
             try{
 
                 /*
-                 * Existing RiderX canonical user profile
-                 * is users/{uid}.
+                 * Canonical RiderX user profile:
+                 *
+                 * users/{uid}
+                 *
+                 * This is more efficient than querying
+                 * __name__ with getDocs().
                  */
 
-                const snapshot =
-                    await getDocs(
-                        query(
-                            collection(
-                                db,
-                                "users"
-                            ),
-                            where(
-                                "__name__",
-                                "==",
-                                user.uid
-                            )
-                        )
+                const userRef =
+                    doc(
+                        db,
+                        "users",
+                        user.uid
                     );
 
 
-                let role = "";
+                const userSnapshot =
+                    await getDoc(
+                        userRef
+                    );
+
+
+                let role =
+                    "";
 
 
                 if(
-                    !snapshot.empty
+                    userSnapshot.exists()
                 ){
 
                     const data =
-                        snapshot
-                            .docs[0]
-                            .data() || {};
+                        userSnapshot.data() ||
+                        {};
 
 
                     role =
@@ -1307,11 +1353,8 @@ function watchAdmin(){
 
 
                 /*
-                 * Admin pages may already be protected
-                 * by the existing application auth system.
-                 *
-                 * If the profile is available and explicitly
-                 * identifies a non-admin user, stop sending.
+                 * If a profile explicitly identifies
+                 * a non-admin user, deny notification sending.
                  */
 
                 if(
@@ -1336,6 +1379,14 @@ function watchAdmin(){
                 }
 
 
+                /*
+                 * If the profile does not contain a role,
+                 * existing application-level admin protection
+                 * may still be responsible for this page.
+                 *
+                 * Firebase Security Rules remain authoritative.
+                 */
+
                 adminReady =
                     true;
 
@@ -1347,26 +1398,29 @@ function watchAdmin(){
             }catch(error){
 
                 console.error(
-                    "Admin authorization check:",
+                    "RiderX admin authorization check:",
                     error
                 );
 
 
                 /*
-                 * Do not break existing admin pages if
-                 * the users profile is unavailable.
+                 * Do not automatically turn an unknown
+                 * authorization error into admin access.
                  *
-                 * Firebase Security Rules must still
-                 * enforce real admin permission.
+                 * The page stays read-only until the
+                 * authorization state is known.
                  */
 
                 adminReady =
-                    true;
-
-                createBtn.disabled =
                     false;
 
-                await loadFirebaseHistory();
+                createBtn.disabled =
+                    true;
+
+                showToast(
+                    "Unable to verify admin permission.",
+                    true
+                );
 
             }
 
@@ -1377,7 +1431,7 @@ function watchAdmin(){
 
 
 /* =========================================================
-   LOAD LOCAL HISTORY
+   LOCAL HISTORY
 ========================================================= */
 
 function loadLocalHistory(){
@@ -1414,7 +1468,7 @@ function loadLocalHistory(){
     }catch(error){
 
         console.warn(
-            "Local notification history:",
+            "RiderX local notification history:",
             error
         );
 
@@ -1444,7 +1498,7 @@ function saveLocalHistory(){
     }catch(error){
 
         console.warn(
-            "Unable to save local notification history:",
+            "RiderX unable to save local history:",
             error
         );
 
@@ -1472,11 +1526,11 @@ async function loadFirebaseHistory(){
     try{
 
         /*
-         * Query only notifications created by
-         * the currently logged-in admin.
+         * Only documents created by this admin are read.
          *
-         * No orderBy is used here so this does not
-         * require a composite Firestore index.
+         * Recipient notifications contain userId/recipientId,
+         * therefore they are collapsed into broadcast summaries
+         * below instead of being displayed one-by-one.
          */
 
         const snapshot =
@@ -1495,21 +1549,36 @@ async function loadFirebaseHistory(){
             );
 
 
-        firebaseNotifications =
-            snapshot.docs.map(
-                function(item){
+        const recipientDocs =
+            snapshot.docs
+                .map(
+                    function(item){
 
-                    const data =
-                        item.data() || {};
+                        return {
+                            id:item.id,
+                            ...(
+                                item.data() || {}
+                            ),
+                            source:"firebase"
+                        };
+
+                    }
+                )
+                .filter(
+                    function(item){
+
+                        return Boolean(
+                            item.userId ||
+                            item.recipientId
+                        );
+
+                    }
+                );
 
 
-                    return {
-                        id:item.id,
-                        ...data,
-                        source:"firebase"
-                    };
-
-                }
+        adminHistory =
+            buildBroadcastHistory(
+                recipientDocs
             );
 
 
@@ -1522,9 +1591,165 @@ async function loadFirebaseHistory(){
             error
         );
 
+        adminHistory =
+            [];
+
         mergeAndRender();
 
     }
+
+}
+
+
+/* =========================================================
+   BUILD BROADCAST HISTORY
+   ---------------------------------------------------------
+   One admin broadcast can create many recipient documents.
+   We group those documents so the admin does not see
+   hundreds of duplicate cards.
+========================================================= */
+
+function buildBroadcastHistory(
+    items
+){
+
+    const groups =
+        new Map();
+
+
+    items.forEach(
+        function(item){
+
+            const title =
+                String(
+                    item.title ||
+                    ""
+                );
+
+            const message =
+                String(
+                    item.message ||
+                    ""
+                );
+
+            const category =
+                String(
+                    item.category ||
+                    "system"
+                );
+
+            const target =
+                String(
+                    item.target ||
+                    "all"
+                );
+
+            const timestamp =
+                getTime(
+                    item.createdAt ||
+                    item.sentAt
+                );
+
+
+            /*
+             * Timestamps from serverTimestamp may not
+             * be resolved immediately. Use content + target
+             * as fallback grouping data.
+             */
+
+            const timeBucket =
+                timestamp
+                    ? Math.floor(
+                        timestamp /
+                        5000
+                    )
+                    : "unknown";
+
+
+            const key =
+                [
+                    title,
+                    message,
+                    category,
+                    target,
+                    timeBucket
+                ]
+                .join("|");
+
+
+            if(
+                !groups.has(key)
+            ){
+
+                groups.set(
+                    key,
+                    {
+                        id:
+                            "firebase_" +
+                            key,
+
+                        title,
+
+                        message,
+
+                        category,
+
+                        target,
+
+                        recipientCount:
+                            0,
+
+                        createdAt:
+                            item.createdAt ||
+                            item.sentAt ||
+                            timestamp,
+
+                        time:
+                            timestamp,
+
+                        source:
+                            "firebase",
+
+                        recipientIds:
+                            []
+
+                    }
+                );
+
+            }
+
+
+            const group =
+                groups.get(
+                    key
+                );
+
+
+            group.recipientCount++;
+
+
+            const recipientId =
+                item.userId ||
+                item.recipientId;
+
+
+            if(
+                recipientId
+            ){
+
+                group.recipientIds.push(
+                    recipientId
+                );
+
+            }
+
+        }
+    );
+
+
+    return Array.from(
+        groups.values()
+    );
 
 }
 
@@ -1542,7 +1767,9 @@ function mergeAndRender(){
     notifications.forEach(
         function(item){
 
-            if(item?.id){
+            if(
+                item?.id
+            ){
 
                 map.set(
                     String(item.id),
@@ -1555,10 +1782,12 @@ function mergeAndRender(){
     );
 
 
-    firebaseNotifications.forEach(
+    adminHistory.forEach(
         function(item){
 
-            if(item?.id){
+            if(
+                item?.id
+            ){
 
                 map.set(
                     String(item.id),
@@ -1622,14 +1851,18 @@ function render(){
         notifications.filter(
             function(item){
 
-                if(
-                    filter !==
-                    "all" &&
+                const category =
                     String(
                         item.category ||
                         "system"
-                    ).toLowerCase() !==
-                    filter
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if(
+                    filter !== "all" &&
+                    category !== filter
                 ){
 
                     return false;
@@ -1686,8 +1919,15 @@ function render(){
             : "block";
 
 
+    /*
+     * This counter represents sent notification
+     * broadcasts, not unread notifications.
+     */
+
     unreadCount.textContent =
-        notifications.length;
+        String(
+            notifications.length
+        );
 
 }
 
@@ -1854,6 +2094,43 @@ function createNotificationElement(
     );
 
 
+    if(
+        Number(
+            item.recipientCount
+        ) > 0
+    ){
+
+        const countTag =
+            document.createElement(
+                "span"
+            );
+
+
+        countTag.className =
+            "tag";
+
+
+        countTag.textContent =
+            String(
+                item.recipientCount
+            ) +
+            " recipient" +
+            (
+                Number(
+                    item.recipientCount
+                ) === 1
+                    ? ""
+                    : "s"
+            );
+
+
+        meta.appendChild(
+            countTag
+        );
+
+    }
+
+
     const actions =
         document.createElement(
             "div"
@@ -1873,8 +2150,10 @@ function createNotificationElement(
     deleteBtn.type =
         "button";
 
+
     deleteBtn.className =
         "small-btn";
+
 
     deleteBtn.textContent =
         "Delete";
@@ -1937,10 +2216,22 @@ async function deleteNotification(
 ){
 
     if(
-        !confirm(
-            "Delete this admin notification history?"
-        )
+        !item ||
+        !item.id
     ){
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Delete this admin notification history?"
+        );
+
+
+    if(!confirmed){
 
         return;
 
@@ -1949,9 +2240,21 @@ async function deleteNotification(
 
     try{
 
+        /*
+         * For Firebase history, delete only the individual
+         * recipient document if this is a real document ID.
+         *
+         * Broadcast summary IDs start with firebase_ and
+         * are intentionally not passed to deleteDoc().
+         */
+
         if(
             item.source === "firebase" &&
-            item.id
+            !String(
+                item.id
+            ).startsWith(
+                "firebase_"
+            )
         ){
 
             await deleteDoc(
@@ -1980,12 +2283,41 @@ async function deleteNotification(
             );
 
 
+        adminHistory =
+            adminHistory.filter(
+                function(notification){
+
+                    return String(
+                        notification.id
+                    ) !==
+                    String(
+                        item.id
+                    );
+
+                }
+            );
+
+
         saveLocalHistory();
 
         render();
 
         showToast(
-            "Notification deleted."
+            "Notification history deleted."
+        );
+
+
+        /*
+         * Reload Firebase summaries after deleting.
+         */
+
+        setTimeout(
+            function(){
+
+                loadFirebaseHistory();
+
+            },
+            250
         );
 
     }catch(error){
@@ -2027,9 +2359,11 @@ function openModal(){
 
     updateTargetInfo();
 
+
     sendStatus.classList.remove(
         "show"
     );
+
 
     sendStatus.textContent =
         "";
@@ -2037,6 +2371,12 @@ function openModal(){
 
     createModal.classList.add(
         "show"
+    );
+
+
+    createModal.setAttribute(
+        "aria-hidden",
+        "false"
     );
 
 
@@ -2064,6 +2404,12 @@ function closeCreateModal(){
 
     createModal.classList.remove(
         "show"
+    );
+
+
+    createModal.setAttribute(
+        "aria-hidden",
+        "true"
     );
 
 }
@@ -2202,6 +2548,10 @@ async function sendNotification(
         true;
 
 
+    refreshBtn.disabled =
+        true;
+
+
     sendStatus.classList.add(
         "show"
     );
@@ -2248,15 +2598,33 @@ async function sendNotification(
             );
 
 
+        if(
+            sent <= 0
+        ){
+
+            throw new Error(
+                "No notifications were created."
+            );
+
+        }
+
+
         /*
-         * Save a small admin history record locally.
+         * Save local admin history.
+         *
+         * This is a broadcast summary, not one entry
+         * per recipient.
          */
 
         const historyItem = {
 
             id:
                 "admin_" +
-                Date.now(),
+                Date.now() +
+                "_" +
+                Math.random()
+                    .toString(36)
+                    .slice(2,8),
 
             title,
 
@@ -2293,6 +2661,8 @@ async function sendNotification(
 
         notificationForm.reset();
 
+        updateTargetInfo();
+
         closeCreateModal();
 
 
@@ -2304,36 +2674,47 @@ async function sendNotification(
 
 
         /*
-         * Refresh Firebase admin history.
+         * Refresh Firebase history.
          */
 
         setTimeout(
-            loadFirebaseHistory,
+            function(){
+
+                loadFirebaseHistory();
+
+            },
             500
         );
 
     }catch(error){
 
         console.error(
-            "Send notification:",
+            "RiderX send notification:",
             error
         );
 
 
         sendStatus.textContent =
-            error.message ||
-            "Unable to send notification.";
+            error &&
+            error.message
+                ? error.message
+                : "Unable to send notification.";
 
 
         showToast(
-            error.message ||
-            "Unable to send notification.",
+            error &&
+            error.message
+                ? error.message
+                : "Unable to send notification.",
             true
         );
 
     }finally{
 
         sendBtn.disabled =
+            false;
+
+        refreshBtn.disabled =
             false;
 
     }
@@ -2385,26 +2766,19 @@ async function findRecipients(
 
 
     /*
-     * RiderX canonical user records are:
-     *
-     * users/{uid}
-     *
-     * with role/userRole/accountType.
-     *
-     * We check all three role fields for compatibility
-     * with older RiderX profiles.
+     * Compatibility with older RiderX profiles.
      */
+
+    const fieldNames = [
+        "role",
+        "userRole",
+        "accountType"
+    ];
+
 
     for(
         const role of roles
     ){
-
-        const fieldNames = [
-            "role",
-            "userRole",
-            "accountType"
-        ];
-
 
         for(
             const fieldName of fieldNames
@@ -2460,6 +2834,11 @@ async function findRecipients(
 
             }catch(error){
 
+                /*
+                 * A failed compatibility query should not
+                 * prevent other role fields from being checked.
+                 */
+
                 console.warn(
                     "Recipient role query failed:",
                     fieldName,
@@ -2495,8 +2874,8 @@ async function createRecipientNotifications(
 
 
     /*
-     * Firestore writeBatch maximum is 500 operations.
-     * Keep some safety margin.
+     * Firestore writeBatch limit is 500 operations.
+     * We intentionally use 450.
      */
 
     for(
@@ -2523,6 +2902,7 @@ async function createRecipientNotifications(
             function(user){
 
                 if(
+                    !user ||
                     !user.uid
                 ){
 
@@ -2621,13 +3001,19 @@ async function createRecipientNotifications(
 
 
                         /*
-                         * Optional navigation data.
+                         * Optional navigation
                          */
 
                         rideId:
                             "",
 
+                        bookingId:
+                            "",
+
                         action:
+                            "",
+
+                        url:
                             "",
 
 
@@ -2654,7 +3040,13 @@ async function createRecipientNotifications(
         );
 
 
-        await batch.commit();
+        if(
+            chunk.length > 0
+        ){
+
+            await batch.commit();
+
+        }
 
     }
 
@@ -2675,11 +3067,12 @@ function normalizeTargetRole(
 
     const role =
         String(
-            user.role ||
-            user.userRole ||
-            user.accountType ||
+            user?.role ||
+            user?.userRole ||
+            user?.accountType ||
             ""
         )
+        .trim()
         .toLowerCase();
 
 
@@ -2736,7 +3129,9 @@ function getIcon(
         String(
             category ||
             ""
-        ).toLowerCase()
+        )
+        .trim()
+        .toLowerCase()
     ){
 
         case "ride":
@@ -2768,7 +3163,11 @@ function formatTarget(
 ){
 
     switch(
-        target
+        String(
+            target ||
+            ""
+        )
+        .toLowerCase()
     ){
 
         case "riders":
@@ -2797,7 +3196,11 @@ function getTime(
     value
 ){
 
-    if(!value){
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
 
         return 0;
 
@@ -2850,7 +3253,8 @@ function getTime(
         if(
             Number.isFinite(
                 number
-            )
+            ) &&
+            number > 0
         ){
 
             return number;
@@ -2965,12 +3369,20 @@ function formatTime(
     }
 
 
-    return (
+    const days =
         Math.floor(
             diff /
             day
-        ) +
-        " day ago"
+        );
+
+
+    return (
+        days +
+        (
+            days === 1
+                ? " day ago"
+                : " days ago"
+        )
     );
 
 }
@@ -2979,10 +3391,6 @@ function formatTime(
 /* =========================================================
    TOAST
 ========================================================= */
-
-let toastTimer =
-    null;
-
 
 function showToast(
     message,
@@ -3044,12 +3452,13 @@ function goBack(){
 
         history.back();
 
-    }else{
-
-        window.location.href =
-            "dashboard.html";
+        return;
 
     }
+
+
+    window.location.href =
+        "dashboard.html";
 
 }
 
@@ -3062,14 +3471,18 @@ window.RiderX =
     window.RiderX ||
     {};
 
+
 window.RiderX.adminNotifications =
     {
 
-        send:
-            sendNotification,
-
         refresh:
-            loadFirebaseHistory
+            loadFirebaseHistory,
+
+        open:
+            openModal,
+
+        close:
+            closeCreateModal
 
     };
 
@@ -3077,4 +3490,5 @@ window.RiderX.adminNotifications =
 
 
 </body>
-    </html>
+
+</html>
