@@ -741,78 +741,28 @@ button:disabled{
         <div class="summary">
 
             <div class="summary-row">
-
-                <span class="summary-label">
-                    Service
-                </span>
-
-                <span
-                    class="summary-value"
-                    id="service"
-                >
-                    Bike Taxi
-                </span>
-
+                <span class="summary-label">Service</span>
+                <span class="summary-value" id="service">Bike Taxi</span>
             </div>
 
             <div class="summary-row">
-
-                <span class="summary-label">
-                    Pickup
-                </span>
-
-                <span
-                    class="summary-value"
-                    id="pickup"
-                >
-                    Pickup location
-                </span>
-
+                <span class="summary-label">Pickup</span>
+                <span class="summary-value" id="pickup">Pickup location</span>
             </div>
 
             <div class="summary-row">
-
-                <span class="summary-label">
-                    Destination
-                </span>
-
-                <span
-                    class="summary-value"
-                    id="destination"
-                >
-                    Destination location
-                </span>
-
+                <span class="summary-label">Destination</span>
+                <span class="summary-value" id="destination">Destination location</span>
             </div>
 
             <div class="summary-row">
-
-                <span class="summary-label">
-                    Estimated fare
-                </span>
-
-                <span
-                    class="summary-value"
-                    id="fare"
-                >
-                    —
-                </span>
-
+                <span class="summary-label">Estimated fare</span>
+                <span class="summary-value" id="fare">—</span>
             </div>
 
             <div class="summary-row">
-
-                <span class="summary-label">
-                    Payment
-                </span>
-
-                <span
-                    class="summary-value"
-                    id="payment"
-                >
-                    Cash
-                </span>
-
+                <span class="summary-label">Payment</span>
+                <span class="summary-value" id="payment">Cash</span>
             </div>
 
         </div>
@@ -918,8 +868,7 @@ const RIDER_STALE_MS = 90000;
    DOM
 ============================================================ */
 
-const $ = id =>
-    document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 /* ============================================================
    DEFAULT RIDE
@@ -989,15 +938,11 @@ const defaultRide = {
 function getParam(name){
 
     try{
-
         return new URLSearchParams(
             window.location.search
         ).get(name) || "";
-
     }catch(error){
-
         return "";
-
     }
 
 }
@@ -1077,10 +1022,7 @@ function validateCoordinates(lat,lng){
         return null;
     }
 
-    return {
-        lat,
-        lng
-    };
+    return {lat,lng};
 
 }
 
@@ -1091,14 +1033,12 @@ function validateCoordinates(lat,lng){
 function getRideId(data = rideData){
 
     return String(
-
         data?.id ||
         data?.rideId ||
         data?.ride_id ||
         data?.bookingId ||
         data?.booking_id ||
         ""
-
     ).trim();
 
 }
@@ -1121,6 +1061,12 @@ function normalizeStatus(status){
         return "searching";
     }
 
+    /*
+     * Order matters.
+     * "arriving" must be checked before generic
+     * "start" matching.
+     */
+
     if(
         value.includes("cancel") ||
         value === "rejected" ||
@@ -1138,6 +1084,23 @@ function normalizeStatus(status){
     }
 
     if(
+        value === "arriving" ||
+        value.includes("rider arriving") ||
+        value.includes("driver arriving") ||
+        value.includes("on the way")
+    ){
+        return "arriving";
+    }
+
+    if(
+        value.includes("arriv") ||
+        value.includes("reached pickup") ||
+        value === "at pickup"
+    ){
+        return "arrived";
+    }
+
+    if(
         value.includes("start") ||
         value.includes("ongoing") ||
         value.includes("in progress") ||
@@ -1145,15 +1108,6 @@ function normalizeStatus(status){
         value === "trip"
     ){
         return "started";
-    }
-
-    if(
-        value.includes("arriv") ||
-        value.includes("reached pickup") ||
-        value === "arrived" ||
-        value === "at pickup"
-    ){
-        return "arrived";
     }
 
     if(
@@ -1190,13 +1144,11 @@ function normalizeStatus(status){
 function getRideStatus(data = rideData){
 
     return normalizeStatus(
-
         data?.status ||
         data?.rideStatus ||
         data?.state ||
         data?.bookingStatus ||
         "searching"
-
     );
 
 }
@@ -1217,15 +1169,15 @@ function loadRide(){
         getParam("bookingId");
 
     const keys = [
-
         "currentRide",
         "activeRide",
         "riderxCurrentRide",
         "rideData",
         "pendingRide",
         "bookingData"
-
     ];
+
+    let found = false;
 
     for(const key of keys){
 
@@ -1249,11 +1201,15 @@ function loadRide(){
         const dataId =
             getRideId(data);
 
+        /*
+         * If URL contains a ride ID, never load another
+         * ride's localStorage record.
+         */
+
         if(
             urlId &&
             dataId &&
-            String(dataId) !==
-            String(urlId)
+            String(dataId) !== String(urlId)
         ){
             continue;
         }
@@ -1263,28 +1219,22 @@ function loadRide(){
             ...data
         };
 
+        found = true;
         break;
 
     }
 
+    /*
+     * URL rideId is authoritative when present.
+     */
+
     if(urlId){
 
-        const existingId =
-            getRideId();
+        rideData.id =
+            String(urlId);
 
-        if(
-            !existingId ||
-            String(existingId) !==
-            String(urlId)
-        ){
-
-            rideData.id =
-                urlId;
-
-            rideData.rideId =
-                urlId;
-
-        }
+        rideData.rideId =
+            String(urlId);
 
     }
 
@@ -1301,6 +1251,21 @@ function loadRide(){
     subscribeToRide();
 
     checkRideStatus();
+
+    /*
+     * If there was no local ride at all, keep the page
+     * usable instead of throwing an exception.
+     */
+
+    if(!found && urlId){
+
+        rideData.searchStartedAt =
+            rideData.searchStartedAt ||
+            Date.now();
+
+        saveRide();
+
+    }
 
 }
 
@@ -1327,60 +1292,48 @@ function normalizeRideIdentity(){
         rideData.customerId &&
         !rideData.customerUid
     ){
-
         rideData.customerUid =
             rideData.customerId;
-
     }
 
     if(
         rideData.customerUid &&
         !rideData.customerId
     ){
-
         rideData.customerId =
             rideData.customerUid;
-
     }
 
     if(
         rideData.riderId &&
         !rideData.riderUid
     ){
-
         rideData.riderUid =
             rideData.riderId;
-
     }
 
     if(
         rideData.riderUid &&
         !rideData.riderId
     ){
-
         rideData.riderId =
             rideData.riderUid;
-
     }
 
     if(
         rideData.driverId &&
         !rideData.riderId
     ){
-
         rideData.riderId =
             rideData.driverId;
-
     }
 
     if(
         rideData.driverUid &&
         !rideData.riderUid
     ){
-
         rideData.riderUid =
             rideData.driverUid;
-
     }
 
 }
@@ -1500,7 +1453,6 @@ function getPickupCoordinates(){
 
     const lat =
         getNumber(
-
             rideData.pickupLat,
             rideData.pickupLatitude,
 
@@ -1515,12 +1467,10 @@ function getPickupCoordinates(){
 
             rideData.fromLat,
             rideData.fromLatitude
-
         );
 
     const lng =
         getNumber(
-
             rideData.pickupLng,
             rideData.pickupLongitude,
 
@@ -1538,7 +1488,6 @@ function getPickupCoordinates(){
 
             rideData.fromLng,
             rideData.fromLongitude
-
         );
 
     return validateCoordinates(
@@ -1573,7 +1522,6 @@ function getDestinationCoordinates(){
 
     const lat =
         getNumber(
-
             rideData.destinationLat,
             rideData.destinationLatitude,
 
@@ -1588,12 +1536,10 @@ function getDestinationCoordinates(){
 
             coordinates.lat,
             coordinates.latitude
-
         );
 
     const lng =
         getNumber(
-
             rideData.destinationLng,
             rideData.destinationLongitude,
 
@@ -1611,7 +1557,6 @@ function getDestinationCoordinates(){
             coordinates.lng,
             coordinates.lon,
             coordinates.longitude
-
         );
 
     return validateCoordinates(
@@ -1649,6 +1594,9 @@ function initializeMap(){
     if(
         typeof L === "undefined"
     ){
+        console.warn(
+            "Leaflet is not available."
+        );
         return;
     }
 
@@ -1707,6 +1655,9 @@ function initializeMap(){
         );
 
     }catch(error){
+
+        map = null;
+        mapReady = false;
 
         console.warn(
             "Map initialization failed:",
@@ -1899,11 +1850,8 @@ function handleCustomerPosition(position){
         getPickupCoordinates();
 
     /*
-     * Existing booking pickup coordinates
-     * always have priority.
-     *
-     * GPS is only used when pickup
-     * coordinates are missing.
+     * Never overwrite a valid booking pickup with
+     * live GPS coordinates.
      */
 
     if(!bookingPickup){
@@ -2025,7 +1973,10 @@ async function updateCustomerCoordinatesRemote(
     const id =
         getRideId();
 
-    if(!id){
+    if(
+        !id ||
+        !coordinates
+    ){
         return;
     }
 
@@ -2042,6 +1993,22 @@ async function updateCustomerCoordinatesRemote(
     lastRemoteUpdate =
         now;
 
+    const payload = {
+
+        pickupLat:
+            coordinates.lat,
+
+        pickupLng:
+            coordinates.lng,
+
+        pickupLatitude:
+            coordinates.lat,
+
+        pickupLongitude:
+            coordinates.lng
+
+    };
+
     try{
 
         if(
@@ -2055,18 +2022,7 @@ async function updateCustomerCoordinatesRemote(
                 .doc(id)
                 .set(
                     {
-                        pickupLat:
-                            coordinates.lat,
-
-                        pickupLng:
-                            coordinates.lng,
-
-                        pickupLatitude:
-                            coordinates.lat,
-
-                        pickupLongitude:
-                            coordinates.lng,
-
+                        ...payload,
                         updatedAt:
                             firebase
                             .firestore
@@ -2103,20 +2059,8 @@ async function updateCustomerCoordinatesRemote(
                 )
                 .update(
                     {
-                        pickupLat:
-                            coordinates.lat,
-
-                        pickupLng:
-                            coordinates.lng,
-
-                        pickupLatitude:
-                            coordinates.lat,
-
-                        pickupLongitude:
-                            coordinates.lng,
-
-                        updatedAt:
-                            Date.now()
+                        ...payload,
+                        updatedAt:Date.now()
                     }
                 );
 
@@ -2165,7 +2109,6 @@ function getRiderCoordinates(data){
 
     const lat =
         getNumber(
-
             data.latitude,
             data.lat,
             data.currentLat,
@@ -2182,12 +2125,10 @@ function getRiderCoordinates(data){
 
             nested.latitude,
             nested.lat
-
         );
 
     const lng =
         getNumber(
-
             data.longitude,
             data.lng,
             data.lon,
@@ -2208,7 +2149,6 @@ function getRiderCoordinates(data){
             nested.longitude,
             nested.lng,
             nested.lon
-
         );
 
     return validateCoordinates(
@@ -2224,7 +2164,6 @@ function getRiderId(
 ){
 
     return String(
-
         riderId ||
 
         data?.riderId ||
@@ -2239,7 +2178,6 @@ function getRiderId(
         data?.id ||
 
         ""
-
     ).trim();
 
 }
@@ -2252,7 +2190,6 @@ function getAssignedRiderId(){
         {};
 
     return String(
-
         rideData.riderId ||
         rideData.riderUid ||
 
@@ -2267,7 +2204,6 @@ function getAssignedRiderId(){
         nestedRider.driverUid ||
 
         ""
-
     ).trim();
 
 }
@@ -2469,7 +2405,14 @@ function fitCustomerAndAssignedRider(
             }
         );
 
-    }catch(error){}
+    }catch(error){
+
+        console.warn(
+            "Map bounds update failed:",
+            error
+        );
+
+    }
 
 }
 
@@ -2517,6 +2460,10 @@ function processRiderLocations(data){
         return;
     }
 
+    /*
+     * Single rider object.
+     */
+
     if(
         getRiderCoordinates(data)
     ){
@@ -2546,6 +2493,10 @@ function processRiderLocations(data){
     ){
         return;
     }
+
+    /*
+     * Collection of riders.
+     */
 
     Object.entries(data).forEach(
         ([id,rider]) => {
@@ -2700,6 +2651,9 @@ function initializeFirebase(){
     if(
         typeof firebase === "undefined"
     ){
+        console.warn(
+            "Firebase SDK is not available."
+        );
         return;
     }
 
@@ -2715,17 +2669,32 @@ function initializeFirebase(){
     }
 
     if(
-        firebaseConfigLoading ||
-        firebaseBootAttempted
+        firebaseConfigLoading
     ){
         return;
     }
 
-    firebaseBootAttempted =
-        true;
+    /*
+     * Do not permanently block a retry if the config
+     * script failed previously.
+     */
 
     firebaseConfigLoading =
         true;
+
+    const existing =
+        document.querySelector(
+            'script[data-riderx-firebase-config="1"]'
+        );
+
+    if(existing){
+
+        firebaseConfigLoading =
+            false;
+
+        return;
+
+    }
 
     const script =
         document.createElement(
@@ -2738,8 +2707,14 @@ function initializeFirebase(){
     script.async =
         true;
 
+    script.dataset.riderxFirebaseConfig =
+        "1";
+
     script.onload =
         () => {
+
+            firebaseBootAttempted =
+                true;
 
             firebaseConfigLoading =
                 false;
@@ -2762,6 +2737,9 @@ function initializeFirebase(){
 
             firebaseConfigLoading =
                 false;
+
+            firebaseBootAttempted =
+                true;
 
             console.warn(
                 "Firebase config could not be loaded."
@@ -2847,6 +2825,25 @@ function subscribeFirestore(id){
         return;
     }
 
+    /*
+     * If listener belongs to another ride, remove it.
+     */
+
+    if(
+        firestoreRideUnsubscribe &&
+        firestoreRideUnsubscribe.__rideId &&
+        firestoreRideUnsubscribe.__rideId !== id
+    ){
+
+        try{
+            firestoreRideUnsubscribe();
+        }catch(error){}
+
+        firestoreRideUnsubscribe =
+            null;
+
+    }
+
     if(
         firestoreRideUnsubscribe
     ){
@@ -2858,7 +2855,7 @@ function subscribeFirestore(id){
         const db =
             firebase.firestore();
 
-        firestoreRideUnsubscribe =
+        const unsubscribe =
             db
             .collection("rides")
             .doc(id)
@@ -2887,6 +2884,12 @@ function subscribeFirestore(id){
                 }
             );
 
+        unsubscribe.__rideId =
+            id;
+
+        firestoreRideUnsubscribe =
+            unsubscribe;
+
     }catch(error){
 
         firestoreRideUnsubscribe =
@@ -2912,6 +2915,21 @@ function subscribeRealtime(id){
         typeof firebase === "undefined"
     ){
         return;
+    }
+
+    if(
+        realtimeRideUnsubscribe &&
+        realtimeRideUnsubscribe.__rideId &&
+        realtimeRideUnsubscribe.__rideId !== id
+    ){
+
+        try{
+            realtimeRideUnsubscribe();
+        }catch(error){}
+
+        realtimeRideUnsubscribe =
+            null;
+
     }
 
     if(
@@ -2954,7 +2972,7 @@ function subscribeRealtime(id){
             handler
         );
 
-        realtimeRideUnsubscribe =
+        const unsubscribe =
             () => {
 
                 try{
@@ -2967,6 +2985,12 @@ function subscribeRealtime(id){
                 }catch(error){}
 
             };
+
+        unsubscribe.__rideId =
+            id;
+
+        realtimeRideUnsubscribe =
+            unsubscribe;
 
     }catch(error){
 
@@ -3015,6 +3039,7 @@ function subscribeRiderLocations(){
         return;
     }
 
+    stopAssignedRiderListener();
     stopRiderCollectionListener();
 
     try{
@@ -3062,6 +3087,9 @@ function subscribeRiderLocations(){
 
     }catch(error){
 
+        riderLocationsUnsubscribe =
+            null;
+
         console.warn(
             "Rider locations subscription failed:",
             error
@@ -3088,9 +3116,12 @@ function subscribeAssignedRider(
         return;
     }
 
+    const normalizedId =
+        String(riderId).trim();
+
     const key =
         "assigned:" +
-        riderId;
+        normalizedId;
 
     if(
         riderSubscriptionKey === key &&
@@ -3100,7 +3131,6 @@ function subscribeAssignedRider(
     }
 
     stopRiderCollectionListener();
-
     stopAssignedRiderListener();
 
     try{
@@ -3112,30 +3142,30 @@ function subscribeAssignedRider(
 
             database.ref(
                 "riderLocations/" +
-                riderId
+                normalizedId
             ),
 
             database.ref(
                 "riders/" +
-                riderId +
+                normalizedId +
                 "/location"
             ),
 
             database.ref(
                 "riders/" +
-                riderId +
+                normalizedId +
                 "/currentLocation"
             ),
 
             database.ref(
                 "users/" +
-                riderId +
+                normalizedId +
                 "/location"
             ),
 
             database.ref(
                 "users/" +
-                riderId +
+                normalizedId +
                 "/currentLocation"
             )
 
@@ -3158,7 +3188,7 @@ function subscribeAssignedRider(
                         ){
 
                             updateRiderMarker(
-                                riderId,
+                                normalizedId,
                                 data,
                                 true
                             );
@@ -3179,7 +3209,14 @@ function subscribeAssignedRider(
                         handler
                     });
 
-                }catch(error){}
+                }catch(error){
+
+                    console.warn(
+                        "Assigned rider ref failed:",
+                        error
+                    );
+
+                }
 
             }
         );
@@ -3202,6 +3239,8 @@ function subscribeAssignedRider(
                     }
                 };
 
+            };
+
         riderSubscriptionMode =
             "assigned";
 
@@ -3209,6 +3248,9 @@ function subscribeAssignedRider(
             key;
 
     }catch(error){
+
+        assignedRiderUnsubscribe =
+            null;
 
         console.warn(
             "Assigned rider listener failed:",
@@ -3394,6 +3436,17 @@ async function updateRemoteRideStatus(
         return false;
     }
 
+    const normalized =
+        normalizeStatus(status);
+
+    /*
+     * Don't accidentally write an invalid internal
+     * status to Firebase.
+     */
+
+    const firebaseStatus =
+        normalized;
+
     let success = false;
 
     try{
@@ -3409,10 +3462,17 @@ async function updateRemoteRideStatus(
                 .doc(id)
                 .set(
                     {
-                        status,
-                        rideStatus:status,
-                        state:status,
-                        bookingStatus:status,
+                        status:
+                            firebaseStatus,
+
+                        rideStatus:
+                            firebaseStatus,
+
+                        state:
+                            firebaseStatus,
+
+                        bookingStatus:
+                            firebaseStatus,
 
                         updatedAt:
                             firebase
@@ -3452,11 +3512,20 @@ async function updateRemoteRideStatus(
                 )
                 .update(
                     {
-                        status,
-                        rideStatus:status,
-                        state:status,
-                        bookingStatus:status,
-                        updatedAt:Date.now()
+                        status:
+                            firebaseStatus,
+
+                        rideStatus:
+                            firebaseStatus,
+
+                        state:
+                            firebaseStatus,
+
+                        bookingStatus:
+                            firebaseStatus,
+
+                        updatedAt:
+                            Date.now()
                     }
                 );
 
@@ -3552,6 +3621,8 @@ function checkRideStatus(){
 
 function showSearching(){
 
+    searching = true;
+
     $("searchState").style.display =
         "block";
 
@@ -3597,6 +3668,8 @@ function showSearching(){
 function showConnected(
     status
 ){
+
+    searching = false;
 
     $("searchState").style.display =
         "none";
@@ -3925,6 +3998,23 @@ function showSearchTimeout(){
 
             searching = true;
 
+            rideData.status =
+                "searching";
+
+            rideData.rideStatus =
+                "searching";
+
+            rideData.state =
+                "searching";
+
+            rideData.bookingStatus =
+                "searching";
+
+            rideData.searchStartedAt =
+                Date.now();
+
+            saveRide();
+
             showSearching();
 
             startSearchTimeout();
@@ -3971,9 +4061,7 @@ function stopSearchProcesses(
     timeoutTimer = null;
 
     if(stopFirebase){
-
         stopRideListenersOnly();
-
     }
 
 }
@@ -4046,6 +4134,9 @@ function redirectToStatus(
         status;
 
     rideData.state =
+        status;
+
+    rideData.bookingStatus =
         status;
 
     saveRide();
@@ -4324,9 +4415,7 @@ function handleOnline(){
 
         setTimeout(
             () => {
-
                 subscribeToRide();
-
             },
             250
         );
@@ -4427,6 +4516,9 @@ function goBack(){
 
         saveRide();
 
+        /*
+         * Don't block navigation waiting for Firebase.
+         */
         updateRemoteRideStatus(
             "cancelled"
         );
@@ -4555,9 +4647,6 @@ function initializePage(){
 
     loadRide();
 
-    /*
-     * Local ride status synchronization.
-     */
     statusTimer =
         setInterval(
             syncFromLocalStorage,
@@ -4565,9 +4654,7 @@ function initializePage(){
         );
 
     if(searching){
-
         startSearchTimeout();
-
     }
 
     riderCleanupTimer =
