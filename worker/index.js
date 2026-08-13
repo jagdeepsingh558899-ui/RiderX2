@@ -3,9 +3,10 @@
 /*
  * =========================================================
  * RIDERX2 — CLOUDFLARE WORKER + BACKBLAZE B2
+ * FINAL UPLOAD VERSION
  * =========================================================
  *
- * REQUIRED CLOUDFLARE SETTINGS
+ * CLOUDFLARE:
  *
  * Secrets:
  *   B2_APPLICATION_KEY_ID
@@ -38,22 +39,17 @@
  * CONFIGURATION
  * ========================================================= */
 
-const MAX_UPLOAD_BYTES =
-    10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-const ALLOWED_CONTENT_TYPES =
-    new Set([
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "application/pdf"
-    ]);
+const ALLOWED_CONTENT_TYPES = new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf"
+]);
 
-const B2_REGION =
-    "us-east-005";
-
-const B2_SERVICE =
-    "s3";
+const B2_REGION = "us-east-005";
+const B2_SERVICE = "s3";
 
 
 /* =========================================================
@@ -61,9 +57,9 @@ const B2_SERVICE =
  * ========================================================= */
 
 function corsHeaders(origin = "*") {
+
     return {
-        "Access-Control-Allow-Origin":
-            origin,
+        "Access-Control-Allow-Origin": origin,
 
         "Access-Control-Allow-Methods":
             "GET,POST,OPTIONS",
@@ -72,7 +68,10 @@ function corsHeaders(origin = "*") {
             "Content-Type, Authorization, X-Filename, X-Upload-Path",
 
         "Access-Control-Max-Age":
-            "86400"
+            "86400",
+
+        "Vary":
+            "Origin"
     };
 }
 
@@ -86,6 +85,7 @@ function jsonResponse(
     status = 200,
     origin = "*"
 ) {
+
     return new Response(
         JSON.stringify(
             data,
@@ -114,17 +114,17 @@ function jsonResponse(
  * ========================================================= */
 
 async function sha256Hex(data) {
+
     let buffer;
 
-    if (
-        data instanceof ArrayBuffer
-    ) {
-        buffer =
-            data;
+    if (data instanceof ArrayBuffer) {
+
+        buffer = data;
 
     } else if (
         ArrayBuffer.isView(data)
     ) {
+
         buffer =
             data.buffer.slice(
                 data.byteOffset,
@@ -133,17 +133,20 @@ async function sha256Hex(data) {
             );
 
     } else {
+
         buffer =
             await new Response(
                 data
             ).arrayBuffer();
     }
 
+
     const hash =
         await crypto.subtle.digest(
             "SHA-256",
             buffer
         );
+
 
     return Array.from(
         new Uint8Array(hash)
@@ -166,6 +169,7 @@ async function hmacSha256(
     key,
     message
 ) {
+
     const cryptoKey =
         await crypto.subtle.importKey(
             "raw",
@@ -181,14 +185,15 @@ async function hmacSha256(
             ["sign"]
         );
 
+
     const signature =
         await crypto.subtle.sign(
             "HMAC",
             cryptoKey,
-            new TextEncoder().encode(
-                message
-            )
+            new TextEncoder()
+                .encode(message)
         );
+
 
     return new Uint8Array(
         signature
@@ -201,6 +206,7 @@ async function hmacSha256(
  * ========================================================= */
 
 function bytesToHex(bytes) {
+
     return Array.from(
         bytes
     )
@@ -224,8 +230,10 @@ async function getSignatureKey(
     region,
     service
 ) {
+
     const encoder =
         new TextEncoder();
+
 
     const kDate =
         await hmacSha256(
@@ -236,11 +244,13 @@ async function getSignatureKey(
             dateStamp
         );
 
+
     const kRegion =
         await hmacSha256(
             kDate,
             region
         );
+
 
     const kService =
         await hmacSha256(
@@ -248,11 +258,13 @@ async function getSignatureKey(
             service
         );
 
+
     const kSigning =
         await hmacSha256(
             kService,
             "aws4_request"
         );
+
 
     return kSigning;
 }
@@ -263,26 +275,23 @@ async function getSignatureKey(
  * ========================================================= */
 
 function encodePath(path) {
-    return path
+
+    return String(path)
         .split("/")
         .map(
             part =>
                 encodeURIComponent(
                     part
                 )
-                    .replace(
-                        /[!'()*]/g,
-                        character =>
-                            "%" +
-                            character
-                                .charCodeAt(
-                                    0
-                                )
-                                .toString(
-                                    16
-                                )
-                                .toUpperCase()
-                    )
+                .replace(
+                    /[!'()*]/g,
+                    character =>
+                        "%" +
+                        character
+                            .charCodeAt(0)
+                            .toString(16)
+                            .toUpperCase()
+                )
         )
         .join("/");
 }
@@ -295,6 +304,7 @@ function encodePath(path) {
 function sanitizeFilename(
     filename
 ) {
+
     return String(
         filename ||
         "upload.bin"
@@ -321,6 +331,7 @@ function sanitizeFilename(
 function sanitizeObjectPath(
     path
 ) {
+
     return String(
         path ||
         ""
@@ -345,45 +356,59 @@ function sanitizeObjectPath(
 
 
 /* =========================================================
- * CHECK B2 CONFIGURATION
+ * B2 CONFIGURATION
  * ========================================================= */
 
 function getB2Configuration(
     env
 ) {
+
     const missing = [];
 
+
     if (
+        !env ||
         !env.B2_APPLICATION_KEY_ID
     ) {
+
         missing.push(
             "B2_APPLICATION_KEY_ID"
         );
     }
 
+
     if (
+        !env ||
         !env.B2_APPLICATION_KEY
     ) {
+
         missing.push(
             "B2_APPLICATION_KEY"
         );
     }
 
+
     if (
+        !env ||
         !env.B2_BUCKET
     ) {
+
         missing.push(
             "B2_BUCKET"
         );
     }
 
+
     if (
+        !env ||
         !env.B2_ENDPOINT
     ) {
+
         missing.push(
             "B2_ENDPOINT"
         );
     }
+
 
     return {
         configured:
@@ -395,65 +420,136 @@ function getB2Configuration(
 
 
 /* =========================================================
- * CREATE FIXED-LENGTH REQUEST BODY
- *
- * Cloudflare Workers automatically calculates the correct
- * Content-Length when a fixed-length body is used.
- *
- * FixedLengthStream makes the byte count explicit and avoids
- * chunked/incomplete-body behavior.
+ * NORMALIZE B2 ENDPOINT
  * ========================================================= */
 
-async function createFixedLengthBody(
-    bytes
+function getB2Endpoint(
+    env
 ) {
-    if (
-        typeof FixedLengthStream !==
-        "undefined"
-    ) {
-        const fixedStream =
-            new FixedLengthStream(
-                bytes.byteLength
-            );
 
-        const writer =
-            fixedStream.writable.getWriter();
+    const raw =
+        String(
+            env.B2_ENDPOINT ||
+            ""
+        )
+        .trim();
 
-        try {
-            await writer.write(
-                bytes
-            );
 
-            await writer.close();
+    if (!raw) {
 
-        } catch (error) {
-            try {
-                await writer.abort(
-                    error
-                );
-            } catch (
-                abortError
-            ) {
-                console.error(
-                    "FixedLengthStream abort error:",
-                    abortError
-                );
-            }
-
-            throw error;
-        }
-
-        return fixedStream.readable;
+        throw new Error(
+            "B2_ENDPOINT is empty."
+        );
     }
 
-    /*
-     * Fallback for runtimes where
-     * FixedLengthStream is unavailable.
-     *
-     * Uint8Array is a fixed-length request body
-     * and Cloudflare will calculate Content-Length.
-     */
-    return bytes;
+
+    let url;
+
+    try {
+
+        url =
+            new URL(raw);
+
+    } catch (error) {
+
+        throw new Error(
+            "B2_ENDPOINT is not a valid URL."
+        );
+    }
+
+
+    if (
+        url.protocol !==
+        "https:"
+    ) {
+
+        throw new Error(
+            "B2_ENDPOINT must use HTTPS."
+        );
+    }
+
+
+    return {
+        base:
+            url.origin,
+
+        host:
+            url.host
+    };
+}
+
+
+/* =========================================================
+ * READ REQUEST BODY
+ * ========================================================= */
+
+async function readUploadBody(
+    request
+) {
+
+    const contentLengthHeader =
+        request.headers.get(
+            "Content-Length"
+        );
+
+
+    if (
+        contentLengthHeader
+    ) {
+
+        const declaredLength =
+            Number(
+                contentLengthHeader
+            );
+
+
+        if (
+            Number.isFinite(
+                declaredLength
+            ) &&
+            declaredLength >
+                MAX_UPLOAD_BYTES
+        ) {
+
+            throw new Error(
+                "File is too large."
+            );
+        }
+    }
+
+
+    const arrayBuffer =
+        await request.arrayBuffer();
+
+
+    const body =
+        new Uint8Array(
+            arrayBuffer
+        );
+
+
+    if (
+        body.byteLength === 0
+    ) {
+
+        throw new Error(
+            "Upload body is empty."
+        );
+    }
+
+
+    if (
+        body.byteLength >
+        MAX_UPLOAD_BYTES
+    ) {
+
+        throw new Error(
+            "File is too large."
+        );
+    }
+
+
+    return body;
 }
 
 
@@ -466,6 +562,7 @@ async function uploadToB2(
     env,
     origin
 ) {
+
     /* -------------------------------------------------------
      * CONFIGURATION
      * ----------------------------------------------------- */
@@ -475,12 +572,15 @@ async function uploadToB2(
             env
         );
 
+
     if (
         !configuration.configured
     ) {
+
         return jsonResponse(
             {
-                ok: false,
+                ok:
+                    false,
 
                 error:
                     "B2 storage configuration is incomplete.",
@@ -504,6 +604,7 @@ async function uploadToB2(
         ) ||
         "application/octet-stream";
 
+
     contentType =
         contentType
             .split(";")[0]
@@ -516,9 +617,11 @@ async function uploadToB2(
             contentType
         )
     ) {
+
         return jsonResponse(
             {
-                ok: false,
+                ok:
+                    false,
 
                 error:
                     "File type is not allowed.",
@@ -544,74 +647,53 @@ async function uploadToB2(
     let body;
 
     try {
-        const arrayBuffer =
-            await request.arrayBuffer();
 
         body =
-            new Uint8Array(
-                arrayBuffer
+            await readUploadBody(
+                request
             );
 
     } catch (error) {
+
+        const message =
+            error?.message ||
+            String(error);
+
+
+        if (
+            message ===
+            "File is too large."
+        ) {
+
+            return jsonResponse(
+                {
+                    ok:
+                        false,
+
+                    error:
+                        message,
+
+                    maxBytes:
+                        MAX_UPLOAD_BYTES,
+
+                    maxMB:
+                        10
+                },
+                413,
+                origin
+            );
+        }
+
+
         return jsonResponse(
             {
-                ok: false,
+                ok:
+                    false,
 
                 error:
-                    "Could not read upload body.",
-
-                details:
-                    error?.message ||
-                    String(error)
+                    message
             },
             400,
-            origin
-        );
-    }
-
-
-    /* -------------------------------------------------------
-     * EMPTY BODY CHECK
-     * ----------------------------------------------------- */
-
-    if (
-        body.byteLength === 0
-    ) {
-        return jsonResponse(
-            {
-                ok: false,
-
-                error:
-                    "Upload body is empty."
-            },
-            400,
-            origin
-        );
-    }
-
-
-    /* -------------------------------------------------------
-     * FILE SIZE
-     * ----------------------------------------------------- */
-
-    if (
-        body.byteLength >
-        MAX_UPLOAD_BYTES
-    ) {
-        return jsonResponse(
-            {
-                ok: false,
-
-                error:
-                    "File is too large.",
-
-                maxBytes:
-                    MAX_UPLOAD_BYTES,
-
-                maxMB:
-                    10
-            },
-            413,
             origin
         );
     }
@@ -626,6 +708,7 @@ async function uploadToB2(
             "X-Filename"
         ) ||
         "upload.bin";
+
 
     const safeFilename =
         sanitizeFilename(
@@ -642,20 +725,25 @@ async function uploadToB2(
             "X-Upload-Path"
         );
 
+
     let objectPath;
+
 
     if (
         requestedPath
     ) {
+
         objectPath =
             sanitizeObjectPath(
                 requestedPath
             );
     }
 
+
     if (
         !objectPath
     ) {
+
         objectPath =
             "riderx2/uploads/" +
             Date.now() +
@@ -670,61 +758,30 @@ async function uploadToB2(
      * B2 ENDPOINT
      * ----------------------------------------------------- */
 
-    const endpoint =
-        String(
-            env.B2_ENDPOINT
-        )
-            .trim()
-            .replace(
-                /\/+$/,
-                ""
-            );
-
-    let endpointUrl;
+    let endpoint;
 
     try {
-        endpointUrl =
-            new URL(
-                endpoint
+
+        endpoint =
+            getB2Endpoint(
+                env
             );
 
     } catch (error) {
+
         return jsonResponse(
             {
-                ok: false,
+                ok:
+                    false,
 
                 error:
-                    "B2_ENDPOINT is not a valid URL."
+                    error?.message ||
+                    String(error)
             },
             500,
             origin
         );
     }
-
-
-    /* -------------------------------------------------------
-     * ENSURE HTTPS
-     * ----------------------------------------------------- */
-
-    if (
-        endpointUrl.protocol !==
-        "https:"
-    ) {
-        return jsonResponse(
-            {
-                ok: false,
-
-                error:
-                    "B2_ENDPOINT must use HTTPS."
-            },
-            500,
-            origin
-        );
-    }
-
-
-    const host =
-        endpointUrl.host;
 
 
     /* -------------------------------------------------------
@@ -733,15 +790,20 @@ async function uploadToB2(
 
     const bucket =
         String(
-            env.B2_BUCKET
-        ).trim();
+            env.B2_BUCKET ||
+            ""
+        )
+        .trim();
+
 
     if (
         !bucket
     ) {
+
         return jsonResponse(
             {
-                ok: false,
+                ok:
+                    false,
 
                 error:
                     "B2_BUCKET is empty."
@@ -769,6 +831,7 @@ async function uploadToB2(
     const now =
         new Date();
 
+
     const amzDate =
         now
             .toISOString()
@@ -776,6 +839,7 @@ async function uploadToB2(
                 /[:-]|\.\d{3}/g,
                 ""
             );
+
 
     const dateStamp =
         amzDate.slice(
@@ -802,10 +866,12 @@ async function uploadToB2(
     /* -------------------------------------------------------
      * CANONICAL HEADERS
      *
-     * Content-Length is intentionally NOT signed.
+     * IMPORTANT:
      *
-     * Cloudflare determines the HTTP Content-Length from
-     * the fixed-length request body.
+     * We sign only headers that we control and send.
+     *
+     * Content-Length is intentionally NOT manually set.
+     * Cloudflare fetch handles the request body framing.
      * ----------------------------------------------------- */
 
     const canonicalHeaders =
@@ -814,7 +880,7 @@ async function uploadToB2(
         "\n" +
 
         "host:" +
-        host +
+        endpoint.host +
         "\n" +
 
         "x-amz-content-sha256:" +
@@ -863,13 +929,18 @@ async function uploadToB2(
 
 
     /* -------------------------------------------------------
-     * STRING TO SIGN
+     * CANONICAL REQUEST HASH
      * ----------------------------------------------------- */
 
     const canonicalRequestHash =
         await sha256Hex(
             canonicalRequest
         );
+
+
+    /* -------------------------------------------------------
+     * STRING TO SIGN
+     * ----------------------------------------------------- */
 
     const stringToSign =
         "AWS4-HMAC-SHA256\n" +
@@ -903,6 +974,7 @@ async function uploadToB2(
             stringToSign
         );
 
+
     const signature =
         bytesToHex(
             signatureBytes
@@ -932,7 +1004,7 @@ async function uploadToB2(
      * ----------------------------------------------------- */
 
     const uploadUrl =
-        endpoint +
+        endpoint.base +
         "/" +
         encodePath(
             bucket
@@ -944,52 +1016,20 @@ async function uploadToB2(
 
 
     /* -------------------------------------------------------
-     * CREATE EXACT-LENGTH BODY
-     * ----------------------------------------------------- */
-
-    let requestBody;
-
-    try {
-        requestBody =
-            await createFixedLengthBody(
-                body
-            );
-
-    } catch (error) {
-        console.error(
-            "Request body creation error:",
-            error
-        );
-
-        return jsonResponse(
-            {
-                ok: false,
-
-                error:
-                    "Could not prepare upload body.",
-
-                details:
-                    error?.message ||
-                    String(error)
-            },
-            500,
-            origin
-        );
-    }
-
-
-    /* -------------------------------------------------------
      * SEND TO B2
+     *
+     * IMPORTANT:
      *
      * DO NOT manually set Content-Length.
      *
-     * Cloudflare Workers derives it from the fixed-length
-     * body. This avoids the IncompleteBody problem.
+     * The exact Uint8Array is passed as the request body.
      * ----------------------------------------------------- */
 
     let b2Response;
 
+
     try {
+
         b2Response =
             await fetch(
                 uploadUrl,
@@ -1012,19 +1052,22 @@ async function uploadToB2(
                     },
 
                     body:
-                        requestBody
+                        body
                 }
             );
 
     } catch (error) {
+
         console.error(
             "B2 network error:",
             error
         );
 
+
         return jsonResponse(
             {
-                ok: false,
+                ok:
+                    false,
 
                 error:
                     "Could not connect to Backblaze B2.",
@@ -1040,25 +1083,43 @@ async function uploadToB2(
 
 
     /* -------------------------------------------------------
-     * B2 RESPONSE
+     * READ B2 RESPONSE
      * ----------------------------------------------------- */
 
-    const responseText =
-        await b2Response.text();
+    let responseText = "";
 
+
+    try {
+
+        responseText =
+            await b2Response.text();
+
+    } catch (error) {
+
+        responseText =
+            "";
+    }
+
+
+    /* -------------------------------------------------------
+     * B2 ERROR
+     * ----------------------------------------------------- */
 
     if (
         !b2Response.ok
     ) {
+
         console.error(
             "Backblaze B2 upload failed:",
             b2Response.status,
             responseText
         );
 
+
         return jsonResponse(
             {
-                ok: false,
+                ok:
+                    false,
 
                 error:
                     "Backblaze B2 upload failed.",
@@ -1066,17 +1127,15 @@ async function uploadToB2(
                 b2Status:
                     b2Response.status,
 
+                b2StatusText:
+                    b2Response.statusText ||
+                    "",
+
                 b2Response:
                     responseText.slice(
                         0,
-                        2000
-                    ),
-
-                uploadedBytes:
-                    body.byteLength,
-
-                objectKey:
-                    objectPath
+                        4000
+                    )
             },
             502,
             origin
@@ -1090,7 +1149,8 @@ async function uploadToB2(
 
     return jsonResponse(
         {
-            ok: true,
+            ok:
+                true,
 
             message:
                 "File uploaded successfully.",
@@ -1121,8 +1181,10 @@ async function uploadToB2(
  * ========================================================= */
 
 function storageTestPage() {
+
     return `
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -1157,6 +1219,7 @@ body {
 }
 
 body {
+
     min-height: 100vh;
 
     padding:
@@ -1175,8 +1238,11 @@ body {
 }
 
 .container {
+
     width: 100%;
-    max-width: 520px;
+
+    max-width:
+        520px;
 
     margin:
         0 auto;
@@ -1192,11 +1258,18 @@ body {
 
     box-shadow:
         0 15px 40px
-        rgba(0, 0, 0, 0.35);
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
 }
 
 h1 {
-    margin-top: 0;
+
+    margin-top:
+        0;
 
     color:
         #FFD400;
@@ -1209,6 +1282,7 @@ h1 {
 }
 
 p {
+
     color:
         #d1d5db;
 
@@ -1220,7 +1294,9 @@ p {
 }
 
 input[type="file"] {
-    width: 100%;
+
+    width:
+        100%;
 
     padding:
         15px;
@@ -1242,12 +1318,15 @@ input[type="file"] {
 }
 
 button {
-    width: 100%;
+
+    width:
+        100%;
 
     padding:
         16px;
 
-    border: none;
+    border:
+        none;
 
     border-radius:
         12px;
@@ -1269,6 +1348,7 @@ button {
 }
 
 button:disabled {
+
     opacity:
         0.6;
 
@@ -1277,6 +1357,7 @@ button:disabled {
 }
 
 pre {
+
     white-space:
         pre-wrap;
 
@@ -1306,11 +1387,13 @@ pre {
 }
 
 .success {
+
     color:
         #86efac;
 }
 
 .error {
+
     color:
         #fca5a5;
 }
@@ -1350,19 +1433,23 @@ pre {
 
 </div>
 
+
 <script>
 
 "use strict";
+
 
 const fileInput =
     document.getElementById(
         "file"
     );
 
+
 const uploadButton =
     document.getElementById(
         "uploadButton"
     );
+
 
 const result =
     document.getElementById(
@@ -1415,10 +1502,15 @@ async function uploadFile() {
 
 
     const allowedTypes = [
+
         "image/jpeg",
+
         "image/png",
+
         "image/webp",
+
         "application/pdf"
+
     ];
 
 
@@ -1441,11 +1533,14 @@ async function uploadFile() {
     uploadButton.disabled =
         true;
 
+
     uploadButton.textContent =
         "Uploading...";
 
+
     result.className =
         "";
+
 
     result.textContent =
         "Uploading " +
@@ -1463,6 +1558,7 @@ async function uploadFile() {
                         "POST",
 
                     headers: {
+
                         "Content-Type":
                             file.type,
 
@@ -1482,23 +1578,32 @@ async function uploadFile() {
 
         let data;
 
+
         try {
+
             data =
                 JSON.parse(
                     raw
                 );
 
-        } catch (
-            error
-        ) {
+        } catch (error) {
+
             data = {
-                ok: false,
+
+                ok:
+                    false,
 
                 error:
                     "Worker returned invalid JSON.",
 
+                status:
+                    response.status,
+
                 raw:
-                    raw
+                    raw.slice(
+                        0,
+                        5000
+                    )
             };
         }
 
@@ -1506,6 +1611,7 @@ async function uploadFile() {
         if (
             !response.ok
         ) {
+
             throw new Error(
                 JSON.stringify(
                     data,
@@ -1519,6 +1625,7 @@ async function uploadFile() {
         result.className =
             "success";
 
+
         result.textContent =
             JSON.stringify(
                 data,
@@ -1527,17 +1634,17 @@ async function uploadFile() {
             );
 
 
-    } catch (
-        error
-    ) {
+    } catch (error) {
 
         console.error(
             "Upload error:",
             error
         );
 
+
         result.className =
             "error";
+
 
         result.textContent =
             "Upload failed:\\n\\n" +
@@ -1550,6 +1657,7 @@ async function uploadFile() {
 
         uploadButton.disabled =
             false;
+
 
         uploadButton.textContent =
             "Upload to Backblaze B2";
@@ -1575,8 +1683,30 @@ async function checkStorage() {
             );
 
 
-        const data =
-            await response.json();
+        const raw =
+            await response.text();
+
+
+        let data;
+
+
+        try {
+
+            data =
+                JSON.parse(
+                    raw
+                );
+
+        } catch (error) {
+
+            result.className =
+                "error";
+
+            result.textContent =
+                "Health check returned invalid response.";
+
+            return;
+        }
 
 
         if (
@@ -1586,6 +1716,7 @@ async function checkStorage() {
 
             result.className =
                 "error";
+
 
             result.textContent =
                 "Storage configuration incomplete:\\n\\n" +
@@ -1602,19 +1733,19 @@ async function checkStorage() {
         result.className =
             "success";
 
+
         result.textContent =
             "Storage ready. Select a file to upload.";
 
-    } catch (
-        error
-    ) {
+
+    } catch (error) {
 
         result.className =
             "error";
 
+
         result.textContent =
             "Could not check storage.";
-
     }
 }
 
@@ -1645,6 +1776,7 @@ export default {
             new URL(
                 request.url
             );
+
 
         const origin =
             request.headers.get(
@@ -1684,6 +1816,7 @@ export default {
         if (
             request.method ===
                 "GET" &&
+
             url.pathname ===
                 "/api/health"
         ) {
@@ -1735,6 +1868,7 @@ export default {
         if (
             request.method ===
                 "GET" &&
+
             url.pathname ===
                 "/storage-test"
         ) {
@@ -1746,6 +1880,7 @@ export default {
                         200,
 
                     headers: {
+
                         "Content-Type":
                             "text/html; charset=UTF-8",
 
@@ -1764,6 +1899,7 @@ export default {
         if (
             request.method ===
                 "POST" &&
+
             url.pathname ===
                 "/api/storage/upload"
         ) {
@@ -1776,14 +1912,13 @@ export default {
                     origin
                 );
 
-            } catch (
-                error
-            ) {
+            } catch (error) {
 
                 console.error(
                     "Storage upload error:",
                     error
                 );
+
 
                 return jsonResponse(
                     {
@@ -1805,7 +1940,7 @@ export default {
 
 
         /* =====================================================
-         * STATIC WEBSITE
+         * STATIC WEBSITE / CLOUDFLARE ASSETS
          * ===================================================== */
 
         if (
@@ -1815,9 +1950,33 @@ export default {
                 "function"
         ) {
 
-            return env.ASSETS.fetch(
-                request
-            );
+            try {
+
+                return await env.ASSETS.fetch(
+                    request
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Assets fetch error:",
+                    error
+                );
+
+
+                return new Response(
+                    "RiderX Assets error.",
+                    {
+                        status:
+                            502,
+
+                        headers: {
+                            "Content-Type":
+                                "text/plain; charset=UTF-8"
+                        }
+                    }
+                );
+            }
         }
 
 
@@ -1832,6 +1991,7 @@ export default {
                     200,
 
                 headers: {
+
                     "Content-Type":
                         "text/plain; charset=UTF-8"
                 }
