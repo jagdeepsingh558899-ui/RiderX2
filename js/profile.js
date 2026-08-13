@@ -5,17 +5,14 @@
    Handles:
    - Customer profile
    - Rider profile
-   - Admin profile
    - Profile loading
    - Profile editing
    - Profile saving
    - Profile photo
-   - Cloudflare Worker + Backblaze B2 upload
-   - Firebase Realtime Database sync
-   - Firestore fallback
+   - Backblaze B2 photo upload through Cloudflare Worker
+   - Firebase profile sync
    - Rider vehicle information
    - Rating display
-   - Profile completion
    - Logout integration
    ============================================================ */
 
@@ -25,12 +22,12 @@
 
 
     /* ========================================================
-       RIDERX NAMESPACE
+       GLOBAL NAMESPACE
        ======================================================== */
 
     window.RiderX =
-        window.RiderX ||
-        {};
+        window.RiderX || {};
+
 
     const RX =
         window.RiderX;
@@ -47,55 +44,49 @@
 
     Profile.config = {
 
-        /*
-         * Local profile cache only.
-         *
-         * IMPORTANT:
-         * Profile photos are NO LONGER stored as base64
-         * inside localStorage.
-         */
-
         storageKey:
             "riderx_profile",
 
+        imageStorageKey:
+            "riderx_profile_image",
 
         /*
-         * Cloudflare Worker upload endpoint.
+         * Maximum profile photo size.
          *
-         * When the RiderX website and Worker are served
-         * from the same domain, this relative URL is correct.
+         * Worker itself supports 10 MB,
+         * but profile photos are intentionally
+         * restricted to 2 MB.
          */
-
-        storageUploadUrl:
-            "/api/storage/upload",
-
-
-        /*
-         * Maximum profile image size.
-         *
-         * Worker maximum is 10 MB.
-         * We keep profile photos at 2 MB for normal app use.
-         */
-
         maxImageSize:
             2 * 1024 * 1024,
 
+        /*
+         * Worker upload endpoint.
+         *
+         * Empty string means same-origin.
+         *
+         * Example:
+         *
+         * https://api.example.com/api/storage/upload
+         *
+         * can also be configured here if API is hosted
+         * separately from the RiderX website.
+         */
+        storageUploadEndpoint:
+            "/api/storage/upload",
 
         /*
-         * Allowed profile image types.
+         * Worker storage-file endpoint.
+         *
+         * This endpoint can be used by the Worker as a
+         * secure proxy for private B2 objects.
+         *
+         * If the Worker does not currently expose this route,
+         * the B2 public URL returned by the upload API will
+         * be preferred.
          */
-
-        allowedImageTypes:
-            [
-                "image/jpeg",
-                "image/png",
-                "image/webp"
-            ],
-
-
-        /*
-         * Default avatar.
-         */
+        storageFileEndpoint:
+            "/api/storage/file",
 
         defaultAvatar:
             "assets/logo.svg"
@@ -143,7 +134,7 @@
                 if (
                     window.firebase &&
                     typeof firebase.auth ===
-                        "function"
+                    "function"
                 ) {
 
                     return firebase.auth()
@@ -153,7 +144,7 @@
             } catch (error) {
 
                 console.warn(
-                    "Firebase user lookup failed:",
+                    "Could not get Firebase user:",
                     error
                 );
             }
@@ -225,8 +216,8 @@
                         String(
                             savedRole
                         )
-                            .trim()
-                            .toLowerCase();
+                            .toLowerCase()
+                            .trim();
 
 
                     if (
@@ -242,22 +233,18 @@
             } catch (error) {
 
                 console.warn(
-                    "Saved role lookup failed:",
+                    "Could not read saved role:",
                     error
                 );
             }
 
-
-            /*
-             * Existing RiderX role system.
-             */
 
             try {
 
                 if (
                     RX.auth &&
                     typeof RX.auth.getRole ===
-                        "function"
+                    "function"
                 ) {
 
                     const role =
@@ -271,14 +258,15 @@
                         return String(
                             role
                         )
-                            .toLowerCase();
+                            .toLowerCase()
+                            .trim();
                     }
                 }
 
             } catch (error) {
 
                 console.warn(
-                    "RiderX auth role lookup failed:",
+                    "Could not get role from auth:",
                     error
                 );
             }
@@ -313,7 +301,7 @@
                 if (
                     window.firebase &&
                     typeof firebase.database ===
-                        "function"
+                    "function"
                 ) {
 
                     return firebase.database();
@@ -351,7 +339,7 @@
                 if (
                     window.firebase &&
                     typeof firebase.firestore ===
-                        "function"
+                    "function"
                 ) {
 
                     return firebase.firestore();
@@ -365,7 +353,7 @@
 
 
     /* ========================================================
-       PROFILE COLLECTION
+       PROFILE PATH COLLECTION
        ======================================================== */
 
     Profile.getCollection =
@@ -488,17 +476,10 @@
                     user?.photoURL ||
                     Profile.config.defaultAvatar,
 
-                /*
-                 * B2 object metadata.
-                 */
-
                 photoKey:
                     "",
 
                 photoFileId:
-                    "",
-
-                photoStorage:
                     "",
 
                 city:
@@ -559,45 +540,44 @@
                 updatedAt:
                     Date.now(),
 
-                vehicle:
-                    {
+                vehicle: {
 
-                        type:
-                            "bike",
+                    type:
+                        "bike",
 
-                        brand:
-                            "",
+                    brand:
+                        "",
 
-                        model:
-                            "",
+                    model:
+                        "",
 
-                        color:
-                            "",
+                    color:
+                        "",
 
-                        number:
-                            "",
+                    number:
+                        "",
 
-                        year:
-                            "",
+                    year:
+                        "",
 
-                        licenseNumber:
-                            "",
+                    licenseNumber:
+                        "",
 
-                        rcNumber:
-                            "",
+                    rcNumber:
+                        "",
 
-                        insuranceNumber:
-                            "",
+                    insuranceNumber:
+                        "",
 
-                        verified:
-                            false
-                    }
+                    verified:
+                        false
+                }
             };
         };
 
 
     /* ========================================================
-       LOCAL PROFILE
+       LOCAL PROFILE LOAD
        ======================================================== */
 
     Profile.loadLocal =
@@ -624,7 +604,7 @@
                     if (
                         saved &&
                         typeof saved ===
-                            "object"
+                        "object"
                     ) {
 
                         return saved;
@@ -645,7 +625,7 @@
 
 
     /* ========================================================
-       SAVE LOCAL PROFILE
+       LOCAL PROFILE SAVE
        ======================================================== */
 
     Profile.saveLocal =
@@ -707,25 +687,24 @@
                     Profile.loadLocal();
 
 
-                Profile.state.profile =
-                    {
+                Profile.state.profile = {
 
-                        ...defaults,
+                    ...defaults,
 
-                        ...(local || {}),
+                    ...(local || {}),
 
-                        uid:
-                            Profile.state.userId ||
-                            local?.uid ||
-                            defaults.uid,
+                    uid:
+                        Profile.state.userId ||
+                        local?.uid ||
+                        defaults.uid,
 
-                        role:
-                            Profile.state.role
-                    };
+                    role:
+                        Profile.state.role
+                };
 
 
                 /*
-                 * Firebase remote profile.
+                 * Firebase profile.
                  */
 
                 try {
@@ -738,19 +717,18 @@
                         remote
                     ) {
 
-                        Profile.state.profile =
-                            {
+                        Profile.state.profile = {
 
-                                ...Profile.state.profile,
+                            ...Profile.state.profile,
 
-                                ...remote,
+                            ...remote,
 
-                                uid:
-                                    Profile.state.userId,
+                            uid:
+                                Profile.state.userId,
 
-                                role:
-                                    Profile.state.role
-                            };
+                            role:
+                                Profile.state.role
+                        };
 
 
                         Profile.saveLocal(
@@ -775,7 +753,6 @@
                 Profile.emit(
                     "loaded",
                     {
-
                         profile:
                             Profile.state.profile
                     }
@@ -959,7 +936,7 @@
             if (
                 !values ||
                 typeof values !==
-                    "object"
+                "object"
             ) {
 
                 return false;
@@ -974,10 +951,10 @@
             }
 
 
-            const oldProfile =
-                {
-                    ...Profile.state.profile
-                };
+            const oldProfile = {
+
+                ...Profile.state.profile
+            };
 
 
             const clean =
@@ -986,16 +963,15 @@
                 );
 
 
-            Profile.state.profile =
-                {
+            Profile.state.profile = {
 
-                    ...Profile.state.profile,
+                ...Profile.state.profile,
 
-                    ...clean,
+                ...clean,
 
-                    updatedAt:
-                        Date.now()
-                };
+                updatedAt:
+                    Date.now()
+            };
 
 
             Profile.normalizeName();
@@ -1038,7 +1014,7 @@
 
 
     /* ========================================================
-       SANITIZE PROFILE
+       SANITIZE
        ======================================================== */
 
     Profile.sanitize =
@@ -1050,28 +1026,41 @@
                 {};
 
 
-            const allowed =
-                [
+            const allowed = [
 
-                    "name",
-                    "fullName",
-                    "firstName",
-                    "lastName",
-                    "phone",
-                    "email",
-                    "gender",
-                    "dateOfBirth",
-                    "address",
-                    "city",
-                    "language",
-                    "bio",
-                    "photoURL",
-                    "photoKey",
-                    "photoFileId",
-                    "photoStorage",
-                    "vehicle"
+                "name",
 
-                ];
+                "fullName",
+
+                "firstName",
+
+                "lastName",
+
+                "phone",
+
+                "email",
+
+                "gender",
+
+                "dateOfBirth",
+
+                "address",
+
+                "city",
+
+                "language",
+
+                "bio",
+
+                "photoURL",
+
+                "photoKey",
+
+                "photoFileId",
+
+                "vehicle"
+
+            ];
 
 
             allowed.forEach(
@@ -1081,7 +1070,7 @@
 
                     if (
                         values[key] !==
-                            undefined
+                        undefined
                     ) {
 
                         result[key] =
@@ -1092,27 +1081,26 @@
 
 
             /*
-             * Vehicle fields remain grouped.
+             * Vehicle fields.
              */
 
             if (
                 values.vehicle &&
                 typeof values.vehicle ===
-                    "object"
+                "object"
             ) {
 
-                result.vehicle =
-                    {
+                result.vehicle = {
 
-                        ...(
-                            Profile.state
-                                .profile
-                                ?.vehicle ||
-                            {}
-                        ),
+                    ...(
+                        Profile.state
+                            .profile
+                            ?.vehicle ||
+                        {}
+                    ),
 
-                        ...values.vehicle
-                    };
+                    ...values.vehicle
+                };
             }
 
 
@@ -1221,18 +1209,17 @@
                     values
                 ) {
 
-                    Profile.state.profile =
-                        {
+                    Profile.state.profile = {
 
-                            ...Profile.state.profile,
+                        ...Profile.state.profile,
 
-                            ...Profile.sanitize(
-                                values
-                            ),
+                        ...Profile.sanitize(
+                            values
+                        ),
 
-                            updatedAt:
-                                Date.now()
-                        };
+                        updatedAt:
+                            Date.now()
+                    };
 
 
                     Profile.normalizeName();
@@ -1400,7 +1387,386 @@
 
 
     /* ========================================================
-       PROFILE PHOTO — B2 UPLOAD
+       STORAGE UPLOAD ENDPOINT
+       ======================================================== */
+
+    Profile.getStorageUploadEndpoint =
+        function () {
+
+            const configured =
+                Profile.config
+                    .storageUploadEndpoint;
+
+
+            if (
+                configured
+            ) {
+
+                return configured;
+            }
+
+
+            return "/api/storage/upload";
+        };
+
+
+    /* ========================================================
+       STORAGE FILE URL
+       ======================================================== */
+
+    Profile.getStorageFileURL =
+        function (
+            key
+        ) {
+
+            if (
+                !key
+            ) {
+
+                return "";
+            }
+
+
+            const endpoint =
+                Profile.config
+                    .storageFileEndpoint;
+
+
+            if (
+                !endpoint
+            ) {
+
+                return "";
+            }
+
+
+            try {
+
+                return (
+                    endpoint +
+                    "?key=" +
+                    encodeURIComponent(
+                        key
+                    )
+                );
+
+            } catch (error) {
+
+                return "";
+            }
+        };
+
+
+    /* ========================================================
+       UPLOAD IMAGE TO RIDERX WORKER
+       ======================================================== */
+
+    Profile.uploadPhotoToWorker =
+        async function (
+            file
+        ) {
+
+            if (
+                !file
+            ) {
+
+                throw new Error(
+                    "No image selected."
+                );
+            }
+
+
+            /*
+             * Content type.
+             */
+
+            const contentType =
+                String(
+                    file.type ||
+                    ""
+                )
+                    .split(";")[0]
+                    .trim()
+                    .toLowerCase();
+
+
+            const allowedTypes = [
+
+                "image/jpeg",
+
+                "image/png",
+
+                "image/webp"
+
+            ];
+
+
+            if (
+                !allowedTypes.includes(
+                    contentType
+                )
+            ) {
+
+                throw new Error(
+                    "Profile photo must be JPG, PNG or WebP."
+                );
+            }
+
+
+            /*
+             * Size.
+             */
+
+            if (
+                file.size <= 0
+            ) {
+
+                throw new Error(
+                    "Selected image is empty."
+                );
+            }
+
+
+            if (
+                file.size >
+                Profile.config.maxImageSize
+            ) {
+
+                throw new Error(
+                    "Profile photo must be smaller than 2 MB."
+                );
+            }
+
+
+            const endpoint =
+                Profile.getStorageUploadEndpoint();
+
+
+            /*
+             * Filename.
+             */
+
+            const originalName =
+                String(
+                    file.name ||
+                    "profile-photo"
+                );
+
+
+            const safeName =
+                originalName
+                    .replace(
+                        /[^a-zA-Z0-9._-]/g,
+                        "_"
+                    )
+                    .slice(
+                        0,
+                        120
+                    ) ||
+                "profile-photo";
+
+
+            /*
+             * User-specific folder.
+             *
+             * Worker also sanitizes this path.
+             */
+
+            const uid =
+                Profile.state.userId ||
+                Profile.getUserId();
+
+
+            const pathPrefix =
+                uid
+                    ? (
+                        "riderx2/profiles/" +
+                        uid +
+                        "/"
+                    )
+                    : "riderx2/profiles/";
+
+
+            const uploadPath =
+                pathPrefix +
+                Date.now() +
+                "-" +
+                safeName;
+
+
+            /*
+             * Upload directly as binary body.
+             *
+             * DO NOT use FormData.
+             */
+
+            const response =
+                await fetch(
+                    endpoint,
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                contentType,
+
+                            "X-Filename":
+                                safeName,
+
+                            "X-Upload-Path":
+                                uploadPath
+                        },
+
+                        body:
+                            file
+                    }
+                );
+
+
+            /*
+             * Always read response as text first.
+             *
+             * This prevents JSON.parse errors when Cloudflare
+             * returns an HTML error page.
+             */
+
+            const raw =
+                await response.text();
+
+
+            let data;
+
+
+            try {
+
+                data =
+                    JSON.parse(
+                        raw
+                    );
+
+            } catch (error) {
+
+                throw new Error(
+                    "Storage server returned invalid response (" +
+                    response.status +
+                    ")."
+                );
+            }
+
+
+            if (
+                !response.ok ||
+                !data ||
+                data.ok !== true
+            ) {
+
+                const message =
+                    data?.error ||
+                    "Profile photo upload failed.";
+
+
+                throw new Error(
+                    message
+                );
+            }
+
+
+            /*
+             * Worker returns:
+             *
+             * key
+             * contentType
+             * size
+             * sha256
+             *
+             * Newer Worker versions may additionally return:
+             *
+             * url
+             * fileId
+             */
+
+            const key =
+                data.key ||
+                "";
+
+
+            if (
+                !key
+            ) {
+
+                throw new Error(
+                    "Storage upload succeeded but no file key was returned."
+                );
+            }
+
+
+            let photoURL =
+                data.url ||
+                data.publicUrl ||
+                data.downloadURL ||
+                "";
+
+
+            /*
+             * If Worker supplied a file URL, use it.
+             */
+
+            if (
+                !photoURL
+            ) {
+
+                photoURL =
+                    Profile.getStorageFileURL(
+                        key
+                    );
+            }
+
+
+            /*
+             * If no proxy URL exists, save the key.
+             *
+             * The render function will use the key only when
+             * a usable URL exists. This avoids accidentally
+             * displaying an invalid URL.
+             */
+
+            return {
+
+                ok:
+                    true,
+
+                key:
+                    key,
+
+                url:
+                    photoURL,
+
+                fileId:
+                    data.fileId ||
+                    "",
+
+                contentType:
+                    data.contentType ||
+                    contentType,
+
+                size:
+                    Number(
+                        data.size ||
+                        file.size
+                    ),
+
+                sha256:
+                    data.sha256 ||
+                    ""
+            };
+        };
+
+
+    /* ========================================================
+       PROFILE PHOTO
        ======================================================== */
 
     Profile.setPhoto =
@@ -1416,27 +1782,18 @@
             }
 
 
-            /*
-             * Check MIME type.
-             */
-
             if (
-                !Profile.config
-                    .allowedImageTypes
-                    .includes(
-                        file.type
-                    )
+                !file.type ||
+                !file.type.startsWith(
+                    "image/"
+                )
             ) {
 
                 throw new Error(
-                    "Please select a JPG, PNG or WebP image."
+                    "Please select an image."
                 );
             }
 
-
-            /*
-             * Check size.
-             */
 
             if (
                 file.size >
@@ -1449,16 +1806,6 @@
             }
 
 
-            if (
-                Profile.state.uploading
-            ) {
-
-                throw new Error(
-                    "Profile photo upload is already in progress."
-                );
-            }
-
-
             Profile.state.uploading =
                 true;
 
@@ -1466,319 +1813,189 @@
             try {
 
                 /*
-                 * User must be authenticated.
+                 * ------------------------------------------------
+                 * FIRST:
+                 * Upload to RiderX Cloudflare Worker → B2.
+                 * ------------------------------------------------
                  */
-
-                const userId =
-                    Profile.state.userId ||
-                    Profile.getUserId();
-
-
-                if (
-                    !userId
-                ) {
-
-                    throw new Error(
-                        "Please login before uploading a profile photo."
-                    );
-                }
-
-
-                /*
-                 * Create a unique filename.
-                 */
-
-                const extension =
-                    Profile.getImageExtension(
-                        file.type,
-                        file.name
-                    );
-
-
-                const filename =
-                    "profile-" +
-                    userId +
-                    "-" +
-                    Date.now() +
-                    "-" +
-                    crypto.randomUUID() +
-                    extension;
-
-
-                /*
-                 * RiderX Worker path.
-                 *
-                 * Keep profile images separate from
-                 * generic uploads.
-                 */
-
-                const uploadPath =
-                    "riderx2/profiles/" +
-                    userId +
-                    "/" +
-                    filename;
-
-
-                /*
-                 * Upload directly to Cloudflare Worker.
-                 *
-                 * Worker then uploads to Backblaze B2.
-                 */
-
-                const response =
-                    await fetch(
-                        Profile.config
-                            .storageUploadUrl,
-                        {
-
-                            method:
-                                "POST",
-
-                            headers: {
-
-                                "Content-Type":
-                                    file.type,
-
-                                "X-Filename":
-                                    filename,
-
-                                "X-Upload-Path":
-                                    uploadPath
-                            },
-
-                            body:
-                                file
-                        }
-                    );
-
-
-                /*
-                 * Worker response.
-                 */
-
-                const raw =
-                    await response.text();
-
-
-                let data;
-
 
                 try {
 
-                    data =
-                        raw
-                            ? JSON.parse(
-                                raw
-                            )
-                            : null;
-
-                } catch (error) {
-
-                    throw new Error(
-                        "Storage server returned invalid JSON."
-                    );
-                }
-
-
-                /*
-                 * HTTP error.
-                 */
-
-                if (
-                    !response.ok ||
-                    !data ||
-                    data.ok !== true
-                ) {
-
-                    const message =
-                        data?.error ||
-                        "Profile photo upload failed.";
-
-
-                    const details =
-                        data?.details ||
-                        data?.b2Response ||
-                        "";
-
-
-                    throw new Error(
-                        details
-                            ? message +
-                              " " +
-                              details
-                            : message
-                    );
-                }
-
-
-                /*
-                 * B2 upload succeeded.
-                 *
-                 * Worker currently returns:
-                 *
-                 * key
-                 * fileId
-                 * bucket
-                 * contentType
-                 * size
-                 * sha1
-                 *
-                 * A direct URL may also be returned by
-                 * future Worker versions.
-                 */
-
-                const photoKey =
-                    data.key ||
-                    uploadPath;
-
-
-                const photoFileId =
-                    data.fileId ||
-                    "";
-
-
-                /*
-                 * Prefer Worker-provided URL.
-                 *
-                 * This allows the Worker to later provide
-                 * signed/private URLs without changing
-                 * profile.js.
-                 */
-
-                let photoURL =
-                    data.url ||
-                    data.fileUrl ||
-                    data.downloadUrl ||
-                    "";
-
-
-                /*
-                 * If the Worker does not provide a URL,
-                 * preserve the existing Firebase user's
-                 * photo URL only when it exists.
-                 *
-                 * Do NOT save a B2 object key as an <img>
-                 * URL because it is not itself a browser URL.
-                 */
-
-                if (
-                    !photoURL
-                ) {
-
-                    const current =
-                        Profile.get(
-                            "photoURL"
+                    const upload =
+                        await Profile.uploadPhotoToWorker(
+                            file
                         );
 
 
                     if (
-                        current &&
-                        typeof current ===
-                            "string" &&
-                        /^https?:\/\//i.test(
-                            current
-                        )
+                        upload &&
+                        upload.ok
                     ) {
 
                         /*
-                         * Do not overwrite an existing
-                         * valid URL until Worker exposes
-                         * the B2 download URL.
+                         * Prefer URL.
                          */
 
-                        photoURL =
-                            current;
+                        const photoURL =
+                            upload.url ||
+                            "";
+
+
+                        /*
+                         * Save B2 key and metadata.
+                         *
+                         * If URL is available, use it.
+                         * If not, retain the previous URL instead
+                         * of replacing it with an invalid value.
+                         */
+
+                        const values = {
+
+                            photoKey:
+                                upload.key,
+
+                            photoFileId:
+                                upload.fileId ||
+                                "",
+
+                            photoURL:
+                                photoURL ||
+                                Profile.get(
+                                    "photoURL"
+                                ) ||
+                                Profile.config
+                                    .defaultAvatar
+                        };
+
+
+                        /*
+                         * Save profile remotely.
+                         */
+
+                        await Profile.update(
+                            values
+                        );
+
+
+                        /*
+                         * Keep local image preview/cache.
+                         *
+                         * This is only a local display cache.
+                         * The actual uploaded file is in B2.
+                         */
+
+                        try {
+
+                            const dataURL =
+                                await Profile.fileToDataURL(
+                                    file
+                                );
+
+
+                            localStorage.setItem(
+                                Profile.config
+                                    .imageStorageKey,
+                                dataURL
+                            );
+
+                        } catch (cacheError) {
+
+                            /*
+                             * Local cache is optional.
+                             */
+                        }
+
+
+                        return (
+                            photoURL ||
+                            upload.key
+                        );
                     }
+
+                } catch (storageError) {
+
+                    console.error(
+                        "RiderX B2 photo upload failed:",
+                        storageError
+                    );
+
+
+                    /*
+                     * Do NOT silently upload the same photo to
+                     * Firebase Storage.
+                     *
+                     * B2 is now the primary RiderX storage.
+                     *
+                     * We only use a local preview fallback.
+                     */
                 }
 
 
                 /*
-                 * Update profile metadata.
+                 * ------------------------------------------------
+                 * LOCAL FALLBACK
+                 * ------------------------------------------------
                  *
-                 * photoKey/fileId are always saved.
+                 * If B2 upload fails, do not pretend that the
+                 * upload succeeded remotely.
                  *
-                 * photoURL is saved only when an actual
-                 * browser URL was returned.
+                 * Save local preview only.
+                 * ------------------------------------------------
                  */
 
-                const updateData = {
-
-                    photoKey:
-                        photoKey,
-
-                    photoFileId:
-                        photoFileId,
-
-                    photoStorage:
-                        "Backblaze B2"
-                };
+                const dataURL =
+                    await Profile.fileToDataURL(
+                        file
+                    );
 
 
-                if (
-                    photoURL
-                ) {
+                try {
 
-                    updateData.photoURL =
-                        photoURL;
+                    localStorage.setItem(
+                        Profile.config
+                            .imageStorageKey,
+                        dataURL
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Could not save local profile image:",
+                        error
+                    );
                 }
 
-
-                /*
-                 * Save metadata to Firebase.
-                 */
 
                 await Profile.update(
-                    updateData
+                    {
+
+                        photoURL:
+                            dataURL
+
+                    },
+                    {
+
+                        remote:
+                            false
+                    }
                 );
 
 
                 /*
-                 * Re-render profile.
-                 */
-
-                Profile.render();
-
-
-                /*
-                 * Emit dedicated upload event.
+                 * Inform caller that this was only a local
+                 * fallback.
                  */
 
                 Profile.emit(
-                    "photo-uploaded",
+                    "photo-local-fallback",
                     {
-
                         profile:
-                            Profile.state.profile,
-
-                        key:
-                            photoKey,
-
-                        fileId:
-                            photoFileId,
-
-                        storage:
-                            "Backblaze B2",
-
-                        response:
-                            data
+                            Profile.state.profile
                     }
                 );
 
 
-                return (
-                    photoURL ||
-                    photoKey
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Backblaze B2 profile photo upload failed:",
-                    error
-                );
-
-
-                throw error;
+                return dataURL;
 
             } finally {
 
@@ -1789,85 +2006,48 @@
 
 
     /* ========================================================
-       IMAGE EXTENSION
-       ======================================================== */
-
-    Profile.getImageExtension =
-        function (
-            contentType,
-            filename
-        ) {
-
-            const map = {
-
-                "image/jpeg":
-                    ".jpg",
-
-                "image/png":
-                    ".png",
-
-                "image/webp":
-                    ".webp"
-            };
-
-
-            if (
-                map[contentType]
-            ) {
-
-                return map[
-                    contentType
-                ];
-            }
-
-
-            const original =
-                String(
-                    filename ||
-                    ""
-                );
-
-
-            const match =
-                original.match(
-                    /\.[a-zA-Z0-9]+$/
-                );
-
-
-            if (
-                match
-            ) {
-
-                return match[0]
-                    .toLowerCase();
-            }
-
-
-            return ".jpg";
-        };
-
-
-    /* ========================================================
-       LEGACY STORAGE METHOD
+       GET FIREBASE STORAGE
        ========================================================
-       Kept only for compatibility with older RiderX code.
-
-       Firebase Storage is intentionally NOT used anymore
-       for profile photos.
+       Kept for backward compatibility with old RiderX code.
+       It is NOT used by setPhoto().
        ======================================================== */
 
     Profile.getStorage =
         function () {
+
+            try {
+
+                if (
+                    window.firebase &&
+                    typeof firebase.storage ===
+                    "function"
+                ) {
+
+                    return firebase.storage();
+                }
+
+            } catch (error) {}
+
+
+            try {
+
+                if (
+                    RX.firebase &&
+                    RX.firebase.storage
+                ) {
+
+                    return RX.firebase.storage;
+                }
+
+            } catch (error) {}
+
 
             return null;
         };
 
 
     /* ========================================================
-       LEGACY FILE TO DATA URL
-       ========================================================
-       Kept as a compatibility helper but NOT used for
-       profile photo uploads.
+       FILE TO DATA URL
        ======================================================== */
 
     Profile.fileToDataURL =
@@ -1880,20 +2060,6 @@
                     resolve,
                     reject
                 ) {
-
-                    if (
-                        !file
-                    ) {
-
-                        reject(
-                            new Error(
-                                "No file provided."
-                            )
-                        );
-
-                        return;
-                    }
-
 
                     const reader =
                         new FileReader();
@@ -1926,6 +2092,27 @@
 
 
     /* ========================================================
+       GET CACHED LOCAL IMAGE
+       ======================================================== */
+
+    Profile.getLocalImage =
+        function () {
+
+            try {
+
+                return localStorage.getItem(
+                    Profile.config
+                        .imageStorageKey
+                );
+
+            } catch (error) {
+
+                return null;
+            }
+        };
+
+
+    /* ========================================================
        RATING
        ======================================================== */
 
@@ -1947,13 +2134,28 @@
         ) {
 
             rating =
+                Number(
+                    rating
+                );
+
+
+            if (
+                !Number.isFinite(
+                    rating
+                )
+            ) {
+
+                rating =
+                    0;
+            }
+
+
+            rating =
                 Math.max(
                     0,
                     Math.min(
                         5,
-                        Number(
-                            rating
-                        ) || 0
+                        rating
                     )
                 );
 
@@ -2005,20 +2207,19 @@
 
             if (
                 Profile.state.role !==
-                    "rider"
+                "rider"
             ) {
 
                 return false;
             }
 
 
-            const vehicle =
-                {
+            const vehicle = {
 
-                    ...Profile.getVehicle(),
+                ...Profile.getVehicle(),
 
-                    ...(values || {})
-                };
+                ...(values || {})
+            };
 
 
             return Profile.update(
@@ -2050,16 +2251,19 @@
             }
 
 
-            const fields =
-                [
+            const fields = [
 
-                    "name",
-                    "phone",
-                    "email",
-                    "city",
-                    "photoURL"
+                "name",
 
-                ];
+                "phone",
+
+                "email",
+
+                "city",
+
+                "photoURL"
+
+            ];
 
 
             let completed =
@@ -2086,7 +2290,7 @@
 
             if (
                 Profile.state.role ===
-                    "rider"
+                "rider"
             ) {
 
                 const vehicle =
@@ -2169,7 +2373,7 @@
 
                         if (
                             input.type ===
-                                "checkbox"
+                            "checkbox"
                         ) {
 
                             data[name] =
@@ -2234,9 +2438,9 @@
 
                         if (
                             value ===
-                                undefined ||
+                            undefined ||
                             value ===
-                                null
+                            null
                         ) {
 
                             value =
@@ -2348,11 +2552,36 @@
 
             /*
              * Avatar.
+             *
+             * Priority:
+             *
+             * 1. photoURL
+             * 2. local cached image
+             * 3. default avatar
              */
 
-            const image =
+            let image =
                 profile.photoURL ||
-                Profile.config.defaultAvatar;
+                "";
+
+
+            if (
+                !image
+            ) {
+
+                image =
+                    Profile.getLocalImage() ||
+                    "";
+            }
+
+
+            if (
+                !image
+            ) {
+
+                image =
+                    Profile.config.defaultAvatar;
+            }
 
 
             document
@@ -2366,7 +2595,7 @@
 
                         if (
                             element.tagName ===
-                                "IMG"
+                            "IMG"
                         ) {
 
                             element.src =
@@ -2376,26 +2605,22 @@
                                 profile.name ||
                                 "RiderX";
 
-                            element.onerror =
-                                function () {
-
-                                    if (
-                                        this.src !==
-                                        Profile.config
-                                            .defaultAvatar
-                                    ) {
-
-                                        this.src =
-                                            Profile.config
-                                                .defaultAvatar;
-                                    }
-                                };
+                            element.loading =
+                                "lazy";
 
                         } else {
 
                             element.style
                                 .backgroundImage =
-                                `url("${image}")`;
+                                'url("' +
+                                String(
+                                    image
+                                )
+                                    .replace(
+                                        /"/g,
+                                        '\\"'
+                                    ) +
+                                '")';
                         }
                     }
                 );
@@ -2490,26 +2715,6 @@
                             "customer";
                     }
                 );
-
-
-            /*
-             * Upload state.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-profile-photo-uploading]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.hidden =
-                            !Profile.state
-                                .uploading;
-                    }
-                );
         };
 
 
@@ -2555,27 +2760,34 @@
 
                     if (
                         Profile.state.role ===
-                            "rider"
+                        "rider"
                     ) {
 
                         const vehicle =
                             Profile.getVehicle();
 
 
-                        const vehicleFields =
-                            [
+                        const vehicleFields = [
 
-                                "type",
-                                "brand",
-                                "model",
-                                "color",
-                                "number",
-                                "year",
-                                "licenseNumber",
-                                "rcNumber",
-                                "insuranceNumber"
+                            "type",
 
-                            ];
+                            "brand",
+
+                            "model",
+
+                            "color",
+
+                            "number",
+
+                            "year",
+
+                            "licenseNumber",
+
+                            "rcNumber",
+
+                            "insuranceNumber"
+
+                        ];
 
 
                         vehicleFields.forEach(
@@ -2585,7 +2797,7 @@
 
                                 if (
                                     data[field] !==
-                                        undefined
+                                    undefined
                                 ) {
 
                                     vehicle[field] =
@@ -2653,9 +2865,6 @@
 
                     try {
 
-                        Profile.render();
-
-
                         const url =
                             await Profile.setPhoto(
                                 input.files[0]
@@ -2669,32 +2878,45 @@
                             Profile.render();
 
 
+                            /*
+                             * If URL is a data URL, this was
+                             * local fallback.
+                             */
+
+                            const isLocal =
+                                String(
+                                    url
+                                ).startsWith(
+                                    "data:"
+                                );
+
+
                             Profile.showMessage(
                                 null,
-                                "Profile photo uploaded successfully."
+                                isLocal
+                                    ? "Photo saved locally. Cloud storage upload failed."
+                                    : "Profile photo uploaded successfully."
                             );
                         }
 
                     } catch (error) {
 
                         console.error(
-                            "Profile photo upload failed:",
+                            "Profile photo error:",
                             error
                         );
 
 
                         Profile.showMessage(
                             null,
-                            error?.message ||
-                            "Unable to upload profile photo."
+                            error.message ||
+                            "Unable to update profile photo."
                         );
 
                     } finally {
 
                         input.value =
                             "";
-
-                        Profile.render();
                     }
                 }
             );
@@ -2777,7 +2999,7 @@
                 if (
                     RX.auth &&
                     typeof RX.auth.logout ===
-                        "function"
+                    "function"
                 ) {
 
                     await RX.auth.logout();
@@ -2799,7 +3021,7 @@
                 if (
                     window.firebase &&
                     typeof firebase.auth ===
-                        "function"
+                    "function"
                 ) {
 
                     await firebase.auth()
@@ -2875,7 +3097,7 @@
             } catch (error) {
 
                 console.warn(
-                    "Profile event emit failed:",
+                    "Profile event failed:",
                     error
                 );
             }
@@ -2930,10 +3152,83 @@
                         );
 
 
+                    if (
+                        !form
+                    ) {
+
+                        Profile.showMessage(
+                            null,
+                            "Profile form not found."
+                        );
+
+                        return;
+                    }
+
+
                     const data =
                         Profile.collectForm(
                             form
                         );
+
+
+                    /*
+                     * Rider vehicle fields.
+                     */
+
+                    if (
+                        Profile.state.role ===
+                        "rider"
+                    ) {
+
+                        const vehicle =
+                            Profile.getVehicle();
+
+
+                        const vehicleFields = [
+
+                            "type",
+
+                            "brand",
+
+                            "model",
+
+                            "color",
+
+                            "number",
+
+                            "year",
+
+                            "licenseNumber",
+
+                            "rcNumber",
+
+                            "insuranceNumber"
+
+                        ];
+
+
+                        vehicleFields.forEach(
+                            function (
+                                field
+                            ) {
+
+                                if (
+                                    data[field] !==
+                                    undefined
+                                ) {
+
+                                    vehicle[field] =
+                                        data[field];
+
+                                    delete data[field];
+                                }
+                            }
+                        );
+
+
+                        data.vehicle =
+                            vehicle;
+                    }
 
 
                     const success =
@@ -3117,7 +3412,7 @@
             } catch (error) {
 
                 console.error(
-                    "RiderX profile initialization failed:",
+                    "Profile initialization load failed:",
                     error
                 );
             }
@@ -3130,7 +3425,7 @@
 
 
             console.log(
-                "RiderX profile.js loaded with Backblaze B2 storage."
+                "RiderX profile.js loaded. B2 storage enabled."
             );
         };
 
@@ -3141,7 +3436,7 @@
 
     if (
         document.readyState ===
-            "loading"
+        "loading"
     ) {
 
         document.addEventListener(
