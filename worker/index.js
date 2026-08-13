@@ -803,7 +803,7 @@ async function uploadToB2(
                     },
 
                     body:
-                        body
+                        body.buffer
                 }
             );
     } catch (error) {
