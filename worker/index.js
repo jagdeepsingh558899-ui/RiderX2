@@ -30,9 +30,6 @@
  * GET
  *   /storage-test
  *
- * Everything else:
- *   Cloudflare Assets
- *
  * =========================================================
  */
 
@@ -107,8 +104,11 @@ async function sha256Hex(data) {
 
     if (data instanceof ArrayBuffer) {
         buffer = data;
-    } else if (data instanceof Uint8Array) {
-        buffer = data.buffer;
+    } else if (ArrayBuffer.isView(data)) {
+        buffer = data.buffer.slice(
+            data.byteOffset,
+            data.byteOffset + data.byteLength
+        );
     } else {
         buffer =
             await new Response(data).arrayBuffer();
@@ -409,11 +409,43 @@ async function uploadToB2(
 
     /* -------------------------------------------------------
      * READ BODY
+     *
+     * IMPORTANT:
+     * Convert request body into Uint8Array so the exact
+     * payload bytes and payload length are preserved.
      * ----------------------------------------------------- */
 
-    const body =
-        await request.arrayBuffer();
+    let body;
 
+    try {
+        const arrayBuffer =
+            await request.arrayBuffer();
+
+        body =
+            new Uint8Array(
+                arrayBuffer
+            );
+    } catch (error) {
+        return jsonResponse(
+            {
+                ok: false,
+
+                error:
+                    "Could not read upload body.",
+
+                details:
+                    error?.message ||
+                    String(error)
+            },
+            400,
+            origin
+        );
+    }
+
+
+    /* -------------------------------------------------------
+     * EMPTY BODY CHECK
+     * ----------------------------------------------------- */
 
     if (!body.byteLength) {
         return jsonResponse(
@@ -596,6 +628,10 @@ async function uploadToB2(
 
     /* -------------------------------------------------------
      * CANONICAL HEADERS
+     *
+     * Content-Length is deliberately NOT included in the
+     * signed headers. It is supplied to the HTTP request
+     * itself so B2 receives the exact payload size.
      * ----------------------------------------------------- */
 
     const canonicalHeaders =
@@ -731,6 +767,11 @@ async function uploadToB2(
 
     /* -------------------------------------------------------
      * SEND TO B2
+     *
+     * IMPORTANT FIX:
+     * Explicit Content-Length prevents the B2 S3 API from
+     * receiving a request whose declared/streamed body length
+     * does not match the actual payload.
      * ----------------------------------------------------- */
 
     let b2Response;
@@ -749,6 +790,11 @@ async function uploadToB2(
                         "Content-Type":
                             contentType,
 
+                        "Content-Length":
+                            String(
+                                body.byteLength
+                            ),
+
                         "X-Amz-Content-Sha256":
                             payloadHash,
 
@@ -756,7 +802,8 @@ async function uploadToB2(
                             amzDate
                     },
 
-                    body
+                    body:
+                        body
                 }
             );
     } catch (error) {
@@ -1223,8 +1270,10 @@ async function uploadFile() {
         } catch (error) {
             data = {
                 ok: false,
+
                 error:
                     "Worker returned invalid JSON.",
+
                 raw:
                     raw
             };
