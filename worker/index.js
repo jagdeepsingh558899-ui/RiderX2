@@ -3,22 +3,20 @@
 /*
  * =========================================================
  * RIDERX2 — CLOUDFLARE WORKER + BACKBLAZE B2
- * FINAL UPLOAD VERSION
  * =========================================================
  *
- * CLOUDFLARE:
+ * BACKBLAZE B2 NATIVE API UPLOAD
  *
- * Secrets:
+ * CLOUDFLARE SECRETS:
+ *
  *   B2_APPLICATION_KEY_ID
  *   B2_APPLICATION_KEY
  *
- * Variables:
- *   B2_BUCKET
- *   B2_ENDPOINT
+ * CLOUDFLARE VARIABLES:
  *
- * Example:
- *   B2_BUCKET   = riderx2-prod
- *   B2_ENDPOINT = https://s3.us-east-005.backblazeb2.com
+ *   B2_BUCKET
+ *
+ * B2_ENDPOINT is no longer required for uploads.
  *
  * ROUTES:
  *
@@ -39,17 +37,19 @@
  * CONFIGURATION
  * ========================================================= */
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES =
+    10 * 1024 * 1024;
 
-const ALLOWED_CONTENT_TYPES = new Set([
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "application/pdf"
-]);
+const ALLOWED_CONTENT_TYPES =
+    new Set([
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/pdf"
+    ]);
 
-const B2_REGION = "us-east-005";
-const B2_SERVICE = "s3";
+const B2_AUTH_URL =
+    "https://api.backblazeb2.com/b2api/v2/b2_authorize_account";
 
 
 /* =========================================================
@@ -59,7 +59,8 @@ const B2_SERVICE = "s3";
 function corsHeaders(origin = "*") {
 
     return {
-        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Origin":
+            origin,
 
         "Access-Control-Allow-Methods":
             "GET,POST,OPTIONS",
@@ -68,10 +69,7 @@ function corsHeaders(origin = "*") {
             "Content-Type, Authorization, X-Filename, X-Upload-Path",
 
         "Access-Control-Max-Age":
-            "86400",
-
-        "Vary":
-            "Origin"
+            "86400"
     };
 }
 
@@ -102,198 +100,12 @@ function jsonResponse(
                 "Cache-Control":
                     "no-store",
 
-                ...corsHeaders(origin)
+                ...corsHeaders(
+                    origin
+                )
             }
         }
     );
-}
-
-
-/* =========================================================
- * SHA-256
- * ========================================================= */
-
-async function sha256Hex(data) {
-
-    let buffer;
-
-    if (data instanceof ArrayBuffer) {
-
-        buffer = data;
-
-    } else if (
-        ArrayBuffer.isView(data)
-    ) {
-
-        buffer =
-            data.buffer.slice(
-                data.byteOffset,
-                data.byteOffset +
-                    data.byteLength
-            );
-
-    } else {
-
-        buffer =
-            await new Response(
-                data
-            ).arrayBuffer();
-    }
-
-
-    const hash =
-        await crypto.subtle.digest(
-            "SHA-256",
-            buffer
-        );
-
-
-    return Array.from(
-        new Uint8Array(hash)
-    )
-        .map(
-            byte =>
-                byte
-                    .toString(16)
-                    .padStart(2, "0")
-        )
-        .join("");
-}
-
-
-/* =========================================================
- * HMAC-SHA256
- * ========================================================= */
-
-async function hmacSha256(
-    key,
-    message
-) {
-
-    const cryptoKey =
-        await crypto.subtle.importKey(
-            "raw",
-            key,
-            {
-                name:
-                    "HMAC",
-
-                hash:
-                    "SHA-256"
-            },
-            false,
-            ["sign"]
-        );
-
-
-    const signature =
-        await crypto.subtle.sign(
-            "HMAC",
-            cryptoKey,
-            new TextEncoder()
-                .encode(message)
-        );
-
-
-    return new Uint8Array(
-        signature
-    );
-}
-
-
-/* =========================================================
- * BYTES TO HEX
- * ========================================================= */
-
-function bytesToHex(bytes) {
-
-    return Array.from(
-        bytes
-    )
-        .map(
-            byte =>
-                byte
-                    .toString(16)
-                    .padStart(2, "0")
-        )
-        .join("");
-}
-
-
-/* =========================================================
- * AWS SIGNING KEY
- * ========================================================= */
-
-async function getSignatureKey(
-    secretKey,
-    dateStamp,
-    region,
-    service
-) {
-
-    const encoder =
-        new TextEncoder();
-
-
-    const kDate =
-        await hmacSha256(
-            encoder.encode(
-                "AWS4" +
-                secretKey
-            ),
-            dateStamp
-        );
-
-
-    const kRegion =
-        await hmacSha256(
-            kDate,
-            region
-        );
-
-
-    const kService =
-        await hmacSha256(
-            kRegion,
-            service
-        );
-
-
-    const kSigning =
-        await hmacSha256(
-            kService,
-            "aws4_request"
-        );
-
-
-    return kSigning;
-}
-
-
-/* =========================================================
- * AWS URI ENCODING
- * ========================================================= */
-
-function encodePath(path) {
-
-    return String(path)
-        .split("/")
-        .map(
-            part =>
-                encodeURIComponent(
-                    part
-                )
-                .replace(
-                    /[!'()*]/g,
-                    character =>
-                        "%" +
-                        character
-                            .charCodeAt(0)
-                            .toString(16)
-                            .toUpperCase()
-                )
-        )
-        .join("/");
 }
 
 
@@ -356,6 +168,40 @@ function sanitizeObjectPath(
 
 
 /* =========================================================
+ * SHA-1
+ *
+ * Backblaze Native Upload API requires SHA-1.
+ * ========================================================= */
+
+async function sha1Hex(
+    data
+) {
+
+    const hash =
+        await crypto.subtle.digest(
+            "SHA-1",
+            data
+        );
+
+    return Array.from(
+        new Uint8Array(
+            hash
+        )
+    )
+        .map(
+            byte =>
+                byte
+                    .toString(16)
+                    .padStart(
+                        2,
+                        "0"
+                    )
+        )
+        .join("");
+}
+
+
+/* =========================================================
  * B2 CONFIGURATION
  * ========================================================= */
 
@@ -367,7 +213,6 @@ function getB2Configuration(
 
 
     if (
-        !env ||
         !env.B2_APPLICATION_KEY_ID
     ) {
 
@@ -378,7 +223,6 @@ function getB2Configuration(
 
 
     if (
-        !env ||
         !env.B2_APPLICATION_KEY
     ) {
 
@@ -389,23 +233,11 @@ function getB2Configuration(
 
 
     if (
-        !env ||
         !env.B2_BUCKET
     ) {
 
         missing.push(
             "B2_BUCKET"
-        );
-    }
-
-
-    if (
-        !env ||
-        !env.B2_ENDPOINT
-    ) {
-
-        missing.push(
-            "B2_ENDPOINT"
         );
     }
 
@@ -420,141 +252,432 @@ function getB2Configuration(
 
 
 /* =========================================================
- * NORMALIZE B2 ENDPOINT
+ * B2 AUTHORIZE ACCOUNT
  * ========================================================= */
 
-function getB2Endpoint(
+async function authorizeB2(
     env
 ) {
 
-    const raw =
-        String(
-            env.B2_ENDPOINT ||
-            ""
-        )
-        .trim();
+    const credentials =
+        env.B2_APPLICATION_KEY_ID +
+        ":" +
+        env.B2_APPLICATION_KEY;
 
 
-    if (!raw) {
-
-        throw new Error(
-            "B2_ENDPOINT is empty."
+    const basicAuth =
+        btoa(
+            credentials
         );
-    }
 
 
-    let url;
+    let response;
 
     try {
 
-        url =
-            new URL(raw);
+        response =
+            await fetch(
+                B2_AUTH_URL,
+                {
+                    method:
+                        "GET",
+
+                    headers: {
+                        "Authorization":
+                            "Basic " +
+                            basicAuth
+                    }
+                }
+            );
 
     } catch (error) {
 
         throw new Error(
-            "B2_ENDPOINT is not a valid URL."
+            "Could not connect to Backblaze B2 authorization API: " +
+            (
+                error?.message ||
+                String(error)
+            )
+        );
+    }
+
+
+    const text =
+        await response.text();
+
+
+    let data;
+
+    try {
+
+        data =
+            JSON.parse(
+                text
+            );
+
+    } catch (error) {
+
+        throw new Error(
+            "Backblaze authorization returned invalid JSON: " +
+            text.slice(
+                0,
+                1000
+            )
+        );
+    }
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Backblaze authorization failed (" +
+            response.status +
+            "): " +
+            JSON.stringify(
+                data
+            )
         );
     }
 
 
     if (
-        url.protocol !==
-        "https:"
+        !data.authorizationToken ||
+        !data.apiUrl
     ) {
 
         throw new Error(
-            "B2_ENDPOINT must use HTTPS."
+            "Backblaze authorization response is incomplete."
         );
     }
 
 
-    return {
-        base:
-            url.origin,
-
-        host:
-            url.host
-    };
+    return data;
 }
 
 
 /* =========================================================
- * READ REQUEST BODY
+ * FIND BUCKET ID
  * ========================================================= */
 
-async function readUploadBody(
-    request
+async function findBucketId(
+    auth,
+    bucketName
 ) {
 
-    const contentLengthHeader =
-        request.headers.get(
-            "Content-Length"
+    const response =
+        await fetch(
+            auth.apiUrl +
+            "/b2api/v2/b2_list_buckets",
+            {
+                method:
+                    "POST",
+
+                headers: {
+                    "Authorization":
+                        auth.authorizationToken,
+
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+                        accountId:
+                            auth.accountId,
+
+                        bucketName:
+                            bucketName
+                    })
+            }
         );
 
 
+    const text =
+        await response.text();
+
+
+    let data;
+
+    try {
+
+        data =
+            JSON.parse(
+                text
+            );
+
+    } catch (error) {
+
+        throw new Error(
+            "Backblaze bucket lookup returned invalid JSON: " +
+            text.slice(
+                0,
+                1000
+            )
+        );
+    }
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Backblaze bucket lookup failed (" +
+            response.status +
+            "): " +
+            JSON.stringify(
+                data
+            )
+        );
+    }
+
+
+    const bucket =
+        Array.isArray(
+            data.buckets
+        )
+            ? data.buckets.find(
+                item =>
+                    item &&
+                    item.bucketName ===
+                        bucketName
+            )
+            : null;
+
+
+    if (!bucket) {
+
+        throw new Error(
+            "Backblaze bucket not found: " +
+            bucketName
+        );
+    }
+
+
+    if (!bucket.bucketId) {
+
+        throw new Error(
+            "Backblaze bucket ID is missing."
+        );
+    }
+
+
+    return bucket.bucketId;
+}
+
+
+/* =========================================================
+ * GET B2 UPLOAD URL
+ * ========================================================= */
+
+async function getUploadUrl(
+    auth,
+    bucketId
+) {
+
+    const response =
+        await fetch(
+            auth.apiUrl +
+            "/b2api/v2/b2_get_upload_url",
+            {
+                method:
+                    "POST",
+
+                headers: {
+                    "Authorization":
+                        auth.authorizationToken,
+
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+                        bucketId:
+                            bucketId
+                    })
+            }
+        );
+
+
+    const text =
+        await response.text();
+
+
+    let data;
+
+    try {
+
+        data =
+            JSON.parse(
+                text
+            );
+
+    } catch (error) {
+
+        throw new Error(
+            "Backblaze upload URL API returned invalid JSON: " +
+            text.slice(
+                0,
+                1000
+            )
+        );
+    }
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Backblaze upload URL request failed (" +
+            response.status +
+            "): " +
+            JSON.stringify(
+                data
+            )
+        );
+    }
+
+
     if (
-        contentLengthHeader
+        !data.uploadUrl ||
+        !data.authorizationToken
     ) {
 
-        const declaredLength =
-            Number(
-                contentLengthHeader
+        throw new Error(
+            "Backblaze upload URL response is incomplete."
+        );
+    }
+
+
+    return data;
+}
+
+
+/* =========================================================
+ * UPLOAD FILE TO B2
+ * ========================================================= */
+
+async function uploadFileToB2(
+    uploadInfo,
+    filename,
+    contentType,
+    body,
+    sha1
+) {
+
+    /*
+     * B2 Native API expects the file name
+     * URL encoded inside X-Bz-File-Name.
+     */
+
+    const encodedFilename =
+        encodeURIComponent(
+            filename
+        );
+
+
+    let response;
+
+    try {
+
+        response =
+            await fetch(
+                uploadInfo.uploadUrl,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Authorization":
+                            uploadInfo.authorizationToken,
+
+                        "X-Bz-File-Name":
+                            encodedFilename,
+
+                        "Content-Type":
+                            contentType,
+
+                        "Content-Length":
+                            String(
+                                body.byteLength
+                            ),
+
+                        "X-Bz-Content-Sha1":
+                            sha1
+                    },
+
+                    body:
+                        body
+                }
             );
 
+    } catch (error) {
 
-        if (
-            Number.isFinite(
-                declaredLength
-            ) &&
-            declaredLength >
-                MAX_UPLOAD_BYTES
-        ) {
+        throw new Error(
+            "Could not connect to Backblaze B2 upload server: " +
+            (
+                error?.message ||
+                String(error)
+            )
+        );
+    }
 
-            throw new Error(
-                "File is too large."
-            );
+
+    const text =
+        await response.text();
+
+
+    let data = null;
+
+    if (text) {
+
+        try {
+
+            data =
+                JSON.parse(
+                    text
+                );
+
+        } catch (error) {
+
+            data = {
+                raw:
+                    text.slice(
+                        0,
+                        2000
+                    )
+            };
         }
     }
 
 
-    const arrayBuffer =
-        await request.arrayBuffer();
+    if (!response.ok) {
+
+        const error =
+            new Error(
+                "Backblaze B2 upload failed."
+            );
 
 
-    const body =
-        new Uint8Array(
-            arrayBuffer
-        );
+        error.b2Status =
+            response.status;
+
+        error.b2StatusText =
+            response.statusText;
+
+        error.b2Response =
+            data ||
+            text;
 
 
-    if (
-        body.byteLength === 0
-    ) {
-
-        throw new Error(
-            "Upload body is empty."
-        );
+        throw error;
     }
 
 
-    if (
-        body.byteLength >
-        MAX_UPLOAD_BYTES
-    ) {
-
-        throw new Error(
-            "File is too large."
-        );
-    }
-
-
-    return body;
+    return data;
 }
 
 
 /* =========================================================
- * BACKBLAZE B2 UPLOAD
+ * B2 UPLOAD ROUTE
  * ========================================================= */
 
 async function uploadToB2(
@@ -579,8 +702,7 @@ async function uploadToB2(
 
         return jsonResponse(
             {
-                ok:
-                    false,
+                ok: false,
 
                 error:
                     "B2 storage configuration is incomplete.",
@@ -620,8 +742,7 @@ async function uploadToB2(
 
         return jsonResponse(
             {
-                ok:
-                    false,
+                ok: false,
 
                 error:
                     "File type is not allowed.",
@@ -641,59 +762,86 @@ async function uploadToB2(
 
 
     /* -------------------------------------------------------
-     * READ BODY
+     * READ REQUEST BODY
      * ----------------------------------------------------- */
 
     let body;
 
+
     try {
 
+        const arrayBuffer =
+            await request.arrayBuffer();
+
+
         body =
-            await readUploadBody(
-                request
+            new Uint8Array(
+                arrayBuffer
             );
 
     } catch (error) {
 
-        const message =
-            error?.message ||
-            String(error);
+        return jsonResponse(
+            {
+                ok: false,
+
+                error:
+                    "Could not read upload body.",
+
+                details:
+                    error?.message ||
+                    String(error)
+            },
+            400,
+            origin
+        );
+    }
 
 
-        if (
-            message ===
-            "File is too large."
-        ) {
+    /* -------------------------------------------------------
+     * EMPTY BODY
+     * ----------------------------------------------------- */
 
-            return jsonResponse(
-                {
-                    ok:
-                        false,
-
-                    error:
-                        message,
-
-                    maxBytes:
-                        MAX_UPLOAD_BYTES,
-
-                    maxMB:
-                        10
-                },
-                413,
-                origin
-            );
-        }
-
+    if (
+        body.byteLength === 0
+    ) {
 
         return jsonResponse(
             {
-                ok:
-                    false,
+                ok: false,
 
                 error:
-                    message
+                    "Upload body is empty."
             },
             400,
+            origin
+        );
+    }
+
+
+    /* -------------------------------------------------------
+     * MAX FILE SIZE
+     * ----------------------------------------------------- */
+
+    if (
+        body.byteLength >
+        MAX_UPLOAD_BYTES
+    ) {
+
+        return jsonResponse(
+            {
+                ok: false,
+
+                error:
+                    "File is too large.",
+
+                maxBytes:
+                    MAX_UPLOAD_BYTES,
+
+                maxMB:
+                    10
+            },
+            413,
             origin
         );
     }
@@ -754,323 +902,52 @@ async function uploadToB2(
     }
 
 
-    /* -------------------------------------------------------
-     * B2 ENDPOINT
-     * ----------------------------------------------------- */
+    /*
+     * B2 Native API treats the whole file name
+     * as the object key.
+     */
 
-    let endpoint;
-
-    try {
-
-        endpoint =
-            getB2Endpoint(
-                env
-            );
-
-    } catch (error) {
-
-        return jsonResponse(
-            {
-                ok:
-                    false,
-
-                error:
-                    error?.message ||
-                    String(error)
-            },
-            500,
-            origin
-        );
-    }
+    const finalFilename =
+        objectPath;
 
 
     /* -------------------------------------------------------
-     * B2 BUCKET
+     * SHA-1
      * ----------------------------------------------------- */
 
-    const bucket =
-        String(
-            env.B2_BUCKET ||
-            ""
-        )
-        .trim();
-
-
-    if (
-        !bucket
-    ) {
-
-        return jsonResponse(
-            {
-                ok:
-                    false,
-
-                error:
-                    "B2_BUCKET is empty."
-            },
-            500,
-            origin
-        );
-    }
-
-
-    /* -------------------------------------------------------
-     * PAYLOAD HASH
-     * ----------------------------------------------------- */
-
-    const payloadHash =
-        await sha256Hex(
+    const sha1 =
+        await sha1Hex(
             body
         );
 
 
     /* -------------------------------------------------------
-     * AWS DATE
+     * AUTHORIZE B2
      * ----------------------------------------------------- */
 
-    const now =
-        new Date();
-
-
-    const amzDate =
-        now
-            .toISOString()
-            .replace(
-                /[:-]|\.\d{3}/g,
-                ""
-            );
-
-
-    const dateStamp =
-        amzDate.slice(
-            0,
-            8
-        );
-
-
-    /* -------------------------------------------------------
-     * CANONICAL URI
-     * ----------------------------------------------------- */
-
-    const canonicalUri =
-        "/" +
-        encodePath(
-            bucket
-        ) +
-        "/" +
-        encodePath(
-            objectPath
-        );
-
-
-    /* -------------------------------------------------------
-     * CANONICAL HEADERS
-     *
-     * IMPORTANT:
-     *
-     * We sign only headers that we control and send.
-     *
-     * Content-Length is intentionally NOT manually set.
-     * Cloudflare fetch handles the request body framing.
-     * ----------------------------------------------------- */
-
-    const canonicalHeaders =
-        "content-type:" +
-        contentType +
-        "\n" +
-
-        "host:" +
-        endpoint.host +
-        "\n" +
-
-        "x-amz-content-sha256:" +
-        payloadHash +
-        "\n" +
-
-        "x-amz-date:" +
-        amzDate +
-        "\n";
-
-
-    const signedHeaders =
-        "content-type;" +
-        "host;" +
-        "x-amz-content-sha256;" +
-        "x-amz-date";
-
-
-    /* -------------------------------------------------------
-     * CANONICAL REQUEST
-     * ----------------------------------------------------- */
-
-    const canonicalRequest =
-        "PUT\n" +
-        canonicalUri +
-        "\n" +
-        "\n" +
-        canonicalHeaders +
-        "\n" +
-        signedHeaders +
-        "\n" +
-        payloadHash;
-
-
-    /* -------------------------------------------------------
-     * CREDENTIAL SCOPE
-     * ----------------------------------------------------- */
-
-    const credentialScope =
-        dateStamp +
-        "/" +
-        B2_REGION +
-        "/" +
-        B2_SERVICE +
-        "/aws4_request";
-
-
-    /* -------------------------------------------------------
-     * CANONICAL REQUEST HASH
-     * ----------------------------------------------------- */
-
-    const canonicalRequestHash =
-        await sha256Hex(
-            canonicalRequest
-        );
-
-
-    /* -------------------------------------------------------
-     * STRING TO SIGN
-     * ----------------------------------------------------- */
-
-    const stringToSign =
-        "AWS4-HMAC-SHA256\n" +
-        amzDate +
-        "\n" +
-        credentialScope +
-        "\n" +
-        canonicalRequestHash;
-
-
-    /* -------------------------------------------------------
-     * SIGNING KEY
-     * ----------------------------------------------------- */
-
-    const signingKey =
-        await getSignatureKey(
-            env.B2_APPLICATION_KEY,
-            dateStamp,
-            B2_REGION,
-            B2_SERVICE
-        );
-
-
-    /* -------------------------------------------------------
-     * SIGNATURE
-     * ----------------------------------------------------- */
-
-    const signatureBytes =
-        await hmacSha256(
-            signingKey,
-            stringToSign
-        );
-
-
-    const signature =
-        bytesToHex(
-            signatureBytes
-        );
-
-
-    /* -------------------------------------------------------
-     * AUTHORIZATION
-     * ----------------------------------------------------- */
-
-    const authorization =
-        "AWS4-HMAC-SHA256 " +
-        "Credential=" +
-        env.B2_APPLICATION_KEY_ID +
-        "/" +
-        credentialScope +
-        ", " +
-        "SignedHeaders=" +
-        signedHeaders +
-        ", " +
-        "Signature=" +
-        signature;
-
-
-    /* -------------------------------------------------------
-     * UPLOAD URL
-     * ----------------------------------------------------- */
-
-    const uploadUrl =
-        endpoint.base +
-        "/" +
-        encodePath(
-            bucket
-        ) +
-        "/" +
-        encodePath(
-            objectPath
-        );
-
-
-    /* -------------------------------------------------------
-     * SEND TO B2
-     *
-     * IMPORTANT:
-     *
-     * DO NOT manually set Content-Length.
-     *
-     * The exact Uint8Array is passed as the request body.
-     * ----------------------------------------------------- */
-
-    let b2Response;
-
+    let auth;
 
     try {
 
-        b2Response =
-            await fetch(
-                uploadUrl,
-                {
-                    method:
-                        "PUT",
-
-                    headers: {
-                        "Authorization":
-                            authorization,
-
-                        "Content-Type":
-                            contentType,
-
-                        "X-Amz-Content-Sha256":
-                            payloadHash,
-
-                        "X-Amz-Date":
-                            amzDate
-                    },
-
-                    body:
-                        body
-                }
+        auth =
+            await authorizeB2(
+                env
             );
 
     } catch (error) {
 
         console.error(
-            "B2 network error:",
+            "B2 authorization error:",
             error
         );
 
 
         return jsonResponse(
             {
-                ok:
-                    false,
+                ok: false,
 
                 error:
-                    "Could not connect to Backblaze B2.",
+                    "Backblaze B2 authorization failed.",
 
                 details:
                     error?.message ||
@@ -1083,59 +960,129 @@ async function uploadToB2(
 
 
     /* -------------------------------------------------------
-     * READ B2 RESPONSE
+     * FIND BUCKET
      * ----------------------------------------------------- */
 
-    let responseText = "";
-
+    let bucketId;
 
     try {
 
-        responseText =
-            await b2Response.text();
+        bucketId =
+            await findBucketId(
+                auth,
+                String(
+                    env.B2_BUCKET
+                ).trim()
+            );
 
     } catch (error) {
 
-        responseText =
-            "";
-    }
-
-
-    /* -------------------------------------------------------
-     * B2 ERROR
-     * ----------------------------------------------------- */
-
-    if (
-        !b2Response.ok
-    ) {
-
         console.error(
-            "Backblaze B2 upload failed:",
-            b2Response.status,
-            responseText
+            "B2 bucket lookup error:",
+            error
         );
 
 
         return jsonResponse(
             {
-                ok:
-                    false,
+                ok: false,
 
                 error:
+                    "Could not find Backblaze B2 bucket.",
+
+                details:
+                    error?.message ||
+                    String(error)
+            },
+            502,
+            origin
+        );
+    }
+
+
+    /* -------------------------------------------------------
+     * GET UPLOAD URL
+     * ----------------------------------------------------- */
+
+    let uploadInfo;
+
+    try {
+
+        uploadInfo =
+            await getUploadUrl(
+                auth,
+                bucketId
+            );
+
+    } catch (error) {
+
+        console.error(
+            "B2 upload URL error:",
+            error
+        );
+
+
+        return jsonResponse(
+            {
+                ok: false,
+
+                error:
+                    "Could not get Backblaze B2 upload URL.",
+
+                details:
+                    error?.message ||
+                    String(error)
+            },
+            502,
+            origin
+        );
+    }
+
+
+    /* -------------------------------------------------------
+     * UPLOAD
+     * ----------------------------------------------------- */
+
+    let uploaded;
+
+    try {
+
+        uploaded =
+            await uploadFileToB2(
+                uploadInfo,
+                finalFilename,
+                contentType,
+                body,
+                sha1
+            );
+
+    } catch (error) {
+
+        console.error(
+            "B2 file upload error:",
+            error
+        );
+
+
+        return jsonResponse(
+            {
+                ok: false,
+
+                error:
+                    error?.message ||
                     "Backblaze B2 upload failed.",
 
                 b2Status:
-                    b2Response.status,
+                    error?.b2Status ||
+                    null,
 
                 b2StatusText:
-                    b2Response.statusText ||
-                    "",
+                    error?.b2StatusText ||
+                    null,
 
                 b2Response:
-                    responseText.slice(
-                        0,
-                        4000
-                    )
+                    error?.b2Response ||
+                    null
             },
             502,
             origin
@@ -1149,8 +1096,7 @@ async function uploadToB2(
 
     return jsonResponse(
         {
-            ok:
-                true,
+            ok: true,
 
             message:
                 "File uploaded successfully.",
@@ -1159,16 +1105,28 @@ async function uploadToB2(
                 "Backblaze B2",
 
             bucket:
-                bucket,
+                String(
+                    env.B2_BUCKET
+                ).trim(),
+
+            bucketId:
+                bucketId,
 
             key:
-                objectPath,
+                finalFilename,
+
+            fileId:
+                uploaded?.fileId ||
+                null,
 
             contentType:
                 contentType,
 
             size:
-                body.byteLength
+                body.byteLength,
+
+            sha1:
+                sha1
         },
         201,
         origin
@@ -1184,7 +1142,6 @@ function storageTestPage() {
 
     return `
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -1219,7 +1176,6 @@ body {
 }
 
 body {
-
     min-height: 100vh;
 
     padding:
@@ -1238,11 +1194,8 @@ body {
 }
 
 .container {
-
     width: 100%;
-
-    max-width:
-        520px;
+    max-width: 520px;
 
     margin:
         0 auto;
@@ -1258,18 +1211,11 @@ body {
 
     box-shadow:
         0 15px 40px
-        rgba(
-            0,
-            0,
-            0,
-            0.35
-        );
+        rgba(0, 0, 0, 0.35);
 }
 
 h1 {
-
-    margin-top:
-        0;
+    margin-top: 0;
 
     color:
         #FFD400;
@@ -1282,7 +1228,6 @@ h1 {
 }
 
 p {
-
     color:
         #d1d5db;
 
@@ -1294,9 +1239,7 @@ p {
 }
 
 input[type="file"] {
-
-    width:
-        100%;
+    width: 100%;
 
     padding:
         15px;
@@ -1318,15 +1261,12 @@ input[type="file"] {
 }
 
 button {
-
-    width:
-        100%;
+    width: 100%;
 
     padding:
         16px;
 
-    border:
-        none;
+    border: none;
 
     border-radius:
         12px;
@@ -1348,7 +1288,6 @@ button {
 }
 
 button:disabled {
-
     opacity:
         0.6;
 
@@ -1357,7 +1296,6 @@ button:disabled {
 }
 
 pre {
-
     white-space:
         pre-wrap;
 
@@ -1387,13 +1325,11 @@ pre {
 }
 
 .success {
-
     color:
         #86efac;
 }
 
 .error {
-
     color:
         #fca5a5;
 }
@@ -1433,23 +1369,19 @@ pre {
 
 </div>
 
-
 <script>
 
 "use strict";
-
 
 const fileInput =
     document.getElementById(
         "file"
     );
 
-
 const uploadButton =
     document.getElementById(
         "uploadButton"
     );
-
 
 const result =
     document.getElementById(
@@ -1502,15 +1434,10 @@ async function uploadFile() {
 
 
     const allowedTypes = [
-
         "image/jpeg",
-
         "image/png",
-
         "image/webp",
-
         "application/pdf"
-
     ];
 
 
@@ -1533,14 +1460,11 @@ async function uploadFile() {
     uploadButton.disabled =
         true;
 
-
     uploadButton.textContent =
         "Uploading...";
 
-
     result.className =
         "";
-
 
     result.textContent =
         "Uploading " +
@@ -1558,7 +1482,6 @@ async function uploadFile() {
                         "POST",
 
                     headers: {
-
                         "Content-Type":
                             file.type,
 
@@ -1589,21 +1512,13 @@ async function uploadFile() {
         } catch (error) {
 
             data = {
-
-                ok:
-                    false,
+                ok: false,
 
                 error:
                     "Worker returned invalid JSON.",
 
-                status:
-                    response.status,
-
                 raw:
-                    raw.slice(
-                        0,
-                        5000
-                    )
+                    raw
             };
         }
 
@@ -1625,7 +1540,6 @@ async function uploadFile() {
         result.className =
             "success";
 
-
         result.textContent =
             JSON.stringify(
                 data,
@@ -1645,7 +1559,6 @@ async function uploadFile() {
         result.className =
             "error";
 
-
         result.textContent =
             "Upload failed:\\n\\n" +
             (
@@ -1657,7 +1570,6 @@ async function uploadFile() {
 
         uploadButton.disabled =
             false;
-
 
         uploadButton.textContent =
             "Upload to Backblaze B2";
@@ -1683,40 +1595,16 @@ async function checkStorage() {
             );
 
 
-        const raw =
-            await response.text();
-
-
-        let data;
-
-
-        try {
-
-            data =
-                JSON.parse(
-                    raw
-                );
-
-        } catch (error) {
-
-            result.className =
-                "error";
-
-            result.textContent =
-                "Health check returned invalid response.";
-
-            return;
-        }
+        const data =
+            await response.json();
 
 
         if (
-            data.storageConfigured ===
-            false
+            data.storageConfigured === false
         ) {
 
             result.className =
                 "error";
-
 
             result.textContent =
                 "Storage configuration incomplete:\\n\\n" +
@@ -1733,16 +1621,13 @@ async function checkStorage() {
         result.className =
             "success";
 
-
         result.textContent =
             "Storage ready. Select a file to upload.";
-
 
     } catch (error) {
 
         result.className =
             "error";
-
 
         result.textContent =
             "Could not check storage.";
@@ -1814,11 +1699,8 @@ export default {
          * ===================================================== */
 
         if (
-            request.method ===
-                "GET" &&
-
-            url.pathname ===
-                "/api/health"
+            request.method === "GET" &&
+            url.pathname === "/api/health"
         ) {
 
             const configuration =
@@ -1829,8 +1711,7 @@ export default {
 
             return jsonResponse(
                 {
-                    ok:
-                        true,
+                    ok: true,
 
                     service:
                         "RiderX API",
@@ -1862,15 +1743,12 @@ export default {
 
 
         /* =====================================================
-         * STORAGE TEST
+         * STORAGE TEST PAGE
          * ===================================================== */
 
         if (
-            request.method ===
-                "GET" &&
-
-            url.pathname ===
-                "/storage-test"
+            request.method === "GET" &&
+            url.pathname === "/storage-test"
         ) {
 
             return new Response(
@@ -1880,7 +1758,6 @@ export default {
                         200,
 
                     headers: {
-
                         "Content-Type":
                             "text/html; charset=UTF-8",
 
@@ -1897,11 +1774,8 @@ export default {
          * ===================================================== */
 
         if (
-            request.method ===
-                "POST" &&
-
-            url.pathname ===
-                "/api/storage/upload"
+            request.method === "POST" &&
+            url.pathname === "/api/storage/upload"
         ) {
 
             try {
@@ -1922,8 +1796,7 @@ export default {
 
                 return jsonResponse(
                     {
-                        ok:
-                            false,
+                        ok: false,
 
                         error:
                             "Storage upload failed.",
@@ -1940,7 +1813,7 @@ export default {
 
 
         /* =====================================================
-         * STATIC WEBSITE / CLOUDFLARE ASSETS
+         * STATIC WEBSITE
          * ===================================================== */
 
         if (
@@ -1950,33 +1823,9 @@ export default {
                 "function"
         ) {
 
-            try {
-
-                return await env.ASSETS.fetch(
-                    request
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Assets fetch error:",
-                    error
-                );
-
-
-                return new Response(
-                    "RiderX Assets error.",
-                    {
-                        status:
-                            502,
-
-                        headers: {
-                            "Content-Type":
-                                "text/plain; charset=UTF-8"
-                        }
-                    }
-                );
-            }
+            return env.ASSETS.fetch(
+                request
+            );
         }
 
 
@@ -1991,7 +1840,6 @@ export default {
                     200,
 
                 headers: {
-
                     "Content-Type":
                         "text/plain; charset=UTF-8"
                 }
