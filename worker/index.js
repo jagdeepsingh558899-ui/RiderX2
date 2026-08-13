@@ -38,17 +38,22 @@
  * CONFIGURATION
  * ========================================================= */
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES =
+    10 * 1024 * 1024;
 
-const ALLOWED_CONTENT_TYPES = new Set([
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "application/pdf"
-]);
+const ALLOWED_CONTENT_TYPES =
+    new Set([
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/pdf"
+    ]);
 
-const B2_REGION = "us-east-005";
-const B2_SERVICE = "s3";
+const B2_REGION =
+    "us-east-005";
+
+const B2_SERVICE =
+    "s3";
 
 
 /* =========================================================
@@ -57,11 +62,15 @@ const B2_SERVICE = "s3";
 
 function corsHeaders(origin = "*") {
     return {
-        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Origin":
+            origin,
+
         "Access-Control-Allow-Methods":
             "GET,POST,OPTIONS",
+
         "Access-Control-Allow-Headers":
             "Content-Type, Authorization, X-Filename, X-Upload-Path",
+
         "Access-Control-Max-Age":
             "86400"
     };
@@ -78,9 +87,14 @@ function jsonResponse(
     origin = "*"
 ) {
     return new Response(
-        JSON.stringify(data, null, 2),
+        JSON.stringify(
+            data,
+            null,
+            2
+        ),
         {
             status,
+
             headers: {
                 "Content-Type":
                     "application/json; charset=UTF-8",
@@ -102,16 +116,27 @@ function jsonResponse(
 async function sha256Hex(data) {
     let buffer;
 
-    if (data instanceof ArrayBuffer) {
-        buffer = data;
-    } else if (ArrayBuffer.isView(data)) {
-        buffer = data.buffer.slice(
-            data.byteOffset,
-            data.byteOffset + data.byteLength
-        );
+    if (
+        data instanceof ArrayBuffer
+    ) {
+        buffer =
+            data;
+
+    } else if (
+        ArrayBuffer.isView(data)
+    ) {
+        buffer =
+            data.buffer.slice(
+                data.byteOffset,
+                data.byteOffset +
+                    data.byteLength
+            );
+
     } else {
         buffer =
-            await new Response(data).arrayBuffer();
+            await new Response(
+                data
+            ).arrayBuffer();
     }
 
     const hash =
@@ -146,8 +171,11 @@ async function hmacSha256(
             "raw",
             key,
             {
-                name: "HMAC",
-                hash: "SHA-256"
+                name:
+                    "HMAC",
+
+                hash:
+                    "SHA-256"
             },
             false,
             ["sign"]
@@ -157,10 +185,14 @@ async function hmacSha256(
         await crypto.subtle.sign(
             "HMAC",
             cryptoKey,
-            new TextEncoder().encode(message)
+            new TextEncoder().encode(
+                message
+            )
         );
 
-    return new Uint8Array(signature);
+    return new Uint8Array(
+        signature
+    );
 }
 
 
@@ -169,7 +201,9 @@ async function hmacSha256(
  * ========================================================= */
 
 function bytesToHex(bytes) {
-    return Array.from(bytes)
+    return Array.from(
+        bytes
+    )
         .map(
             byte =>
                 byte
@@ -196,7 +230,8 @@ async function getSignatureKey(
     const kDate =
         await hmacSha256(
             encoder.encode(
-                "AWS4" + secretKey
+                "AWS4" +
+                secretKey
             ),
             dateStamp
         );
@@ -232,14 +267,20 @@ function encodePath(path) {
         .split("/")
         .map(
             part =>
-                encodeURIComponent(part)
+                encodeURIComponent(
+                    part
+                )
                     .replace(
                         /[!'()*]/g,
                         character =>
                             "%" +
                             character
-                                .charCodeAt(0)
-                                .toString(16)
+                                .charCodeAt(
+                                    0
+                                )
+                                .toString(
+                                    16
+                                )
                                 .toUpperCase()
                     )
         )
@@ -251,8 +292,13 @@ function encodePath(path) {
  * SAFE FILE NAME
  * ========================================================= */
 
-function sanitizeFilename(filename) {
-    return String(filename || "upload.bin")
+function sanitizeFilename(
+    filename
+) {
+    return String(
+        filename ||
+        "upload.bin"
+    )
         .replace(
             /[^a-zA-Z0-9._-]/g,
             "_"
@@ -272,8 +318,13 @@ function sanitizeFilename(filename) {
  * SAFE OBJECT PATH
  * ========================================================= */
 
-function sanitizeObjectPath(path) {
-    return String(path || "")
+function sanitizeObjectPath(
+    path
+) {
+    return String(
+        path ||
+        ""
+    )
         .replace(
             /^\/+/,
             ""
@@ -297,28 +348,38 @@ function sanitizeObjectPath(path) {
  * CHECK B2 CONFIGURATION
  * ========================================================= */
 
-function getB2Configuration(env) {
+function getB2Configuration(
+    env
+) {
     const missing = [];
 
-    if (!env.B2_APPLICATION_KEY_ID) {
+    if (
+        !env.B2_APPLICATION_KEY_ID
+    ) {
         missing.push(
             "B2_APPLICATION_KEY_ID"
         );
     }
 
-    if (!env.B2_APPLICATION_KEY) {
+    if (
+        !env.B2_APPLICATION_KEY
+    ) {
         missing.push(
             "B2_APPLICATION_KEY"
         );
     }
 
-    if (!env.B2_BUCKET) {
+    if (
+        !env.B2_BUCKET
+    ) {
         missing.push(
             "B2_BUCKET"
         );
     }
 
-    if (!env.B2_ENDPOINT) {
+    if (
+        !env.B2_ENDPOINT
+    ) {
         missing.push(
             "B2_ENDPOINT"
         );
@@ -330,6 +391,69 @@ function getB2Configuration(env) {
 
         missing
     };
+}
+
+
+/* =========================================================
+ * CREATE FIXED-LENGTH REQUEST BODY
+ *
+ * Cloudflare Workers automatically calculates the correct
+ * Content-Length when a fixed-length body is used.
+ *
+ * FixedLengthStream makes the byte count explicit and avoids
+ * chunked/incomplete-body behavior.
+ * ========================================================= */
+
+async function createFixedLengthBody(
+    bytes
+) {
+    if (
+        typeof FixedLengthStream !==
+        "undefined"
+    ) {
+        const fixedStream =
+            new FixedLengthStream(
+                bytes.byteLength
+            );
+
+        const writer =
+            fixedStream.writable.getWriter();
+
+        try {
+            await writer.write(
+                bytes
+            );
+
+            await writer.close();
+
+        } catch (error) {
+            try {
+                await writer.abort(
+                    error
+                );
+            } catch (
+                abortError
+            ) {
+                console.error(
+                    "FixedLengthStream abort error:",
+                    abortError
+                );
+            }
+
+            throw error;
+        }
+
+        return fixedStream.readable;
+    }
+
+    /*
+     * Fallback for runtimes where
+     * FixedLengthStream is unavailable.
+     *
+     * Uint8Array is a fixed-length request body
+     * and Cloudflare will calculate Content-Length.
+     */
+    return bytes;
 }
 
 
@@ -347,14 +471,20 @@ async function uploadToB2(
      * ----------------------------------------------------- */
 
     const configuration =
-        getB2Configuration(env);
+        getB2Configuration(
+            env
+        );
 
-    if (!configuration.configured) {
+    if (
+        !configuration.configured
+    ) {
         return jsonResponse(
             {
                 ok: false,
+
                 error:
                     "B2 storage configuration is incomplete.",
+
                 missing:
                     configuration.missing
             },
@@ -409,10 +539,6 @@ async function uploadToB2(
 
     /* -------------------------------------------------------
      * READ BODY
-     *
-     * IMPORTANT:
-     * Convert request body into Uint8Array so the exact
-     * payload bytes and payload length are preserved.
      * ----------------------------------------------------- */
 
     let body;
@@ -425,6 +551,7 @@ async function uploadToB2(
             new Uint8Array(
                 arrayBuffer
             );
+
     } catch (error) {
         return jsonResponse(
             {
@@ -447,10 +574,13 @@ async function uploadToB2(
      * EMPTY BODY CHECK
      * ----------------------------------------------------- */
 
-    if (!body.byteLength) {
+    if (
+        body.byteLength === 0
+    ) {
         return jsonResponse(
             {
                 ok: false,
+
                 error:
                     "Upload body is empty."
             },
@@ -514,14 +644,18 @@ async function uploadToB2(
 
     let objectPath;
 
-    if (requestedPath) {
+    if (
+        requestedPath
+    ) {
         objectPath =
             sanitizeObjectPath(
                 requestedPath
             );
     }
 
-    if (!objectPath) {
+    if (
+        !objectPath
+    ) {
         objectPath =
             "riderx2/uploads/" +
             Date.now() +
@@ -537,7 +671,10 @@ async function uploadToB2(
      * ----------------------------------------------------- */
 
     const endpoint =
-        String(env.B2_ENDPOINT)
+        String(
+            env.B2_ENDPOINT
+        )
+            .trim()
             .replace(
                 /\/+$/,
                 ""
@@ -547,11 +684,15 @@ async function uploadToB2(
 
     try {
         endpointUrl =
-            new URL(endpoint);
+            new URL(
+                endpoint
+            );
+
     } catch (error) {
         return jsonResponse(
             {
                 ok: false,
+
                 error:
                     "B2_ENDPOINT is not a valid URL."
             },
@@ -559,6 +700,28 @@ async function uploadToB2(
             origin
         );
     }
+
+
+    /* -------------------------------------------------------
+     * ENSURE HTTPS
+     * ----------------------------------------------------- */
+
+    if (
+        endpointUrl.protocol !==
+        "https:"
+    ) {
+        return jsonResponse(
+            {
+                ok: false,
+
+                error:
+                    "B2_ENDPOINT must use HTTPS."
+            },
+            500,
+            origin
+        );
+    }
+
 
     const host =
         endpointUrl.host;
@@ -569,13 +732,17 @@ async function uploadToB2(
      * ----------------------------------------------------- */
 
     const bucket =
-        String(env.B2_BUCKET)
-            .trim();
+        String(
+            env.B2_BUCKET
+        ).trim();
 
-    if (!bucket) {
+    if (
+        !bucket
+    ) {
         return jsonResponse(
             {
                 ok: false,
+
                 error:
                     "B2_BUCKET is empty."
             },
@@ -590,7 +757,9 @@ async function uploadToB2(
      * ----------------------------------------------------- */
 
     const payloadHash =
-        await sha256Hex(body);
+        await sha256Hex(
+            body
+        );
 
 
     /* -------------------------------------------------------
@@ -621,17 +790,22 @@ async function uploadToB2(
 
     const canonicalUri =
         "/" +
-        encodePath(bucket) +
+        encodePath(
+            bucket
+        ) +
         "/" +
-        encodePath(objectPath);
+        encodePath(
+            objectPath
+        );
 
 
     /* -------------------------------------------------------
      * CANONICAL HEADERS
      *
-     * Content-Length is deliberately NOT included in the
-     * signed headers. It is supplied to the HTTP request
-     * itself so B2 receives the exact payload size.
+     * Content-Length is intentionally NOT signed.
+     *
+     * Cloudflare determines the HTTP Content-Length from
+     * the fixed-length request body.
      * ----------------------------------------------------- */
 
     const canonicalHeaders =
@@ -760,18 +934,57 @@ async function uploadToB2(
     const uploadUrl =
         endpoint +
         "/" +
-        encodePath(bucket) +
+        encodePath(
+            bucket
+        ) +
         "/" +
-        encodePath(objectPath);
+        encodePath(
+            objectPath
+        );
+
+
+    /* -------------------------------------------------------
+     * CREATE EXACT-LENGTH BODY
+     * ----------------------------------------------------- */
+
+    let requestBody;
+
+    try {
+        requestBody =
+            await createFixedLengthBody(
+                body
+            );
+
+    } catch (error) {
+        console.error(
+            "Request body creation error:",
+            error
+        );
+
+        return jsonResponse(
+            {
+                ok: false,
+
+                error:
+                    "Could not prepare upload body.",
+
+                details:
+                    error?.message ||
+                    String(error)
+            },
+            500,
+            origin
+        );
+    }
 
 
     /* -------------------------------------------------------
      * SEND TO B2
      *
-     * IMPORTANT FIX:
-     * Explicit Content-Length prevents the B2 S3 API from
-     * receiving a request whose declared/streamed body length
-     * does not match the actual payload.
+     * DO NOT manually set Content-Length.
+     *
+     * Cloudflare Workers derives it from the fixed-length
+     * body. This avoids the IncompleteBody problem.
      * ----------------------------------------------------- */
 
     let b2Response;
@@ -781,7 +994,8 @@ async function uploadToB2(
             await fetch(
                 uploadUrl,
                 {
-                    method: "PUT",
+                    method:
+                        "PUT",
 
                     headers: {
                         "Authorization":
@@ -789,11 +1003,6 @@ async function uploadToB2(
 
                         "Content-Type":
                             contentType,
-
-                        "Content-Length":
-                            String(
-                                body.byteLength
-                            ),
 
                         "X-Amz-Content-Sha256":
                             payloadHash,
@@ -803,9 +1012,10 @@ async function uploadToB2(
                     },
 
                     body:
-                        body.buffer
+                        requestBody
                 }
             );
+
     } catch (error) {
         console.error(
             "B2 network error:",
@@ -837,7 +1047,9 @@ async function uploadToB2(
         await b2Response.text();
 
 
-    if (!b2Response.ok) {
+    if (
+        !b2Response.ok
+    ) {
         console.error(
             "Backblaze B2 upload failed:",
             b2Response.status,
@@ -858,7 +1070,13 @@ async function uploadToB2(
                     responseText.slice(
                         0,
                         2000
-                    )
+                    ),
+
+                uploadedBytes:
+                    body.byteLength,
+
+                objectKey:
+                    objectPath
             },
             502,
             origin
@@ -1266,8 +1484,13 @@ async function uploadFile() {
 
         try {
             data =
-                JSON.parse(raw);
-        } catch (error) {
+                JSON.parse(
+                    raw
+                );
+
+        } catch (
+            error
+        ) {
             data = {
                 ok: false,
 
@@ -1280,8 +1503,9 @@ async function uploadFile() {
         }
 
 
-        if (!response.ok) {
-
+        if (
+            !response.ok
+        ) {
             throw new Error(
                 JSON.stringify(
                     data,
@@ -1303,7 +1527,9 @@ async function uploadFile() {
             );
 
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
         console.error(
             "Upload error:",
@@ -1354,7 +1580,8 @@ async function checkStorage() {
 
 
         if (
-            data.storageConfigured === false
+            data.storageConfigured ===
+            false
         ) {
 
             result.className =
@@ -1378,7 +1605,9 @@ async function checkStorage() {
         result.textContent =
             "Storage ready. Select a file to upload.";
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
         result.className =
             "error";
@@ -1436,7 +1665,8 @@ export default {
             return new Response(
                 null,
                 {
-                    status: 204,
+                    status:
+                        204,
 
                     headers:
                         corsHeaders(
@@ -1452,8 +1682,10 @@ export default {
          * ===================================================== */
 
         if (
-            request.method === "GET" &&
-            url.pathname === "/api/health"
+            request.method ===
+                "GET" &&
+            url.pathname ===
+                "/api/health"
         ) {
 
             const configuration =
@@ -1464,7 +1696,8 @@ export default {
 
             return jsonResponse(
                 {
-                    ok: true,
+                    ok:
+                        true,
 
                     service:
                         "RiderX API",
@@ -1500,14 +1733,17 @@ export default {
          * ===================================================== */
 
         if (
-            request.method === "GET" &&
-            url.pathname === "/storage-test"
+            request.method ===
+                "GET" &&
+            url.pathname ===
+                "/storage-test"
         ) {
 
             return new Response(
                 storageTestPage(),
                 {
-                    status: 200,
+                    status:
+                        200,
 
                     headers: {
                         "Content-Type":
@@ -1526,8 +1762,10 @@ export default {
          * ===================================================== */
 
         if (
-            request.method === "POST" &&
-            url.pathname === "/api/storage/upload"
+            request.method ===
+                "POST" &&
+            url.pathname ===
+                "/api/storage/upload"
         ) {
 
             try {
@@ -1538,7 +1776,9 @@ export default {
                     origin
                 );
 
-            } catch (error) {
+            } catch (
+                error
+            ) {
 
                 console.error(
                     "Storage upload error:",
@@ -1547,7 +1787,8 @@ export default {
 
                 return jsonResponse(
                     {
-                        ok: false,
+                        ok:
+                            false,
 
                         error:
                             "Storage upload failed.",
@@ -1587,7 +1828,8 @@ export default {
         return new Response(
             "RiderX Worker is online.",
             {
-                status: 200,
+                status:
+                    200,
 
                 headers: {
                     "Content-Type":
