@@ -5,8 +5,34 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /* =====================================================
+       RIDERX FIRESTORE SECURITY RULES
+       =====================================================
+
+       AUTHENTICATION:
+       - Firebase Authentication is the source of truth.
+
+       DATABASE:
+       - Cloud Firestore.
+
+       FILE STORAGE:
+       - Backblaze B2 only.
+       - Firebase Storage is NOT used.
+
+       SECURITY PRINCIPLES:
+       - No client can create an admin account.
+       - Users cannot change their own role.
+       - Users cannot self-approve as riders.
+       - Financial fields are protected.
+       - Ride ownership cannot be transferred.
+       - Ride acceptance requires an approved active rider.
+       - Chat messages are immutable for clients.
+       - Unknown collections are denied by default.
+       ===================================================== */
+
+
+    /* =====================================================
        COMMON HELPERS
-    ===================================================== */
+       ===================================================== */
 
     function signedIn() {
       return request.auth != null;
@@ -34,15 +60,31 @@ service cloud.firestore {
     }
 
 
+    function currentUserData() {
+      return userData(request.auth.uid);
+    }
+
+
     function isAdmin() {
       return signedIn()
         && userExists(request.auth.uid)
         && (
-          userData(request.auth.uid).role == "admin"
-          || userData(request.auth.uid).userRole == "admin"
-          || userData(request.auth.uid).accountType == "admin"
-          || userData(request.auth.uid).isAdmin == true
+          currentUserData().get("role", "") == "admin"
+          || currentUserData().get("userRole", "") == "admin"
+          || currentUserData().get("accountType", "") == "admin"
+          || currentUserData().get("isAdmin", false) == true
         );
+    }
+
+
+    function activeAccount() {
+      return signedIn()
+        && userExists(request.auth.uid)
+        && currentUserData().get("disabled", false) != true
+        && currentUserData().get("blocked", false) != true
+        && currentUserData().get("status", "") != "disabled"
+        && currentUserData().get("status", "") != "blocked"
+        && currentUserData().get("status", "") != "suspended";
     }
 
 
@@ -51,10 +93,10 @@ service cloud.firestore {
         && userExists(request.auth.uid)
         && !isAdmin()
         && (
-          userData(request.auth.uid).role == "customer"
-          || userData(request.auth.uid).userRole == "customer"
-          || userData(request.auth.uid).accountType == "customer"
-          || userData(request.auth.uid).role == "user"
+          currentUserData().get("role", "") == "customer"
+          || currentUserData().get("userRole", "") == "customer"
+          || currentUserData().get("accountType", "") == "customer"
+          || currentUserData().get("role", "") == "user"
         );
     }
 
@@ -64,28 +106,17 @@ service cloud.firestore {
         && userExists(request.auth.uid)
         && !isAdmin()
         && (
-          userData(request.auth.uid).role == "rider"
-          || userData(request.auth.uid).userRole == "rider"
-          || userData(request.auth.uid).accountType == "rider"
-          || userData(request.auth.uid).userType == "rider"
+          currentUserData().get("role", "") == "rider"
+          || currentUserData().get("userRole", "") == "rider"
+          || currentUserData().get("accountType", "") == "rider"
+          || currentUserData().get("userType", "") == "rider"
         );
-    }
-
-
-    function activeAccount() {
-      return signedIn()
-        && userExists(request.auth.uid)
-        && userData(request.auth.uid).disabled != true
-        && userData(request.auth.uid).blocked != true
-        && userData(request.auth.uid).status != "disabled"
-        && userData(request.auth.uid).status != "blocked"
-        && userData(request.auth.uid).status != "suspended";
     }
 
 
     /* =====================================================
        RIDER HELPERS
-    ===================================================== */
+       ===================================================== */
 
     function riderPath(uid) {
       return /databases/$(database)/documents/riders/$(uid);
@@ -107,85 +138,82 @@ service cloud.firestore {
         && isRider()
         && riderExists(request.auth.uid)
         && (
-          riderData(request.auth.uid).adminApproved == true
-          || riderData(request.auth.uid).approved == true
-          || riderData(request.auth.uid).isApproved == true
-          || riderData(request.auth.uid).approvalStatus == "approved"
-          || riderData(request.auth.uid).status == "approved"
-          || riderData(request.auth.uid).riderStatus == "approved"
+          riderData(request.auth.uid).get("adminApproved", false) == true
+          || riderData(request.auth.uid).get("approved", false) == true
+          || riderData(request.auth.uid).get("isApproved", false) == true
+          || riderData(request.auth.uid).get("approvalStatus", "") == "approved"
+          || riderData(request.auth.uid).get("status", "") == "approved"
+          || riderData(request.auth.uid).get("riderStatus", "") == "approved"
         );
     }
 
 
     function canReceiveRideRequests() {
-      return
-        riderApproved()
+      return riderApproved()
         && activeAccount();
     }
 
 
     /* =====================================================
-       RIDE HELPERS
-    ===================================================== */
+       GENERIC PARTICIPANT HELPERS
+       ===================================================== */
 
-    function isRideParticipant(resourceData) {
+    function isRideParticipant(data) {
       return signedIn()
         && (
-          resourceData.customerId == request.auth.uid
-          || resourceData.userId == request.auth.uid
-          || resourceData.riderId == request.auth.uid
-          || resourceData.driverId == request.auth.uid
+          data.get("customerId", "") == request.auth.uid
+          || data.get("userId", "") == request.auth.uid
+          || data.get("riderId", "") == request.auth.uid
+          || data.get("driverId", "") == request.auth.uid
         );
     }
 
 
-    function isBookingParticipant(resourceData) {
+    function isBookingParticipant(data) {
       return signedIn()
         && (
-          resourceData.customerId == request.auth.uid
-          || resourceData.userId == request.auth.uid
-          || resourceData.riderId == request.auth.uid
-          || resourceData.driverId == request.auth.uid
+          data.get("customerId", "") == request.auth.uid
+          || data.get("userId", "") == request.auth.uid
+          || data.get("riderId", "") == request.auth.uid
+          || data.get("driverId", "") == request.auth.uid
         );
     }
 
 
-    function isSearchingRide(resourceData) {
-      return
-        resourceData.status == "REQUESTED"
-        || resourceData.status == "requested"
-        || resourceData.status == "SEARCHING"
-        || resourceData.status == "searching"
-        || resourceData.status == "PENDING"
-        || resourceData.status == "pending";
-    }
+    /* =====================================================
+       RIDE STATUS HELPERS
+       ===================================================== */
 
-
-    function isCancelledStatus(status) {
-      return
-        status == "CANCELLED"
-        || status == "cancelled"
-        || status == "CANCELED"
-        || status == "canceled";
+    function isSearchingStatus(status) {
+      return status == "REQUESTED"
+        || status == "requested"
+        || status == "SEARCHING"
+        || status == "searching"
+        || status == "PENDING"
+        || status == "pending";
     }
 
 
     function isAcceptedStatus(status) {
-      return
-        status == "ACCEPTED"
+      return status == "ACCEPTED"
         || status == "accepted";
     }
 
 
-    function isActiveRideStatus(status) {
-      return
-        status == "ACCEPTED"
-        || status == "accepted"
-        || status == "ARRIVING"
-        || status == "arriving"
-        || status == "ARRIVED"
-        || status == "arrived"
-        || status == "STARTED"
+    function isArrivingStatus(status) {
+      return status == "ARRIVING"
+        || status == "arriving";
+    }
+
+
+    function isArrivedStatus(status) {
+      return status == "ARRIVED"
+        || status == "arrived";
+    }
+
+
+    function isStartedStatus(status) {
+      return status == "STARTED"
         || status == "started"
         || status == "IN_PROGRESS"
         || status == "in_progress"
@@ -194,9 +222,49 @@ service cloud.firestore {
     }
 
 
+    function isCompletedStatus(status) {
+      return status == "COMPLETED"
+        || status == "completed"
+        || status == "FINISHED"
+        || status == "finished";
+    }
+
+
+    function isCancelledStatus(status) {
+      return status == "CANCELLED"
+        || status == "cancelled"
+        || status == "CANCELED"
+        || status == "canceled";
+    }
+
+
+    function isActiveRideStatus(status) {
+      return isAcceptedStatus(status)
+        || isArrivingStatus(status)
+        || isArrivedStatus(status)
+        || isStartedStatus(status);
+    }
+
+
+    /* =====================================================
+       USER OWNERSHIP
+       ===================================================== */
+
+    function sameRideOwnership(before, after) {
+      return after.get("customerId", "")
+          == before.get("customerId", "")
+        && after.get("userId", "")
+          == before.get("userId", "")
+        && after.get("riderId", "")
+          == before.get("riderId", "")
+        && after.get("driverId", "")
+          == before.get("driverId", "");
+    }
+
+
     /* =====================================================
        USERS
-    ===================================================== */
+       ===================================================== */
 
     match /users/{uid} {
 
@@ -206,38 +274,34 @@ service cloud.firestore {
 
 
       /*
-       * A user may create only their own customer/rider
-       * account.
-       *
-       * Admin cannot be created from the client.
+       * A client can create only their own non-admin
+       * customer/rider profile.
        */
-
       allow create: if
         isOwner(uid)
         && !(
-          request.resource.data.role == "admin"
-          || request.resource.data.userRole == "admin"
-          || request.resource.data.accountType == "admin"
-          || request.resource.data.isAdmin == true
+          request.resource.data.get("role", "") == "admin"
+          || request.resource.data.get("userRole", "") == "admin"
+          || request.resource.data.get("accountType", "") == "admin"
+          || request.resource.data.get("isAdmin", false) == true
         )
         && (
-          request.resource.data.role == "customer"
-          || request.resource.data.role == "rider"
-          || request.resource.data.userRole == "customer"
-          || request.resource.data.userRole == "rider"
-          || request.resource.data.accountType == "customer"
-          || request.resource.data.accountType == "rider"
+          request.resource.data.get("role", "") == "customer"
+          || request.resource.data.get("role", "") == "rider"
+          || request.resource.data.get("userRole", "") == "customer"
+          || request.resource.data.get("userRole", "") == "rider"
+          || request.resource.data.get("accountType", "") == "customer"
+          || request.resource.data.get("accountType", "") == "rider"
         );
 
 
       /*
-       * Own profile updates are restricted.
+       * Admin may update user documents.
        *
-       * Role, admin state, approval state, wallet state
-       * and other security-sensitive fields cannot be
-       * changed by the user.
+       * Normal users may update only profile/UI fields.
+       * Authentication/security/financial/admin fields remain
+       * protected.
        */
-
       allow update: if
         isAdmin()
 
@@ -245,39 +309,44 @@ service cloud.firestore {
 
         (
           isOwner(uid)
+          && activeAccount()
 
-          && request.resource.data.role == resource.data.role
+          && request.resource.data.get("role", "")
+             == resource.data.get("role", "")
 
-          && request.resource.data.userRole == resource.data.userRole
+          && request.resource.data.get("userRole", "")
+             == resource.data.get("userRole", "")
 
-          && request.resource.data.accountType == resource.data.accountType
+          && request.resource.data.get("accountType", "")
+             == resource.data.get("accountType", "")
 
-          && request.resource.data.isAdmin == resource.data.isAdmin
+          && request.resource.data.get("isAdmin", false)
+             == resource.data.get("isAdmin", false)
 
-          && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly([
-              "name",
-              "fullName",
-              "displayName",
-              "firstName",
-              "lastName",
-              "phone",
-              "mobile",
-              "phoneNumber",
-              "email",
-              "photoURL",
-              "profileImage",
-              "city",
-              "address",
-              "language",
-              "notificationEnabled",
-              "notificationToken",
-              "notificationUpdatedAt",
-              "fcmToken",
-              "pushToken",
-              "updatedAt",
-              "lastSeenAt"
-            ])
+          && request.resource.data.diff(resource.data)
+             .affectedKeys()
+             .hasOnly([
+               "name",
+               "fullName",
+               "displayName",
+               "firstName",
+               "lastName",
+               "phone",
+               "mobile",
+               "phoneNumber",
+               "photoURL",
+               "profileImage",
+               "city",
+               "address",
+               "language",
+               "notificationEnabled",
+               "notificationToken",
+               "notificationUpdatedAt",
+               "fcmToken",
+               "pushToken",
+               "updatedAt",
+               "lastSeenAt"
+             ])
         );
 
 
@@ -288,49 +357,44 @@ service cloud.firestore {
 
     /* =====================================================
        RIDERS
-    ===================================================== */
+       ===================================================== */
 
     match /riders/{uid} {
 
-      /*
-       * Rider can see own profile.
-       * Customer can see rider information.
-       * Admin can see everything.
-       */
-
       allow read: if
-        isOwner(uid)
-        || isAdmin()
+        isAdmin()
+        || isOwner(uid)
         || (
           signedIn()
           && isCustomer()
+          && activeAccount()
         );
 
 
       /*
-       * Rider creates own application.
+       * Rider creates their own application.
        *
-       * Rider cannot self-approve.
+       * A rider can NEVER self-approve.
        */
-
       allow create: if
         isOwner(uid)
         && isRider()
-        && request.resource.data.uid == uid
-        && request.resource.data.approved != true
-        && request.resource.data.isApproved != true
-        && request.resource.data.adminApproved != true
-        && request.resource.data.approvalStatus != "approved"
-        && request.resource.data.status != "approved";
+        && activeAccount()
+        && request.resource.data.get("uid", "") == uid
+        && request.resource.data.get("approved", false) != true
+        && request.resource.data.get("isApproved", false) != true
+        && request.resource.data.get("adminApproved", false) != true
+        && request.resource.data.get("approvalStatus", "") != "approved"
+        && request.resource.data.get("status", "") != "approved"
+        && request.resource.data.get("riderStatus", "") != "approved";
 
 
       /*
-       * Rider may update operational/profile fields only
-       * after approval.
+       * Admin controls approval/security state.
        *
-       * Approval/security fields remain admin-controlled.
+       * Approved rider may update only operational/profile
+       * information.
        */
-
       allow update: if
         isAdmin()
 
@@ -341,45 +405,46 @@ service cloud.firestore {
           && activeAccount()
           && riderApproved()
 
-          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.get("uid", "")
+             == resource.data.get("uid", "")
 
-          && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly([
-              "name",
-              "fullName",
-              "displayName",
-              "firstName",
-              "lastName",
-              "phone",
-              "mobile",
-              "phoneNumber",
-              "email",
-              "photoURL",
-              "profileImage",
-              "city",
-              "address",
-              "vehicle",
-              "vehicleType",
-              "bikeModel",
-              "bikeNumber",
-              "licenseNumber",
-              "drivingLicense",
-              "documents",
-              "online",
-              "isOnline",
-              "currentRideId",
-              "currentBookingId",
-              "latitude",
-              "longitude",
-              "location",
-              "lastLocation",
-              "updatedAt",
-              "lastSeenAt",
-              "fcmToken",
-              "pushToken",
-              "language",
-              "notificationEnabled"
-            ])
+          && request.resource.data.diff(resource.data)
+             .affectedKeys()
+             .hasOnly([
+               "name",
+               "fullName",
+               "displayName",
+               "firstName",
+               "lastName",
+               "phone",
+               "mobile",
+               "phoneNumber",
+               "photoURL",
+               "profileImage",
+               "city",
+               "address",
+               "vehicle",
+               "vehicleType",
+               "bikeModel",
+               "bikeNumber",
+               "licenseNumber",
+               "drivingLicense",
+               "documents",
+               "online",
+               "isOnline",
+               "currentRideId",
+               "currentBookingId",
+               "latitude",
+               "longitude",
+               "location",
+               "lastLocation",
+               "updatedAt",
+               "lastSeenAt",
+               "fcmToken",
+               "pushToken",
+               "language",
+               "notificationEnabled"
+             ])
         );
 
 
@@ -395,28 +460,22 @@ service cloud.firestore {
     match /rides/{rideId} {
 
       /*
-       * IMPORTANT:
-       *
-       * Customer:
-       *   Can read own ride.
-       *
-       * Assigned rider:
-       *   Can read own assigned ride.
+       * READ ACCESS
        *
        * Admin:
-       *   Can read all rides.
+       *   all rides.
        *
-       * Approved active rider:
-       *   Can read unassigned searching rides.
+       * Customer/rider/driver:
+       *   only rides in which they participate.
        *
-       * This last condition is required because
-       * rider/home.html listens for:
+       * Approved riders:
+       *   may see currently searching rides so the dispatch
+       *   flow can operate.
        *
-       *   where("status", "==", "searching")
-       *
-       * before the ride has a riderId.
+       * IMPORTANT:
+       * Firestore rules are not filters. The rider query must
+       * therefore be compatible with this permission.
        */
-
       allow read: if
         isAdmin()
 
@@ -428,45 +487,43 @@ service cloud.firestore {
 
         (
           canReceiveRideRequests()
-          && isSearchingRide(resource.data)
-          && (
-            resource.data.riderId == null
-            || resource.data.riderId == ""
-          )
-          && (
-            resource.data.driverId == null
-            || resource.data.driverId == ""
-          )
+          && isSearchingStatus(
+               resource.data.get("status", "")
+             )
         );
 
 
       /*
-       * CUSTOMER CREATES RIDE
+       * CUSTOMER CREATES A SEARCHING RIDE
        */
-
       allow create: if
         isCustomer()
         && activeAccount()
 
-        && request.resource.data.customerId == request.auth.uid
+        && request.resource.data.get("customerId", "")
+           == request.auth.uid
 
-        && isSearchingRide(request.resource.data)
+        && isSearchingStatus(
+             request.resource.data.get("status", "")
+           )
 
         && (
-          request.resource.data.riderId == null
-          || request.resource.data.riderId == ""
+          request.resource.data.get("riderId", "") == ""
+          || request.resource.data.get("riderId", null) == null
         )
 
         && (
-          request.resource.data.driverId == null
-          || request.resource.data.driverId == ""
+          request.resource.data.get("driverId", "") == ""
+          || request.resource.data.get("driverId", null) == null
         );
 
 
       /*
-       * CUSTOMER CANCELS OWN UNASSIGNED RIDE
+       * CUSTOMER CANCELS THEIR OWN UNASSIGNED RIDE.
+       *
+       * Customer cannot modify fare, rider, driver or
+       * financial ownership while cancelling.
        */
-
       allow update: if
 
         isAdmin()
@@ -475,115 +532,151 @@ service cloud.firestore {
 
         (
           isCustomer()
-
           && activeAccount()
 
-          && resource.data.customerId == request.auth.uid
+          && resource.data.get("customerId", "")
+             == request.auth.uid
 
           && (
-            resource.data.riderId == null
-            || resource.data.riderId == ""
+            resource.data.get("riderId", "") == ""
+            || resource.data.get("riderId", null) == null
           )
 
           && (
-            resource.data.driverId == null
-            || resource.data.driverId == ""
+            resource.data.get("driverId", "") == ""
+            || resource.data.get("driverId", null) == null
           )
 
-          && request.resource.data.customerId
-              == resource.data.customerId
+          && request.resource.data.get("customerId", "")
+             == resource.data.get("customerId", "")
 
-          && request.resource.data.riderId
-              == resource.data.riderId
+          && request.resource.data.get("riderId", "")
+             == resource.data.get("riderId", "")
 
-          && request.resource.data.driverId
-              == resource.data.driverId
+          && request.resource.data.get("driverId", "")
+             == resource.data.get("driverId", "")
 
           && isCancelledStatus(
-               request.resource.data.status
+               request.resource.data.get("status", "")
              )
-        )
-
-        ||
-
-        /*
-         * APPROVED RIDER ACCEPTS SEARCHING RIDE
-         *
-         * Only riderId is assigned here.
-         *
-         * driverId is NOT forced to become rider UID.
-         *
-         * This matches the actual RiderX rider/home.html
-         * acceptance implementation.
-         */
-
-        (
-          canReceiveRideRequests()
-
-          && isSearchingRide(resource.data)
-
-          && (
-            resource.data.riderId == null
-            || resource.data.riderId == ""
-          )
-
-          && (
-            resource.data.driverId == null
-            || resource.data.driverId == ""
-          )
-
-          && request.resource.data.customerId
-              == resource.data.customerId
-
-          && request.resource.data.riderId
-              == request.auth.uid
-
-          && (
-            request.resource.data.driverId
-              == resource.data.driverId
-
-            || request.resource.data.driverId == null
-
-            || request.resource.data.driverId == ""
-          )
-
-          && isAcceptedStatus(
-               request.resource.data.status
-             )
-        )
-
-        ||
-
-        /*
-         * ASSIGNED RIDER / DRIVER UPDATES OWN RIDE
-         *
-         * Existing customer/rider/driver ownership cannot
-         * be transferred.
-         */
-
-        (
-          canReceiveRideRequests()
-
-          && (
-            resource.data.riderId == request.auth.uid
-            || resource.data.driverId == request.auth.uid
-          )
-
-          && request.resource.data.customerId
-              == resource.data.customerId
-
-          && request.resource.data.riderId
-              == resource.data.riderId
-
-          && request.resource.data.driverId
-              == resource.data.driverId
         );
 
 
       /*
-       * Only admin may delete rides.
+       * APPROVED RIDER ACCEPTS A SEARCHING RIDE.
+       *
+       * Ownership is assigned exactly once.
+       *
+       * This rule prevents another rider from taking an
+       * already assigned ride.
        */
+      allow update: if
 
+        canReceiveRideRequests()
+
+        && isSearchingStatus(
+             resource.data.get("status", "")
+           )
+
+        && (
+          resource.data.get("riderId", "") == ""
+          || resource.data.get("riderId", null) == null
+        )
+
+        && (
+          resource.data.get("driverId", "") == ""
+          || resource.data.get("driverId", null) == null
+        )
+
+        && request.resource.data.get("customerId", "")
+           == resource.data.get("customerId", "")
+
+        && request.resource.data.get("riderId", "")
+           == request.auth.uid
+
+        && (
+          request.resource.data.get("driverId", "")
+            == resource.data.get("driverId", "")
+          || request.resource.data.get("driverId", null) == null
+          || request.resource.data.get("driverId", "") == ""
+        )
+
+        && isAcceptedStatus(
+             request.resource.data.get("status", "")
+           )
+
+        /*
+         * Acceptance may not alter financial/location
+         * request data.
+         */
+        && request.resource.data.diff(resource.data)
+             .affectedKeys()
+             .hasOnly([
+               "riderId",
+               "driverId",
+               "status",
+               "acceptedAt",
+               "updatedAt",
+               "riderName",
+               "riderPhone",
+               "riderPhotoURL",
+               "riderVehicle",
+               "riderVehicleNumber"
+             ]);
+
+
+      /*
+       * ASSIGNED RIDER/DRIVER OPERATIONAL UPDATE.
+       *
+       * The rider may update the ride lifecycle, but cannot
+       * transfer ownership or directly alter trusted fare/
+       * payment/customer data.
+       */
+      allow update: if
+
+        canReceiveRideRequests()
+
+        && (
+          resource.data.get("riderId", "") == request.auth.uid
+          || resource.data.get("driverId", "") == request.auth.uid
+        )
+
+        && sameRideOwnership(
+             resource.data,
+             request.resource.data
+           )
+
+        && request.resource.data.diff(resource.data)
+             .affectedKeys()
+             .hasOnly([
+               "status",
+               "acceptedAt",
+               "arrivedAt",
+               "startedAt",
+               "completedAt",
+               "cancelledAt",
+               "updatedAt",
+               "riderLatitude",
+               "riderLongitude",
+               "riderLocation",
+               "currentLocation",
+               "lastLocation",
+               "otpVerified",
+               "rideOtpVerified",
+               "otpVerifiedAt",
+               "distance",
+               "duration",
+               "actualDistance",
+               "actualDuration",
+               "riderNote",
+               "driverNote"
+             ]);
+
+
+      /*
+       * Customer may update only cancellation-related
+       * lifecycle state before assignment.
+       */
       allow delete: if
         isAdmin();
     }
@@ -601,67 +694,76 @@ service cloud.firestore {
 
 
       /*
-       * Customer creates own booking.
+       * Customer creates their own booking.
        */
-
       allow create: if
+        isAdmin()
+
+        ||
+
         (
           isCustomer()
           && activeAccount()
           && (
-            request.resource.data.customerId == request.auth.uid
-            || request.resource.data.userId == request.auth.uid
+            request.resource.data.get("customerId", "")
+              == request.auth.uid
+            || request.resource.data.get("userId", "")
+              == request.auth.uid
           )
-        )
-        ||
-        isAdmin();
+        );
 
 
       /*
-       * Only associated users or admin may update.
+       * Participant updates only operational fields.
        *
-       * Ownership IDs cannot be transferred to another
-       * user.
+       * Ownership fields can never be transferred.
        */
-
       allow update: if
+
         isAdmin()
 
         ||
 
         (
           signedIn()
+          && activeAccount()
           && isBookingParticipant(resource.data)
 
-          && (
-            request.resource.data.customerId
-              == resource.data.customerId
-            || request.resource.data.customerId == null
-            || request.resource.data.customerId == ""
-          )
+          && request.resource.data.get("customerId", "")
+             == resource.data.get("customerId", "")
 
-          && (
-            request.resource.data.userId
-              == resource.data.userId
-            || request.resource.data.userId == null
-            || request.resource.data.userId == ""
-          )
+          && request.resource.data.get("userId", "")
+             == resource.data.get("userId", "")
 
-          && (
-            request.resource.data.riderId
-              == resource.data.riderId
-            || request.resource.data.riderId == request.auth.uid
-            || request.resource.data.riderId == null
-            || request.resource.data.riderId == ""
-          )
+          && request.resource.data.get("riderId", "")
+             == resource.data.get("riderId", "")
 
-          && (
-            request.resource.data.driverId
-              == resource.data.driverId
-            || request.resource.data.driverId == request.auth.uid
-            || request.resource.data.driverId == null
-            || request.resource.data.driverId == ""
-          )
+          && request.resource.data.get("driverId", "")
+             == resource.data.get("driverId", "")
+
+          && request.resource.data.diff(resource.data)
+             .affectedKeys()
+             .hasOnly([
+               "status",
+               "updatedAt",
+               "acceptedAt",
+               "arrivedAt",
+               "startedAt",
+               "completedAt",
+               "cancelledAt",
+               "riderLatitude",
+               "riderLongitude",
+               "riderLocation",
+               "distance",
+               "duration",
+               "actualDistance",
+               "actualDuration",
+               "otpVerified",
+               "rideOtpVerified",
+               "otpVerifiedAt",
+               "riderNote",
+               "driverNote"
+             ])
         );
 
 
@@ -676,23 +778,16 @@ service cloud.firestore {
 
     match /wallet/{uid} {
 
-      /*
-       * User can only read own wallet.
-       * Admin can read all wallets.
-       */
-
       allow read: if
         isOwner(uid)
         || isAdmin();
 
 
       /*
-       * Wallet balance is trusted financial data.
+       * Wallet balance is trusted financial information.
        *
-       * Client cannot directly create/update/delete wallet
-       * balance.
+       * Client applications cannot directly change it.
        */
-
       allow create: if
         isAdmin();
 
@@ -709,11 +804,18 @@ service cloud.firestore {
           isOwner(uid)
           || isAdmin();
 
+
+        /*
+         * Financial transaction creation should come from
+         * trusted backend/admin logic.
+         */
         allow create: if
           isAdmin();
 
+
         allow update: if
           isAdmin();
+
 
         allow delete: if
           isAdmin();
@@ -735,27 +837,27 @@ service cloud.firestore {
         (
           signedIn()
           && (
-            resource.data.userId == request.auth.uid
-            || resource.data.uid == request.auth.uid
-            || resource.data.customerId == request.auth.uid
-            || resource.data.riderId == request.auth.uid
+            resource.data.get("userId", "") == request.auth.uid
+            || resource.data.get("uid", "") == request.auth.uid
+            || resource.data.get("customerId", "") == request.auth.uid
+            || resource.data.get("riderId", "") == request.auth.uid
           )
         );
 
 
       /*
-       * Notifications are trusted server/admin data.
+       * Notifications should be created by trusted backend
+       * or admin logic.
        */
-
       allow create: if
         isAdmin();
 
 
       /*
-       * User may only modify notification state.
+       * User may change only notification-read state.
        */
-
       allow update: if
+
         isAdmin()
 
         ||
@@ -764,19 +866,19 @@ service cloud.firestore {
           signedIn()
 
           && (
-            resource.data.userId == request.auth.uid
-            || resource.data.uid == request.auth.uid
+            resource.data.get("userId", "") == request.auth.uid
+            || resource.data.get("uid", "") == request.auth.uid
           )
 
           && request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly([
-              "read",
-              "isRead",
-              "seen",
-              "readAt",
-              "updatedAt"
-            ])
+             .affectedKeys()
+             .hasOnly([
+               "read",
+               "isRead",
+               "seen",
+               "readAt",
+               "updatedAt"
+             ])
         );
 
 
@@ -799,47 +901,50 @@ service cloud.firestore {
         (
           signedIn()
           && (
-            resource.data.userId == request.auth.uid
-            || resource.data.uid == request.auth.uid
-            || resource.data.customerId == request.auth.uid
-            || resource.data.riderId == request.auth.uid
+            resource.data.get("userId", "") == request.auth.uid
+            || resource.data.get("uid", "") == request.auth.uid
+            || resource.data.get("customerId", "") == request.auth.uid
+            || resource.data.get("riderId", "") == request.auth.uid
           )
         );
 
 
       allow create: if
         signedIn()
+        && activeAccount()
         && (
-          request.resource.data.userId == request.auth.uid
-          || request.resource.data.uid == request.auth.uid
-          || request.resource.data.customerId == request.auth.uid
-          || request.resource.data.riderId == request.auth.uid
+          request.resource.data.get("userId", "") == request.auth.uid
+          || request.resource.data.get("uid", "") == request.auth.uid
+          || request.resource.data.get("customerId", "") == request.auth.uid
+          || request.resource.data.get("riderId", "") == request.auth.uid
         );
 
 
       allow update: if
+
         isAdmin()
 
         ||
 
         (
           signedIn()
+          && activeAccount()
 
           && (
-            resource.data.userId == request.auth.uid
-            || resource.data.uid == request.auth.uid
-            || resource.data.customerId == request.auth.uid
-            || resource.data.riderId == request.auth.uid
+            resource.data.get("userId", "") == request.auth.uid
+            || resource.data.get("uid", "") == request.auth.uid
+            || resource.data.get("customerId", "") == request.auth.uid
+            || resource.data.get("riderId", "") == request.auth.uid
           )
 
           && request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly([
-              "message",
-              "messages",
-              "attachments",
-              "updatedAt"
-            ])
+             .affectedKeys()
+             .hasOnly([
+               "message",
+               "messages",
+               "attachments",
+               "updatedAt"
+             ])
         );
 
 
@@ -862,9 +967,9 @@ service cloud.firestore {
         (
           signedIn()
           && (
-            resource.data.customerId == request.auth.uid
-            || resource.data.riderId == request.auth.uid
-            || resource.data.driverId == request.auth.uid
+            resource.data.get("customerId", "") == request.auth.uid
+            || resource.data.get("riderId", "") == request.auth.uid
+            || resource.data.get("driverId", "") == request.auth.uid
           )
         );
 
@@ -876,10 +981,11 @@ service cloud.firestore {
 
         (
           signedIn()
+          && activeAccount()
           && (
-            request.resource.data.customerId == request.auth.uid
-            || request.resource.data.riderId == request.auth.uid
-            || request.resource.data.driverId == request.auth.uid
+            request.resource.data.get("customerId", "") == request.auth.uid
+            || request.resource.data.get("riderId", "") == request.auth.uid
+            || request.resource.data.get("driverId", "") == request.auth.uid
           )
         );
 
@@ -891,11 +997,22 @@ service cloud.firestore {
 
         (
           signedIn()
+          && activeAccount()
+
           && (
-            resource.data.customerId == request.auth.uid
-            || resource.data.riderId == request.auth.uid
-            || resource.data.driverId == request.auth.uid
+            resource.data.get("customerId", "") == request.auth.uid
+            || resource.data.get("riderId", "") == request.auth.uid
+            || resource.data.get("driverId", "") == request.auth.uid
           )
+
+          && request.resource.data.get("customerId", "")
+             == resource.data.get("customerId", "")
+
+          && request.resource.data.get("riderId", "")
+             == resource.data.get("riderId", "")
+
+          && request.resource.data.get("driverId", "")
+             == resource.data.get("driverId", "")
         );
 
 
@@ -913,6 +1030,7 @@ service cloud.firestore {
       function chatParticipant() {
 
         return signedIn()
+          && activeAccount()
 
           && exists(
             /databases/$(database)/documents/chats/$(chatId)
@@ -921,19 +1039,19 @@ service cloud.firestore {
           && (
             get(
               /databases/$(database)/documents/chats/$(chatId)
-            ).data.customerId == request.auth.uid
+            ).data.get("customerId", "") == request.auth.uid
 
             ||
 
             get(
               /databases/$(database)/documents/chats/$(chatId)
-            ).data.riderId == request.auth.uid
+            ).data.get("riderId", "") == request.auth.uid
 
             ||
 
             get(
               /databases/$(database)/documents/chats/$(chatId)
-            ).data.driverId == request.auth.uid
+            ).data.get("driverId", "") == request.auth.uid
           );
       }
 
@@ -950,16 +1068,17 @@ service cloud.firestore {
 
         (
           chatParticipant()
-          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.get("senderId", "")
+             == request.auth.uid
         );
 
 
       /*
-       * Messages are immutable for clients.
+       * Client messages are immutable.
        */
-
       allow update: if
         isAdmin();
+
 
       allow delete: if
         isAdmin();
@@ -980,27 +1099,28 @@ service cloud.firestore {
         (
           signedIn()
           && (
-            resource.data.userId == request.auth.uid
-            || resource.data.referrerId == request.auth.uid
-            || resource.data.referredUserId == request.auth.uid
+            resource.data.get("userId", "") == request.auth.uid
+            || resource.data.get("referrerId", "") == request.auth.uid
+            || resource.data.get("referredUserId", "") == request.auth.uid
           )
         );
 
 
       allow create: if
         signedIn()
+        && activeAccount()
         && (
-          request.resource.data.userId == request.auth.uid
-          || request.resource.data.referrerId == request.auth.uid
+          request.resource.data.get("userId", "") == request.auth.uid
+          || request.resource.data.get("referrerId", "") == request.auth.uid
         );
 
 
       /*
        * Referral rewards are trusted financial data.
        */
-
       allow update: if
         isAdmin();
+
 
       allow delete: if
         isAdmin();
@@ -1021,27 +1141,27 @@ service cloud.firestore {
         (
           signedIn()
           && (
-            resource.data.customerId == request.auth.uid
-            || resource.data.riderId == request.auth.uid
+            resource.data.get("customerId", "") == request.auth.uid
+            || resource.data.get("riderId", "") == request.auth.uid
           )
         );
 
 
       /*
-       * Customer can submit a rating only for themselves.
+       * Customer can create only their own rating.
+       *
+       * Ride/trip ownership should additionally be validated
+       * by the application/backend before writing the rating.
        */
-
       allow create: if
         isCustomer()
         && activeAccount()
-        && request.resource.data.customerId == request.auth.uid;
+        && request.resource.data.get("customerId", "")
+           == request.auth.uid;
 
-
-      /*
-       * Customer can edit their own rating.
-       */
 
       allow update: if
+
         isAdmin()
 
         ||
@@ -1049,9 +1169,19 @@ service cloud.firestore {
         (
           isCustomer()
           && activeAccount()
-          && resource.data.customerId == request.auth.uid
-          && request.resource.data.customerId
-             == resource.data.customerId
+          && resource.data.get("customerId", "")
+             == request.auth.uid
+          && request.resource.data.get("customerId", "")
+             == resource.data.get("customerId", "")
+          && request.resource.data.diff(resource.data)
+             .affectedKeys()
+             .hasOnly([
+               "rating",
+               "stars",
+               "comment",
+               "review",
+               "updatedAt"
+             ])
         );
 
 
@@ -1067,7 +1197,9 @@ service cloud.firestore {
     match /fareSettings/{documentId} {
 
       allow read: if
-        signedIn();
+        signedIn()
+        && activeAccount();
+
 
       allow write: if
         isAdmin();
@@ -1081,7 +1213,9 @@ service cloud.firestore {
     match /settings/{documentId} {
 
       allow read: if
-        signedIn();
+        signedIn()
+        && activeAccount();
+
 
       allow write: if
         isAdmin();
@@ -1101,7 +1235,11 @@ service cloud.firestore {
 
     /* =====================================================
        DEFAULT DENY
-    ===================================================== */
+    =====================================================
+
+       Every collection not explicitly defined above is
+       completely inaccessible from the client.
+       ===================================================== */
 
     match /{document=**} {
 
