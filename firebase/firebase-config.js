@@ -6,7 +6,7 @@
    CANONICAL FIREBASE CONFIGURATION
 
    Firebase SDK:
-   12.2.1
+   - 12.2.1
 
    Firebase Services:
    - Firebase Authentication
@@ -50,13 +50,38 @@ const FIREBASE_SDK_BASE =
 
 
 /* =========================================================
+   FIREBASE MODULE URLS
+   =========================================================
+
+   IMPORTANT:
+   ---------------------------------------------------------
+   JavaScript static imports cannot use template literals
+   or runtime variables in the "from" clause.
+
+   Therefore the CDN module URLs below are fixed literals.
+   ========================================================= */
+
+const FIREBASE_APP_MODULE =
+    "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+const FIREBASE_AUTH_MODULE =
+    "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+const FIREBASE_FIRESTORE_MODULE =
+    "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const FIREBASE_DATABASE_MODULE =
+    "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+
+/* =========================================================
    FIREBASE APP
    ========================================================= */
 
 import {
     initializeApp,
     getApps
-} from `${FIREBASE_SDK_BASE}/firebase-app.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 
 /* =========================================================
@@ -77,7 +102,7 @@ import {
     updateProfile,
     deleteUser,
     sendEmailVerification
-} from `${FIREBASE_SDK_BASE}/firebase-auth.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 /* =========================================================
@@ -106,7 +131,7 @@ import {
     arrayUnion,
     arrayRemove,
     increment
-} from `${FIREBASE_SDK_BASE}/firebase-firestore.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 /* =========================================================
@@ -125,7 +150,7 @@ import {
     off,
     onDisconnect,
     serverTimestamp as databaseServerTimestamp
-} from `${FIREBASE_SDK_BASE}/firebase-database.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
 
 /* =========================================================
@@ -150,10 +175,9 @@ const firebaseConfig = Object.freeze({
      * Firebase Storage is intentionally NOT configured.
      *
      * RiderX uses Backblaze B2 for file/media storage.
+     *
+     * Do not add a B2 secret/application key here.
      */
-    storageBucket:
-        undefined,
-
     messagingSenderId:
         "261640190671",
 
@@ -183,9 +207,19 @@ try {
                 firebaseApp.name === "[DEFAULT]"
         );
 
-    app =
-        existingDefaultApp ||
-        initializeApp(firebaseConfig);
+    if (existingDefaultApp) {
+
+        app =
+            existingDefaultApp;
+
+    } else {
+
+        app =
+            initializeApp(
+                firebaseConfig
+            );
+
+    }
 
 } catch (error) {
 
@@ -292,38 +326,34 @@ googleProvider.setCustomParameters({
    CANONICAL FIREBASE SERVICES
    =========================================================
 
-   IMPORTANT:
-   ---------------------------------------------------------
-   There is deliberately NO Firebase Storage object here.
+   Firebase Storage is intentionally absent.
 
-   File storage is handled by Backblaze B2 through the
-   dedicated secure upload architecture.
+   File/media storage:
+   - Backblaze B2
 
-   Never add B2 secret credentials here.
+   Firebase:
+   - Authentication
+   - Firestore
+   - Realtime Database
    ========================================================= */
 
 const firebaseServices =
     Object.freeze({
 
-        /* Firebase application */
         app,
 
-        /* Authentication */
         auth,
 
-        /* Firestore */
         db,
 
         firestore:
             db,
 
-        /* Realtime Database */
         realtimeDb,
 
         database:
             realtimeDb,
 
-        /* Google Authentication */
         googleProvider
 
     });
@@ -426,11 +456,9 @@ function assertFirebaseReady() {
    GLOBAL RIDERX FIREBASE BRIDGE
    =========================================================
 
-   These bridges exist for compatibility with older RiderX
-   pages while the project is migrated toward direct ES
-   module imports.
+   Compatibility bridge for existing RiderX pages.
 
-   Firebase remains initialized exactly once.
+   Firebase is initialized only once.
    ========================================================= */
 
 if (
@@ -438,7 +466,7 @@ if (
 ) {
 
     /*
-     * Primary global bridge.
+     * Primary Firebase bridge.
      */
     window.RiderXFirebase =
         firebaseServices;
@@ -483,12 +511,11 @@ if (
 
 
     /*
-     * Explicit B2 marker.
+     * Storage architecture marker.
      *
-     * This does NOT contain credentials.
+     * This is informational only.
      *
-     * It only tells the application that Firebase Storage
-     * is intentionally not part of the RiderX architecture.
+     * No B2 credentials are exposed here.
      */
     window.RiderX.storageProvider =
         "backblaze-b2";
@@ -532,10 +559,10 @@ if (
 
 
     /*
-     * Firebase initialization above is synchronous.
+     * Firebase initialization is synchronous.
      *
-     * Dispatch asynchronously so modules that are already
-     * loading on the page can register their listeners first.
+     * Dispatch asynchronously so modules loaded on the
+     * same page get an opportunity to register listeners.
      */
     if (
         typeof queueMicrotask ===
@@ -562,15 +589,24 @@ if (
    EXPORTS
    ========================================================= */
 
-export {
 
-    /* -----------------------------------------------------
-       Firebase Core
-       ----------------------------------------------------- */
+/* ---------------------------------------------------------
+   Firebase Core
+   --------------------------------------------------------- */
+
+export {
 
     FIREBASE_SDK_VERSION,
 
     FIREBASE_SDK_BASE,
+
+    FIREBASE_APP_MODULE,
+
+    FIREBASE_AUTH_MODULE,
+
+    FIREBASE_FIRESTORE_MODULE,
+
+    FIREBASE_DATABASE_MODULE,
 
     app,
 
